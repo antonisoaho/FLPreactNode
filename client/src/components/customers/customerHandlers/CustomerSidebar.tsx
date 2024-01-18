@@ -6,7 +6,6 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  IconButton,
   Divider,
   Toolbar,
 } from '@mui/material';
@@ -72,7 +71,7 @@ const CustomerSidebar = () => {
       }}
       open={open}>
       <Toolbar sx={{ marginBottom: 0.5 }} />
-      <ListItem disablePadding>
+      <ListItem disablePadding sx={{ overflow: 'hidden' }}>
         <ListItemButton onClick={handleToggleDrawer} sx={{ ...listItemButtonSx }}>
           <ListItemIcon>{open ? <MenuOpenIcon /> : <MenuIcon />}</ListItemIcon>
           {open && <ListItemText primary="Formulär" />}
