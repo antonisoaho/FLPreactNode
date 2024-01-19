@@ -1,12 +1,17 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
+import CustomerSidebar from './CustomerSidebar';
 
-const CustomerEditForm = () => {
+const CustomerEdit = () => {
+  console.log('CustomerEdit render');
+
   return (
     <>
+      <CustomerSidebar />
+      CustomerEdit
       <Outlet />
     </>
   );
 };
 
-export default CustomerEditForm;
+export default CustomerEdit;

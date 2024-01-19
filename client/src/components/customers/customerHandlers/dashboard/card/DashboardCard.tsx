@@ -12,7 +12,7 @@ interface CardProps {
 const DashboardCard: React.FC<CardProps> = (props) => {
   const { custId } = useParams();
   const baseViewPath = `/customers/${custId}/view/`;
-  const baseEditPath = `/customers/${custId}/edit/form/`;
+  const baseEditPath = `/customers/${custId}/edit/`;
 
   return (
     <Grid item xs={2} minWidth="280px">

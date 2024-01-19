@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getSingleCustomerById } from '../../../../apiCalls/apiCustomerCalls';
 import { snackbarState } from '../../../../recoil/RecoilAtoms';
 import { useSetRecoilState } from 'recoil';
@@ -72,7 +72,13 @@ const CustomerDashboard = () => {
   }, []);
 
   return (
-    <Grid justifyContent="center" container spacing={3} wrap="wrap">
+    <Grid
+      justifyContent="center"
+      container
+      spacing={3}
+      wrap="wrap"
+      maxWidth="90%"
+      justifySelf="center">
       <Stack sx={{ position: 'absolute', right: 10, alignItems: 'end' }}>
         <Typography variant="overline">{customer?._id}</Typography>
         <Tooltip title="Gå till sida för utskrift.">

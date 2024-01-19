@@ -212,7 +212,7 @@ type Insurances =
 
 export type CustomerFormData =
   | CustomerDetails
-  | Insurances
+  // | Insurances
   | CustomerPension
   | Assets
   | LiabilityPlanned
@@ -223,4 +223,9 @@ export type CustomerFormData =
   | IncomeBase
   | WorkConditions
   | CustomerChildren
-  | BankFund;
+  | BankFund
+  | InsuranceProperty
+  | InsuranceAccident
+  | InsuranceDeath
+  | InsuranceSickness
+  | InsuranceWork;

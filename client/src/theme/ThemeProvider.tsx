@@ -12,6 +12,16 @@ interface ThemeContextValue {
 
 export const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
+const darkModeColors = {
+  background: '#0a0c0e',
+  foreground: '#b8c1c3',
+};
+
+const lightModeColors = {
+  background: '#fffcfc',
+  foreground: '#1c1c1c',
+};
+
 export const ThemeProvider = ({ children }: ThemeProviderProps) => {
   const [isDarkMode, setIsDarkMode] = useState(() => {
     const storedDarkMode = localStorage.getItem('DARKMODE');
@@ -43,6 +53,12 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
     },
     palette: {
       mode: isDarkMode ? 'dark' : 'light',
+      background: {
+        default: isDarkMode ? darkModeColors.background : lightModeColors.background,
+      },
+      text: {
+        primary: isDarkMode ? darkModeColors.foreground : lightModeColors.foreground,
+      },
     },
   });
 
@@ -63,14 +79,3 @@ export const useTheme = () => {
   }
   return context;
 };
-
-// export const useStyles = makeStyles(() => {
-//   return {
-//     appBar: {
-//       zIndex: (theme: { zIndex: { drawer: number } }) => theme.zIndex.drawer + 1,
-//     },
-//     userDrawer: {
-//       zIndex: (theme: { zIndex: { appBar: number } }) => theme.zIndex.appBar + 1,
-//     },
-//   };
-// });

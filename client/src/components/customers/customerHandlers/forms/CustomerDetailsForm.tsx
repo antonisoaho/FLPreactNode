@@ -2,13 +2,12 @@ import React from 'react';
 import { CustomerDetails } from './models/CustomerFormModels';
 import { Grid, TextField } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { DateValidationError, PickerChangeHandlerContext } from '@mui/x-date-pickers';
 import { formatDate } from './models/commonFunctions';
 import SelectWithLabel from '../../../../commonComponents/selectWithLabel/SelectWithLabel';
 
 interface CustomerDetailsFormProps {
-  formData: CustomerDetails;
-  onChange: (fieldName: string, value: string) => void;
+  formData?: CustomerDetails;
+  onChange?: (fieldName: string, value: string) => void;
 }
 
 const CustomerDetailsForm: React.FC<CustomerDetailsFormProps> = ({ formData, onChange }) => {
@@ -35,21 +34,19 @@ const CustomerDetailsForm: React.FC<CustomerDetailsFormProps> = ({ formData, onC
     <Grid item sx={{ display: 'flex', flexDirection: 'column', rowGap: 2 }}>
       <TextField
         label="Namn"
-        value={formData.name}
-        onChange={(e: any) => onChange('name', e.target.value)}
+        value={formData!.name}
+        onChange={(e: any) => onChange!('name', e.target.value)}
       />
 
       <DatePicker
         label={'Född'}
         views={['month', 'year']}
-        onChange={(value, context: PickerChangeHandlerContext<DateValidationError>) =>
-          onChange('yearMonth', formatDate(value as Date))
-        }
+        onChange={(value) => onChange!('yearMonth', formatDate(value as Date))}
       />
 
       <SelectWithLabel
         name={'status'}
-        onChange={(e) => onChange('status', e)}
+        onChange={(e) => onChange!('status', e)}
         items={selectItems}
         selectLabel={'Relationstatus'}
       />

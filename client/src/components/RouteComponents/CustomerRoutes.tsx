@@ -4,8 +4,7 @@ import CustomerPrintversion from '../customers/customerHandlers/print/CustomerPr
 import CreateCustomer from '../customers/customerHandlers/CreateCustomer';
 import CustomerEdit from '../customers/customerHandlers/CustomerEdit';
 import CustomerView from '../customers/customerHandlers/CustomerView';
-import CustomerDetailsForm from '../customers/customerHandlers/forms/CustomerDetailsForm';
-import CustomerChildForm from '../customers/customerHandlers/forms/CustomerChildForm';
+import DynamicFormContainer from '../customers/customerHandlers/forms/DynamicForm';
 
 const CustomerRoutes = [
   <Route key="customers" path="/customers" element={<CustomerComponent />} />,
@@ -13,7 +12,7 @@ const CustomerRoutes = [
   <Route key="view" path="/customers/:custId" element={<CustomerView />} />,
   <Route key="print" path="/customers/:custId/print" element={<CustomerPrintversion />} />,
   <Route key="edit" path="/customers/:custId/edit" element={<CustomerEdit />}>
-    <Route key="children" path="children" element={<CustomerChildForm />} />
+    <Route path=":formType" element={<DynamicFormContainer />} />
   </Route>,
 ];
 
