@@ -1,6 +1,6 @@
 import React, { useState, FormEvent } from 'react';
 import { useParams } from 'react-router-dom';
-import { Button, Grid, Paper, Typography } from '@mui/material';
+import { Button, Grid, Paper } from '@mui/material';
 import CustomerAssetForm from './CustomerAssetForm';
 import CustomerChildForm from './CustomerChildForm';
 import CustomerDetailsForm from './CustomerDetailsForm';
@@ -14,23 +14,41 @@ const formComponents: Record<string, React.FC<any>> = {
 };
 
 const DynamicFormContainer: React.FC = () => {
-  console.log('dynamicForm render');
-
   const { formType } = useParams();
-  console.log('formType', formType);
 
-  const [formData, setFormData] = useState<CustomerFormData>(
-    (formConfig[formType!]?.initialValue as CustomerFormData) || {}
-  );
+  const [formData, setFormData] = useState<CustomerFormData[]>([
+    (formConfig[formType!]?.initialValue as CustomerFormData) || {},
+  ]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     console.log('Form submitted:', formData);
-    // Perform your submit logic here
   };
 
-  const FormComponent = formComponents[formType!];
-  console.log('FormComponent', FormComponent);
+  const handleAddForm = () => {
+    setFormData((prevData) => [
+      ...prevData,
+      (formConfig[formType!]?.initialValue as CustomerFormData) || {},
+    ]);
+  };
+
+  const handleRemoveForm = (index: number) => {
+    setFormData((prevData) => [...prevData.slice(0, index), ...prevData.slice(index + 1)]);
+  };
+
+  const handleFormChange = (index: number, fieldName: string, value: string | boolean | number) => {
+    setFormData((prevData) =>
+      prevData.map((data, i) =>
+        i === index
+          ? {
+              ...data,
+              [fieldName]: value,
+            }
+          : data
+      )
+    );
+  };
+
   return (
     <Grid container alignItems="center" justifyContent="center" direction="column" paddingTop={4}>
       <Grid item>
@@ -40,42 +58,28 @@ const DynamicFormContainer: React.FC = () => {
             paddingY: 5,
             position: 'relative',
           }}>
-          {FormComponent && (
-            <FormComponent
-              formData={formData}
-              onChange={(fieldName: string, value: string | boolean | number) =>
-                setFormData((prevData) => ({
-                  ...prevData,
-                  [fieldName]: value,
-                }))
-              }
-            />
-          )}
+          {formData.map((formData, index) => {
+            const FormComponent = formComponents[formType!];
+            return (
+              FormComponent && (
+                <Grid container direction="row" spacing={3} gap={4} marginBottom={4} key={index}>
+                  <FormComponent
+                    formData={formData}
+                    onChange={(fieldName: string, value: string | boolean | number) =>
+                      handleFormChange(index, fieldName, value)
+                    }
+                  />
+                  <Button onClick={() => handleRemoveForm(index)}>Remove Form</Button>
+                </Grid>
+              )
+            );
+          })}
           <form onSubmit={handleSubmit}>
             <Button type="submit" variant="contained">
               Skapa dokument för kund
             </Button>
           </form>
-          <Typography variant="h6" sx={{ marginTop: 2 }}>
-            Välj formulärtyp:
-          </Typography>
-          <Grid container spacing={2}>
-            {Object.keys(formComponents).map((type) => (
-              <Grid item key={type}>
-                <Button
-                  variant="outlined"
-                  onClick={() =>
-                    setFormData((formConfig[type]?.initialValue as CustomerFormData) || {})
-                  }
-                  sx={{
-                    textTransform: 'capitalize',
-                    fontWeight: type === formType ? 'bold' : 'normal',
-                  }}>
-                  {type}
-                </Button>
-              </Grid>
-            ))}
-          </Grid>
+          <Button onClick={handleAddForm}>Add Form</Button>
         </Paper>
       </Grid>
     </Grid>
