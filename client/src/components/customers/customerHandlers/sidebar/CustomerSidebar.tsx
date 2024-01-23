@@ -25,7 +25,7 @@ import ElderlyIcon from '@mui/icons-material/Elderly';
 import MenuIcon from '@mui/icons-material/Menu';
 import MenuOpenIcon from '@mui/icons-material/MenuOpen';
 import GroupRemoveIcon from '@mui/icons-material/GroupRemove';
-import CustomerDeleteDialog from './CustomerDeleteDialog';
+import CustomerDeleteDialog from '../edit/CustomerDeleteDialog';
 
 const drawerWidth = 100;
 const closeWidth = 12;

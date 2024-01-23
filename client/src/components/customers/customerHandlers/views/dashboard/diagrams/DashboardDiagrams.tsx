@@ -1,6 +1,6 @@
 import { Stack } from '@mui/material';
 import { PieChart, BarChart } from '@mui/x-charts';
-import { CustomerOverview } from '../../models/ViewCustomerModel';
+import { CustomerOverview } from '../../../models/ViewCustomerModel';
 
 interface DiagramProps {
   customer: CustomerOverview;

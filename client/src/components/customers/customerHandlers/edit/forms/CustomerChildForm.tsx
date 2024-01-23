@@ -2,7 +2,7 @@ import React from 'react';
 import { CustomerChildren } from './models/CustomerFormModels';
 import { Checkbox, Grid, TextField } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers';
-import SelectWithLabel from '../../../../commonComponents/selectWithLabel/SelectWithLabel';
+import SelectWithLabel from '../../../../../commonComponents/selectWithLabel/SelectWithLabel';
 import { formatDate } from './models/commonFunctions';
 
 interface CustomerChildFormProps {

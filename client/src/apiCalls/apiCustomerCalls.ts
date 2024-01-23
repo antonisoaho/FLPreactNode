@@ -2,7 +2,7 @@ import axiosInstance, { ExtendedError } from '../axios/AxiosInstance';
 import {
   CustomerDetails,
   CustomerFormData,
-} from '../components/customers/customerHandlers/forms/models/CustomerFormModels';
+} from '../components/customers/customerHandlers/edit/forms/models/CustomerFormModels';
 import { CustomerOverview } from '../components/customers/customerHandlers/models/ViewCustomerModel';
 import CustomerModel from '../components/customers/models/CustomerModel';
 import {

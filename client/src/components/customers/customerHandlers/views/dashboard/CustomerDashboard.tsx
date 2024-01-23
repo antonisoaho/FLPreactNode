@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { getSingleCustomerById } from '../../../../apiCalls/apiCustomerCalls';
-import { snackbarState } from '../../../../recoil/RecoilAtoms';
+import { getSingleCustomerById } from '../../../../../apiCalls/apiCustomerCalls';
+import { snackbarState } from '../../../../../recoil/RecoilAtoms';
 import { useSetRecoilState } from 'recoil';
 import { Link, useParams } from 'react-router-dom';
-import { CustomerOverview } from '../models/ViewCustomerModel';
+import { CustomerOverview } from '../../models/ViewCustomerModel';
 import { CircularProgress, Grid, IconButton, Stack, Tooltip, Typography } from '@mui/material';
 import DashboardCard from './card/DashboardCard';
 import DashboardDiagrams from './diagrams/DashboardDiagrams';

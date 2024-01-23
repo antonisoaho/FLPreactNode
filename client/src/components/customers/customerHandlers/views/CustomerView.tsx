@@ -1,6 +1,5 @@
-import React from 'react';
 import CustomerDashboard from './dashboard/CustomerDashboard';
-import CustomerSidebar from './CustomerSidebar';
+import CustomerSidebar from '../sidebar/CustomerSidebar';
 
 const CustomerView = () => {
   return (

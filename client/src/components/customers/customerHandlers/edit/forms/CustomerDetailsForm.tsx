@@ -3,7 +3,7 @@ import { CustomerDetails } from './models/CustomerFormModels';
 import { Grid, TextField } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { formatDate } from './models/commonFunctions';
-import SelectWithLabel from '../../../../commonComponents/selectWithLabel/SelectWithLabel';
+import SelectWithLabel from '../../../../../commonComponents/selectWithLabel/SelectWithLabel';
 
 interface CustomerDetailsFormProps {
   formData?: CustomerDetails;

@@ -17,15 +17,13 @@ import {
   Investment,
   LiabilityBase,
   LiabilityPlanned,
-  WorkConditions,
-} from '../forms/models/CustomerFormModels';
+} from '../edit/forms/models/CustomerFormModels';
 
 export type CustomerOverview = {
   _id: string;
   advisor: string;
   customerDetails: [CustomerDetails & DateFields];
   customerChildren: [CustomerChildren & DateFields];
-  workConditions: [WorkConditions & DateFields];
   income: {
     base: [IncomeBase & DateFields];
     change: [IncomeChange & DateFields];
