@@ -1,4 +1,4 @@
-import React, { useState, FormEvent } from 'react';
+import React, { useState, FormEvent, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Button, Grid, Paper } from '@mui/material';
 import CustomerAssetForm from './CustomerAssetForm';
@@ -16,9 +16,11 @@ const formComponents: Record<string, React.FC<any>> = {
 const DynamicFormContainer: React.FC = () => {
   const { formType } = useParams();
 
-  const [formData, setFormData] = useState<CustomerFormData[]>([
-    (formConfig[formType!]?.initialValue as CustomerFormData) || {},
-  ]);
+  const [formData, setFormData] = useState<CustomerFormData[]>([]);
+
+  useEffect(() => {
+    setFormData([(formConfig[formType!]?.initialValue as CustomerFormData) || {}]);
+  }, [formType]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -69,17 +71,17 @@ const DynamicFormContainer: React.FC = () => {
                       handleFormChange(index, fieldName, value)
                     }
                   />
-                  <Button onClick={() => handleRemoveForm(index)}>Remove Form</Button>
+                  <Button onClick={() => handleRemoveForm(index)}>Ta bort</Button>
                 </Grid>
               )
             );
           })}
           <form onSubmit={handleSubmit}>
             <Button type="submit" variant="contained">
-              Skapa dokument för kund
+              Spara dokument
             </Button>
           </form>
-          <Button onClick={handleAddForm}>Add Form</Button>
+          <Button onClick={handleAddForm}>Lägg till formulär</Button>
         </Paper>
       </Grid>
     </Grid>

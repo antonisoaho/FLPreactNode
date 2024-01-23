@@ -12,30 +12,20 @@ export type CustomerChildren = {
   livesAtHomeToAge: number;
 };
 
-export type WorkConditions = {
-  belongs: string;
-  pensionAge: number;
-  activeTimeEnd: number;
-  lifeSpan: number;
-  sickPay: boolean;
-  occupation: string;
-  collectiveAgreement: boolean;
-};
-
 export type IncomeBase = {
   belongs: string;
   values: {
     serviceIncome: number;
-    ofWhichOwnAB: number;
-    companyCarBenefit: boolean;
-    soleTraderIncome: number;
-    deficitOffset: boolean;
-    taxFree: number;
-    k10: {
+    ofWhichOwnAB?: number;
+    companyCarBenefit?: {
       amount: number;
-      distributionMonth: number;
+      gross: boolean;
+    };
+    soleTraderIncome?: number;
+    taxFree?: number;
+    k10?: {
+      amount: number;
       savedDistribution: number;
-      financialStatementsMonth: number;
       salaryBasis: number;
       ownershipShare: number;
     };
@@ -55,12 +45,10 @@ export type ExpensesBase = {
   values: {
     expenseType: string;
     mapped: number;
-    correction: number;
-    difCrisis: number;
-    difPension: number;
-    difActiveEnd: number;
+    correction?: number;
+    difPension: [number];
+    difActiveEnd: [number];
     difDeath: [number];
-    childMovesOut: number;
   };
 };
 
@@ -70,22 +58,31 @@ export type ExpensesChange = {
     when: number;
     ongoing: number;
     value: number;
-    comment: string;
+    comment?: string;
   };
 };
 
 export type Investment = {
-  investmentType: string;
   institution: string;
   name: string;
   belongs: string;
   depositedAmount: number;
   value: number;
-  riskClass: number;
-  timePerspective: number;
-  monthlySavings: number;
+  riskClass?: number;
+  timePerspective: string;
+  monthlySavings?: number;
   saveForHowLong: number;
   projectedGrowth: number;
+};
+
+export type BankFund = {
+  belongs: string;
+  accounType: string;
+  institution: string;
+  name?: string;
+  value: number;
+  timePerspective: string;
+  monthlySavings?: number;
 };
 
 export type LiabilityBase = {
@@ -96,13 +93,9 @@ export type LiabilityBase = {
   debt: number;
   interest: number;
   monthlyAmortization: number;
-  loanProtection: {
-    death: boolean;
-    sickness: boolean;
-    unemployment: boolean;
-    maximumAmount: number;
-  };
+  loanProtection: boolean;
 };
+
 export type LiabilityPlanned = {
   loanType: string;
   event: string;
@@ -121,7 +114,6 @@ export type Assets = {
   belongs: string;
   tax: number;
   assessedValue: number;
-  legalTitleCost: number;
   investment: number;
 };
 
@@ -134,8 +126,6 @@ export type CustomerPension = {
   pensionAge: number;
   monthlyPension: number;
   compensationPeriod: string;
-  altPaymentAge: number;
-  impactPercent: number;
   shellFee: number;
   riskClass: number;
   fundFee: number;
@@ -193,16 +183,6 @@ export type InsuranceWork = {
   insuranceType: string;
 };
 
-export type BankFund = {
-  belongs: string;
-  accounType: string;
-  institution: string;
-  name: string;
-  value: number;
-  timePerspective: string;
-  monthlySavings: number;
-};
-
 type Insurances =
   | InsuranceProperty
   | InsuranceAccident
@@ -221,6 +201,5 @@ export type CustomerFormData =
   | ExpensesBase
   | IncomeChange
   | IncomeBase
-  | WorkConditions
   | CustomerChildren
   | BankFund;
