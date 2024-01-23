@@ -3,8 +3,7 @@ import CustomerComponent from '../customers/CustomerComponent';
 import CustomerPrintversion from '../customers/customerHandlers/print/CustomerPrintversion';
 import CreateCustomer from '../customers/customerHandlers/edit/CreateCustomer';
 import CustomerEdit from '../customers/customerHandlers/edit/CustomerEdit';
-import CustomerView from '../customers/customerHandlers/views/CustomerView';
-import FormContainer from '../customers/customerHandlers/edit/FormContainer';
+import CustomerView from '../customers/customerHandlers/CustomerView';
 
 const CustomerRoutes = [
   <Route key="customers" path="/customers" element={<CustomerComponent />} />,
@@ -12,7 +11,7 @@ const CustomerRoutes = [
   <Route key="view" path="/customers/:custId" element={<CustomerView />} />,
   <Route key="print" path="/customers/:custId/print" element={<CustomerPrintversion />} />,
   <Route key="edit" path="/customers/:custId/edit" element={<CustomerEdit />}>
-    <Route path="forms" element={<FormContainer />} />
+    {/* <Route path="forms" element={<FormContainer />} /> */}
   </Route>,
 ];
 

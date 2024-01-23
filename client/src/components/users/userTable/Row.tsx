@@ -31,31 +31,22 @@ const Row: React.FC<RowProps> = ({ row, onUserPrefsOpen, setUsers }) => {
 
   const handleOpen = async () => {
     if (!open && !row.email) {
-      try {
-        const response = await getSingleUserById(row._id);
+      const response = await getSingleUserById(row._id);
 
-        if (response.success && response.status === 200) {
-          const user = response.data;
-          setUsers((prevUsers) => {
-            const updatedUsers = [...prevUsers];
-            const objIndex = updatedUsers.findIndex((obj) => obj._id === row._id);
-            updatedUsers[objIndex].email = user!.email;
-            updatedUsers[objIndex].updatedAt = user!.updatedAt;
-            updatedUsers[objIndex].createdAt = user!.createdAt;
-            return updatedUsers;
-          });
-        } else {
-          setSnackbarState({
-            open: true,
-            message: response.error!,
-            severity: 'error',
-          });
-        }
-      } catch (error) {
-        console.error('Error fetching user details:', error);
+      if (response.success && response.status === 200) {
+        const user = response.data;
+        setUsers((prevUsers) => {
+          const updatedUsers = [...prevUsers];
+          const objIndex = updatedUsers.findIndex((obj) => obj._id === row._id);
+          updatedUsers[objIndex].email = user!.email;
+          updatedUsers[objIndex].updatedAt = user!.updatedAt;
+          updatedUsers[objIndex].createdAt = user!.createdAt;
+          return updatedUsers;
+        });
+      } else {
         setSnackbarState({
           open: true,
-          message: 'Error fetching user details.',
+          message: response.error!,
           severity: 'error',
         });
       }

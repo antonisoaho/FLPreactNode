@@ -21,6 +21,7 @@ export type CustomerDataHandler = {
 export type DateFields = {
   createdAt: Date;
   updatedAt: Date;
+  _id: string;
 };
 
 export type CustomerFormResponse = CustomerFormData & DateFields;

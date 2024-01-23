@@ -32,8 +32,8 @@ export type CustomerOverview = {
     base: [ExpensesBase & DateFields];
     change: [ExpensesChange & DateFields];
   };
-  bankFunds: [BankFund & DateFields];
   investments: [Investment & DateFields];
+  bankFunds: [BankFund & DateFields];
   liabilities: {
     base: [LiabilityBase & DateFields];
     planned: [LiabilityPlanned & DateFields];

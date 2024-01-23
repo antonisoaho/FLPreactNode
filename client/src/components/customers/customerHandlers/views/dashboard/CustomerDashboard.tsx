@@ -1,40 +1,21 @@
-import { useEffect, useState } from 'react';
-import { getSingleCustomerById } from '../../../../../apiCalls/apiCustomerCalls';
-import { snackbarState } from '../../../../../recoil/RecoilAtoms';
-import { useSetRecoilState } from 'recoil';
-import { Link, useParams } from 'react-router-dom';
+import React from 'react';
+import { Link } from 'react-router-dom';
 import { CustomerOverview } from '../../models/ViewCustomerModel';
-import { CircularProgress, Grid, IconButton, Stack, Tooltip, Typography } from '@mui/material';
+import { Grid, IconButton, Stack, Tooltip, Typography } from '@mui/material';
 import DashboardCard from './card/DashboardCard';
 import DashboardDiagrams from './diagrams/DashboardDiagrams';
 import PrintIcon from '@mui/icons-material/Print';
 
-const CustomerDashboard = () => {
-  const setSnackbarState = useSetRecoilState(snackbarState);
-  const [customer, setCustomer] = useState<CustomerOverview>();
-  const [loading, setLoading] = useState<boolean>(true);
-  const { custId } = useParams();
+interface DashboardProps {
+  customer: CustomerOverview;
+}
 
-  const getCustomer = async () => {
-    const response = await getSingleCustomerById(custId!);
-    if (response.success && response.status === 200) {
-      setCustomer(response.data);
-
-      setLoading(false);
-    } else {
-      setSnackbarState({
-        open: true,
-        message: response.error!,
-        severity: 'error',
-      });
-    }
-  };
-
+const CustomerDashboard: React.FC<DashboardProps> = ({ customer }) => {
   const totalIncome: number =
-    customer?.income.base.reduce((sum, inc) => inc.values.serviceIncome + sum, 0) || 0;
+    customer?.income.base.reduce((sum, inc) => inc.values!.serviceIncome! + sum, 0) || 0;
 
   const totalExpense: number =
-    customer?.expenses.base.reduce((sum, inc) => inc.values.mapped + sum, 0) || 0;
+    customer?.expenses.base.reduce((sum, inc) => inc.values!.mapped! + sum, 0) || 0;
 
   const numberOfChildren: number = customer?.customerChildren.length || 0;
 
@@ -67,41 +48,32 @@ const CustomerDashboard = () => {
     },
   ];
 
-  useEffect(() => {
-    getCustomer();
-  }, []);
-
   return (
     <Grid
       justifyContent="center"
       container
       spacing={3}
       wrap="wrap"
-      maxWidth="90%"
+      maxWidth="100%"
       justifySelf="center">
       <Stack sx={{ position: 'absolute', right: 10, alignItems: 'end' }}>
         <Typography variant="overline">{customer?._id}</Typography>
         <Tooltip title="Gå till sida för utskrift.">
-          <IconButton component={Link} to={`/customers/${custId}/print`}>
+          <IconButton component={Link} to={`/customers/${customer._id}/print`}>
             <PrintIcon />
           </IconButton>
         </Tooltip>
       </Stack>
-      {loading ? (
-        <CircularProgress />
-      ) : (
-        <>
-          {((customer?.income.base.length ?? 0) && (customer?.expenses.base.length ?? 0)) > 0 && (
-            <DashboardDiagrams customer={customer!} />
-          )}
 
-          <Grid container justifyContent="center" spacing={3} sx={{ marginTop: 1 }}>
-            {cardItems.map((item, idx) => (
-              <DashboardCard key={idx} {...item} />
-            ))}
-          </Grid>
-        </>
+      {((customer?.income.base.length ?? 0) && (customer?.expenses.base.length ?? 0)) > 0 && (
+        <DashboardDiagrams customer={customer!} />
       )}
+
+      <Grid container justifyContent="center" spacing={3} sx={{ marginTop: 1 }}>
+        {cardItems.map((item, idx) => (
+          <DashboardCard key={idx} {...item} />
+        ))}
+      </Grid>
     </Grid>
   );
 };

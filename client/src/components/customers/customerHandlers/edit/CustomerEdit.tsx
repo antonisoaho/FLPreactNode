@@ -1,6 +1,6 @@
 import { Link, Outlet } from 'react-router-dom';
 import CustomerSidebar from '../sidebar/CustomerSidebar';
-import { Button } from '@mui/material';
+import { Box, Button } from '@mui/material';
 import { useState } from 'react';
 
 const CustomerEdit = () => {
@@ -14,10 +14,12 @@ const CustomerEdit = () => {
   return (
     <>
       <CustomerSidebar />
-      <Button component={Link} to="forms" variant="contained" onClick={handleClick}>
-        Öppna kunddokument
-      </Button>
-      <Outlet />
+      <Box maxWidth="1600px" marginX="60px" paddingY="20px">
+        <Button component={Link} to="forms" variant="contained" onClick={handleClick}>
+          Öppna kunddokument
+        </Button>
+        <Outlet />
+      </Box>
     </>
   );
 };

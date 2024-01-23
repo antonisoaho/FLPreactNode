@@ -10,7 +10,7 @@ import {
   Toolbar,
   Tooltip,
 } from '@mui/material';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import AccessibilityIcon from '@mui/icons-material/Accessibility';
 import ChildCareIcon from '@mui/icons-material/ChildCare';
 import WorkIcon from '@mui/icons-material/Work';
@@ -25,17 +25,22 @@ import ElderlyIcon from '@mui/icons-material/Elderly';
 import MenuIcon from '@mui/icons-material/Menu';
 import MenuOpenIcon from '@mui/icons-material/MenuOpen';
 import GroupRemoveIcon from '@mui/icons-material/GroupRemove';
-import CustomerDeleteDialog from '../edit/CustomerDeleteDialog';
+import { deleteCustomerById } from '../../../../apiCalls/apiCustomerCalls';
+import { useSetRecoilState } from 'recoil';
+import { snackbarState } from '../../../../recoil/RecoilAtoms';
+import PromptDialog from '../../../../commonComponents/promtDialog/PromptDialog';
 
 const drawerWidth = 100;
-const closeWidth = 12;
+const closeWidth = 15;
 const transDuration = 1000;
 
 const CustomerSidebar = () => {
   const [open, setOpen] = useState<boolean>(false);
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
+  const setSnackbarState = useSetRecoilState(snackbarState);
   const { custId } = useParams();
   const basePath = `/customers/${custId}/edit/`;
+  const navigate = useNavigate();
 
   const items = [
     { text: 'Personer', to: basePath + 'details', icon: <AccessibilityIcon /> },
@@ -57,7 +62,7 @@ const CustomerSidebar = () => {
 
   const listItemButtonSx = {
     width: !open ? '40px' : 'auto',
-    paddingX: open ? 3 : 1,
+    paddingX: open ? 3 : 1.5,
   };
 
   const sidebarSx = {
@@ -72,9 +77,26 @@ const CustomerSidebar = () => {
     setDialogOpen(!dialogOpen);
   };
 
-  const customerDeleteConfirm = () => {
+  const customerDeleteConfirm = async () => {
     handleDialogOpen();
-    console.log('custId deleted:', custId);
+
+    const response = await deleteCustomerById(custId!);
+
+    if (response.success) {
+      setSnackbarState({
+        open: true,
+        message: 'Kund raderad.',
+        severity: 'success',
+      });
+
+      navigate('/customers');
+    } else {
+      setSnackbarState({
+        open: true,
+        message: response.error!,
+        severity: 'error',
+      });
+    }
   };
 
   const customerDeleteCanceled = () => {
@@ -130,10 +152,12 @@ const CustomerSidebar = () => {
           </Tooltip>
         </ListItem>
       </List>
-      <CustomerDeleteDialog
-        deleteDialogOpen={dialogOpen}
-        deleteConfirm={customerDeleteConfirm}
-        deleteCanceled={customerDeleteCanceled}
+      <PromptDialog
+        confirm={customerDeleteConfirm}
+        canceled={customerDeleteCanceled}
+        dialogOpen={dialogOpen}
+        title={'Ta bort kund'}
+        prompt={'Är du säker på att du vill radera dokument för kund?'}
       />
     </Drawer>
   );

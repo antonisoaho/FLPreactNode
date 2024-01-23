@@ -56,6 +56,7 @@ const CreateCustomer = () => {
 
     if (response.success) {
       const newCustomerId = response.data?.custId;
+      console.log('response.data', response.data);
       setSnackbarState({
         open: true,
         message: 'Ny kund skapad!',

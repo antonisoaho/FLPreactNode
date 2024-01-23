@@ -35,7 +35,14 @@ router
       const customer = new Customer({ advisor: userId, ...req.body });
       const result = await customer.save();
 
-      res.status(201).send(result.customerDetails.map((customers) => customers.name));
+      const parsedResult = {
+        advisorId: userId,
+        custId: result._id,
+        customerNames: req.body.customerDetails.map((customers) => customers.name),
+        lastUpdate: result.updatedAt,
+      };
+
+      res.status(201).send(parsedResult);
     } catch (err) {
       console.error(err);
       return res.status(500).json({ error: 'Fel vid uppskapande av kund.' });
