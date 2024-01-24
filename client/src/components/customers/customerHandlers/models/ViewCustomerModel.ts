@@ -10,13 +10,14 @@ import {
   IncomeBase,
   IncomeChange,
   InsuranceAccident,
-  InsuranceDeath,
+  InsuranceLife,
   InsuranceProperty,
   InsuranceSickness,
   InsuranceWork,
   Investment,
   LiabilityBase,
   LiabilityPlanned,
+  SpousalPension,
 } from '../edit/forms/models/CustomerFormModels';
 
 export type CustomerOverview = {
@@ -38,15 +39,16 @@ export type CustomerOverview = {
     base: [LiabilityBase & DateFields];
     planned: [LiabilityPlanned & DateFields];
   };
-  assets: [Assets];
+  assets: [Assets & DateFields];
   insurances: {
     property: [InsuranceProperty & DateFields];
     sickness: [InsuranceSickness & DateFields];
     accident: [InsuranceAccident & DateFields];
-    death: [InsuranceDeath & DateFields];
+    life: [InsuranceLife & DateFields];
     work: [InsuranceWork & DateFields];
   };
   pension: [CustomerPension & DateFields];
+  spousalPension: [SpousalPension & DateFields];
   createdAt: Date;
   updatedAt: Date;
 };

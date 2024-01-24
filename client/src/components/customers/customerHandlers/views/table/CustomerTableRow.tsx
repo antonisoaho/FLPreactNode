@@ -23,7 +23,12 @@ const CustomerTableRow: React.FC<RowProps> = ({ fieldName, fieldLength, children
             padding: 0,
             paddingLeft: '16px',
           }}>
-          <IconButton aria-label="expand row" size="small" onClick={() => setOpen(!open)}>
+          <IconButton
+            aria-label="expand row"
+            size="small"
+            onClick={() => {
+              setOpen(!open);
+            }}>
             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
         </TableCell>

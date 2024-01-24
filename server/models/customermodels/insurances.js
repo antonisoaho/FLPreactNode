@@ -17,7 +17,7 @@ const sickInsuranceSchema = new Schema(
     belongs: { type: String },
     company: { type: String },
     insuranceType: { type: String },
-    taxCategory: { type: String },
+    taxFree: { type: Boolean },
     qualifyingPeriod: { type: String },
     compensationAmount: { type: Number },
     compensationPeriod: { type: String },
@@ -41,7 +41,7 @@ const accidentInsuranceSchema = new Schema(
   { timestamps: true }
 );
 
-const deathInsuranceSchema = new Schema(
+const lifeInsuranceSchema = new Schema(
   {
     belongs: { type: String },
     company: { type: String },
@@ -66,7 +66,7 @@ const workInsuranceSchema = new Schema(
 module.exports = {
   propertyInsuranceSchema,
   sickInsuranceSchema,
-  deathInsuranceSchema,
+  lifeInsuranceSchema,
   accidentInsuranceSchema,
   workInsuranceSchema,
 };

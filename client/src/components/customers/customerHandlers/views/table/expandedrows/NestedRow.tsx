@@ -1,7 +1,8 @@
-import { IconButton, TableCell, TableRow } from '@mui/material';
+import { IconButton, TableCell } from '@mui/material';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import { useState } from 'react';
+import ColoredTableRow from '../../../../../../commonComponents/coloredTableRow/ColoredTableRow';
 
 interface RowProps {
   fieldName: string;
@@ -14,7 +15,7 @@ const NestedRow: React.FC<RowProps> = ({ fieldName, fieldLength, children }) => 
 
   return (
     <>
-      <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
+      <ColoredTableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
         <TableCell
           style={{
             width: 'fit-content',
@@ -33,7 +34,7 @@ const NestedRow: React.FC<RowProps> = ({ fieldName, fieldLength, children }) => 
 
         <TableCell align="right">{fieldLength}</TableCell>
         <TableCell />
-      </TableRow>
+      </ColoredTableRow>
       {open && children}
     </>
   );

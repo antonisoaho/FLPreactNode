@@ -6,13 +6,13 @@ const { expensesBaseSchema, expensesChangeSchema } = require('./customerModels/e
 const { incomeBaseSchema, incomeChangeSchema } = require('./customerModels/income');
 const investmentSchema = require('./customerModels/investments');
 const { liabilityBaseSchema, liabilityPlannedSchema } = require('./customerModels/liabilities');
-const pensionSchema = require('./customerModels/pension');
+const { pensionSchema, spousalPensionSchema } = require('./customerModels/pension');
 const assetSchema = require('./customerModels/assets');
 const {
   propertyInsuranceSchema,
   sickInsuranceSchema,
   accidentInsuranceSchema,
-  deathInsuranceSchema,
+  lifeInsuranceSchema,
   workInsuranceSchema,
 } = require('./customerModels/insurances');
 const bankFundSchema = require('./customerModels/bankFunds');
@@ -46,10 +46,11 @@ const customerSchema = new Schema(
       property: [propertyInsuranceSchema],
       sickness: [sickInsuranceSchema],
       accident: [accidentInsuranceSchema],
-      death: [deathInsuranceSchema],
+      life: [lifeInsuranceSchema],
       work: [workInsuranceSchema],
     },
     pension: [pensionSchema],
+    spousalPension: [spousalPensionSchema],
   },
   { timestamps: true }
 );

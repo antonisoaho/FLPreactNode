@@ -64,15 +64,20 @@ export type ExpensesChange = {
 };
 
 export type Investment = {
+  investmentType?: string;
   institution?: string;
   name?: string;
   belongs?: string;
   depositedAmount?: number;
   value?: number;
   riskClass?: number;
+  managementFee?: number;
+  shellFee?: number;
   timePerspective?: string;
   monthlySavings?: number;
   saveForHowLong?: number;
+  additinalInvestment?: number;
+  when?: number;
   projectedGrowth?: number;
 };
 
@@ -84,6 +89,9 @@ export type BankFund = {
   value?: number;
   timePerspective?: string;
   monthlySavings?: number;
+  saveForHowLong?: number;
+  interestRate?: number;
+  projectedGrowth?: number;
 };
 
 export type LiabilityBase = {
@@ -94,6 +102,7 @@ export type LiabilityBase = {
   debt?: number;
   interest?: number;
   monthlyAmortization?: number;
+  lockInterestDate: Date;
   loanProtection?: boolean;
 };
 
@@ -118,24 +127,6 @@ export type Assets = {
   base?: number;
 };
 
-export type CustomerPension = {
-  belongs?: string;
-  company?: string;
-  pensionType?: string;
-  pensionName?: string;
-  pensionValue?: number;
-  pensionAge?: number;
-  monthlyPension?: number;
-  compensationPeriod?: string;
-  shellFee?: number;
-  riskClass?: number;
-  fundFee?: number;
-  estIncreasedValue?: number;
-  annualSavings?: number;
-  commitmentPowers?: boolean;
-  beneficiary?: string;
-};
-
 export type InsuranceProperty = {
   propertyType?: string;
   company?: string;
@@ -149,7 +140,7 @@ export type InsuranceSickness = {
   belongs?: string;
   company?: string;
   insuranceType?: string;
-  taxCategory?: string;
+  taxFree?: boolean;
   qualifyingPeriod?: string;
   compensationAmount?: number;
   compensationPeriod?: string;
@@ -168,7 +159,7 @@ export type InsuranceAccident = {
   lastControl?: string;
 };
 
-export type InsuranceDeath = {
+export type InsuranceLife = {
   belongs?: string;
   company?: string;
   insuranceType?: string;
@@ -184,16 +175,45 @@ export type InsuranceWork = {
   insuranceType?: string;
 };
 
+export type CustomerPension = {
+  belongs?: string;
+  company?: string;
+  pensionType?: string;
+  pensionName?: string;
+  pensionValue?: number;
+  pensionAge?: number;
+  monthlyPension?: number;
+  compensationPeriod?: string;
+  shellFee?: number;
+  riskClass?: number;
+  fundFee?: number;
+  estIncreasedValue?: number;
+  annualSavings?: number;
+  commitmentPowers?: boolean;
+  beneficiary?: string;
+};
+
+export type SpousalPension = {
+  belongs?: string;
+  company?: string;
+  taxFree?: boolean;
+  compensation?: number;
+  compensationPeriod?: string;
+  premiumCost?: boolean;
+  beneficiary?: string;
+};
+
 type Insurances =
   | InsuranceProperty
   | InsuranceAccident
-  | InsuranceDeath
+  | InsuranceLife
   | InsuranceSickness
   | InsuranceWork;
 
 export type CustomerFormData =
   | CustomerDetails
   | Insurances
+  | SpousalPension
   | CustomerPension
   | Assets
   | LiabilityPlanned

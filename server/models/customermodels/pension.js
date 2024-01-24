@@ -23,4 +23,17 @@ const pensionSchema = new Schema(
   { timestamps: true }
 );
 
-module.exports = pensionSchema;
+const spousalPensionSchema = new Schema(
+  {
+    belongs: { type: String },
+    company: { type: String },
+    taxFree: { type: Boolean },
+    compensation: { type: Number },
+    compensationPeriod: { type: String },
+    premiumCost: { type: Number },
+    beneficiary: { type: String },
+  },
+  { timestamps: true }
+);
+
+module.exports = { pensionSchema, spousalPensionSchema };
