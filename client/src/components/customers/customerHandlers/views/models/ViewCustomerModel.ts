@@ -1,4 +1,4 @@
-import { DateFields } from '../../../../apiCalls/models/ApiModel';
+import { DateFields } from '../../../../../apiCalls/models/ApiModel';
 import {
   Assets,
   BankFund,
@@ -18,7 +18,7 @@ import {
   LiabilityBase,
   LiabilityPlanned,
   SpousalPension,
-} from '../edit/forms/models/CustomerFormModels';
+} from '../forms/models/CustomerFormModels';
 
 export type CustomerOverview = {
   _id: string;

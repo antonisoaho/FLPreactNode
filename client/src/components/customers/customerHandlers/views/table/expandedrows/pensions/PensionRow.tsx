@@ -1,7 +1,7 @@
 import { TableCell, Box, Table, TableHead, TableRow, TableBody } from '@mui/material';
 import React from 'react';
 import { DateFields } from '../../../../../../../apiCalls/models/ApiModel';
-import { CustomerPension } from '../../../../edit/forms/models/CustomerFormModels';
+import { CustomerPension } from '../../../forms/models/CustomerFormModels';
 import ColoredTableRow from '../../../../../../../commonComponents/coloredTableRow/ColoredTableRow';
 
 interface RowProps {

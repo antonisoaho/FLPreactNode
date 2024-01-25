@@ -32,13 +32,12 @@ router
     const { userId } = req.user;
 
     try {
-      const customer = new Customer({ advisor: userId, ...req.body });
+      const customer = new Customer({ advisor: userId });
       const result = await customer.save();
 
       const parsedResult = {
         advisorId: userId,
         custId: result._id,
-        customerNames: req.body.customerDetails.map((customers) => customers.name),
         lastUpdate: result.updatedAt,
       };
 
@@ -102,8 +101,9 @@ router
     const field = req.params.field;
     const subField = req.params.subfield;
     const { userId, isAdmin } = req.user;
-    const newData = subField ? req.body[subField] : req.body[field];
+    const newData = req.body;
 
+    console.log('newData', newData);
     if (!mongoose.Types.ObjectId.isValid(customerId)) {
       return res.status(400).json({ error: 'Ogiltigt kund-ID.' });
     }
@@ -126,6 +126,7 @@ router
         return res.status(404).json({ error: 'Kunde inte hitta kund.' });
       }
       if (subField) {
+        console.log('updatedCustomer[field][subField]', updatedCustomer[field][subField]);
         res.status(200).send(updatedCustomer[field][subField]);
       } else {
         res.status(200).send(updatedCustomer[field]);

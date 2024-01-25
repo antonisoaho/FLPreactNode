@@ -15,19 +15,23 @@ import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { snackbarState, userState } from '../../recoil/RecoilAtoms';
 import { getUserList } from '../../apiCalls/apiUserCalls';
 import UserModel from '../users/models/UserModel';
-import { getCustomerList } from '../../apiCalls/apiCustomerCalls';
+import { createNewCustomer, getCustomerList } from '../../apiCalls/apiCustomerCalls';
 import CustomerCard from './card/CustomerCard';
 import AddButton from '../../commonComponents/button/AddButton';
+import { useNavigate } from 'react-router-dom';
+import PromptDialog from '../../commonComponents/promtDialog/PromptDialog';
 
 const CustomerComponent = () => {
   const [customers, setCustomers] = useState<Array<CustomerModel>>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedAdvisor, setSelectedAdvisor] = useState<any>(-1);
   const [advisorList, setAdvisorList] = useState<UserModel[] | null>(null);
-  const [searchTerm, setSearchTerm] = useState<string>('');
-  const [sortOption, setSortOption] = useState<string>('name');
+  const [searchTerm, setSearchTerm] = useState<string | undefined>();
+  const [sortOption, setSortOption] = useState<string>('updatedAt');
+  const [openDialog, setOpenDialog] = useState(false);
   const { isAdmin } = useRecoilValue(userState);
   const setSnackbarState = useSetRecoilState(snackbarState);
+  const navigate = useNavigate();
 
   const populateAdvisors = async () => {
     const response = await getUserList();
@@ -48,6 +52,7 @@ const CustomerComponent = () => {
     const response = await getCustomerList();
 
     if (response.success && response.status === 200) {
+      console.log('response.data', response.data);
       setCustomers(response.data!);
     } else {
       setSnackbarState({
@@ -64,9 +69,16 @@ const CustomerComponent = () => {
   };
 
   const filterCustomersByName = (customer: CustomerModel) => {
-    return customer.customerNames.some((name) =>
-      name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    if (!customer.customerNames) {
+      return true;
+    }
+    if (searchTerm) {
+      return customer.customerNames.some((name) =>
+        name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    } else {
+      return true;
+    }
   };
 
   const handleSortOption = (event: SelectChangeEvent<string>) => {
@@ -75,12 +87,39 @@ const CustomerComponent = () => {
   };
 
   const sortCustomers = (a: CustomerModel, b: CustomerModel) => {
+    if (!a.customerNames[0] || !b.customerNames[0]) {
+      return 0;
+    }
+
     if (sortOption === 'name') {
       return a.customerNames[0].localeCompare(b.customerNames[0]);
     } else if (sortOption === 'updatedAt') {
       return new Date(b.lastUpdate).getTime() - new Date(a.lastUpdate).getTime();
     }
+
     return 0;
+  };
+
+  const handleAddCustomer = async () => {
+    setLoading(true);
+    const response = await createNewCustomer();
+
+    if (response.success) {
+      const newCustomerId = response.data?.custId;
+      setSnackbarState({
+        open: true,
+        message: 'Ny kund skapad!',
+        severity: 'success',
+      });
+
+      navigate(`/customers/${newCustomerId}`);
+    } else {
+      setSnackbarState({
+        open: true,
+        message: response.error!,
+        severity: 'error',
+      });
+    }
   };
 
   useEffect(() => {
@@ -94,8 +133,19 @@ const CustomerComponent = () => {
     <Container>
       {!loading ? (
         <>
-          <AddButton isLink={true} to="create" textInput={'Skapa ny kund'} />
-
+          <AddButton
+            onClick={() => setOpenDialog(true)}
+            isLink={false}
+            textInput={'Skapa ny kund'}
+          />
+          <PromptDialog
+            confirm={handleAddCustomer}
+            canceled={() => setOpenDialog(false)}
+            dialogOpen={openDialog}
+            title={'Skapa ny kund?'}
+            prompt={'Vill du fortsätta med att skapa upp ett nytt kunddokument?'}
+            color={'primary'}
+          />
           <Grid container direction="row" spacing={2} alignItems="end" justifyContent="center">
             {isAdmin && (
               <Grid item alignItems="center">
@@ -144,7 +194,7 @@ const CustomerComponent = () => {
                 variant="outlined"
                 value={searchTerm}
                 onChange={(e: { target: { value: SetStateAction<string> } }) =>
-                  setSearchTerm(e.target.value)
+                  setSearchTerm(e.target.value as string)
                 }
               />
             </Grid>

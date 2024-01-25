@@ -2,7 +2,7 @@ import { CircularProgress, Grid, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useSetRecoilState } from 'recoil';
 import { snackbarState } from '../../../../recoil/RecoilAtoms';
-import { CustomerOverview } from '../models/ViewCustomerModel';
+import { CustomerOverview } from '../views/models/ViewCustomerModel';
 import { getSingleCustomerById } from '../../../../apiCalls/apiCustomerCalls';
 import { useParams } from 'react-router-dom';
 

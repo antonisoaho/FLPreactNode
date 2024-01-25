@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { CustomerOverview } from '../../models/ViewCustomerModel';
+import { CustomerOverview } from '../models/ViewCustomerModel';
 import { Grid, IconButton, Stack, Tooltip, Typography } from '@mui/material';
 import DashboardCard from './card/DashboardCard';
 import DashboardDiagrams from './diagrams/DashboardDiagrams';

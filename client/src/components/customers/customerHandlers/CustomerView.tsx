@@ -4,7 +4,7 @@ import CustomerTable from './views/table/CustomerTable';
 import { Box, CircularProgress, Divider } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import { getSingleCustomerById } from '../../../apiCalls/apiCustomerCalls';
-import { CustomerOverview } from './models/ViewCustomerModel';
+import { CustomerOverview } from './views/models/ViewCustomerModel';
 import { useEffect, useState } from 'react';
 import { useSetRecoilState } from 'recoil';
 import { snackbarState } from '../../../recoil/RecoilAtoms';

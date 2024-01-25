@@ -14,6 +14,7 @@ interface PromptDialogProps {
   dialogOpen: boolean;
   title: string;
   prompt: string;
+  color: 'error' | 'primary' | 'secondary' | 'success' | 'warning';
 }
 
 const PromptDialog: React.FC<PromptDialogProps> = ({
@@ -22,6 +23,7 @@ const PromptDialog: React.FC<PromptDialogProps> = ({
   dialogOpen,
   title,
   prompt,
+  color,
 }) => {
   return (
     <Dialog open={dialogOpen} onClose={canceled}>
@@ -30,10 +32,22 @@ const PromptDialog: React.FC<PromptDialogProps> = ({
         <Typography>{prompt}</Typography>
       </DialogContent>
       <DialogActions>
-        <Button onClick={canceled}>Avbryt</Button>
-        <Button onClick={confirm} variant="contained" color="error">
-          Ta bort
-        </Button>
+        {color === 'error' ? (
+          <>
+            <Button onClick={canceled}>Avbryt</Button>
+            <Button onClick={confirm} variant="contained" color="error">
+              Ta bort
+            </Button>
+          </>
+        ) : (
+          <>
+            <Button onClick={confirm} variant="contained" color={color}>
+              Bekräfta
+            </Button>
+
+            <Button onClick={canceled}>Avbryt</Button>
+          </>
+        )}
       </DialogActions>
     </Dialog>
   );

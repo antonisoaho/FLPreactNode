@@ -158,6 +158,7 @@ const CustomerSidebar = () => {
         dialogOpen={dialogOpen}
         title={'Ta bort kund'}
         prompt={'Är du säker på att du vill radera dokument för kund?'}
+        color={'error'}
       />
     </Drawer>
   );

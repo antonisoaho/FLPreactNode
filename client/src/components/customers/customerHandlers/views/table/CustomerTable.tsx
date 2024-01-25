@@ -8,7 +8,7 @@ import {
   TableBody,
   CircularProgress,
 } from '@mui/material';
-import { CustomerOverview } from '../../models/ViewCustomerModel';
+import { CustomerOverview } from '../models/ViewCustomerModel';
 import CustomerTableRow from './CustomerTableRow';
 import CustomerDetailsRow from './expandedrows/details/CustomerDetailsRow';
 import CustomerChildrenRow from './expandedrows/details/CustomerChildrenRow';

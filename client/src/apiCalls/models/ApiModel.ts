@@ -1,4 +1,4 @@
-import { CustomerFormData } from '../../components/customers/customerHandlers/edit/forms/models/CustomerFormModels';
+import { CustomerFormData } from '../../components/customers/customerHandlers/views/forms/models/CustomerFormModels';
 
 export type ApiResponse<T> = {
   success: boolean;

@@ -1,14 +1,29 @@
-import { TableCell, Box, Table, TableHead, TableRow, TableBody } from '@mui/material';
-import React from 'react';
+import {
+  TableCell,
+  Box,
+  Table,
+  TableHead,
+  TableRow,
+  TableBody,
+  ListItemButton,
+} from '@mui/material';
+import React, { useState } from 'react';
 import { DateFields } from '../../../../../../../apiCalls/models/ApiModel';
-import { CustomerDetails } from '../../../../edit/forms/models/CustomerFormModels';
+import { CustomerDetails } from '../../../forms/models/CustomerFormModels';
 import ColoredTableRow from '../../../../../../../commonComponents/coloredTableRow/ColoredTableRow';
+import CustomerDetailsForm from '../../../forms/CustomerDetailsForm';
 
 interface RowProps {
   fields: [CustomerDetails & DateFields];
 }
 
 const CustomerDetailsRow: React.FC<RowProps> = ({ fields }) => {
+  const [formOpen, setFormOpen] = useState<boolean>(false);
+
+  const onSubmit = () => {
+    console.log('refreshData');
+  };
+
   return (
     <TableRow>
       <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={5}>
@@ -37,9 +52,17 @@ const CustomerDetailsRow: React.FC<RowProps> = ({ fields }) => {
                   <TableCell />
                 </TableRow>
               ))}
+              <TableRow>
+                <TableCell colSpan={6} align="right">
+                  <ListItemButton onClick={() => setFormOpen(!formOpen)}>Lägg till</ListItemButton>
+                </TableCell>
+              </TableRow>
             </TableBody>
           </Table>
         </Box>
+        {formOpen && (
+          <CustomerDetailsForm submitted={onSubmit} closeForm={() => setFormOpen(false)} />
+        )}
       </TableCell>
     </TableRow>
   );

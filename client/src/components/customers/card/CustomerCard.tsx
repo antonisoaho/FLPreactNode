@@ -9,7 +9,6 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import EditIcon from '@mui/icons-material/Edit';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { Link } from 'react-router-dom';
 
@@ -22,17 +21,29 @@ interface CustomerCardProps {
 }
 const CustomerCard: React.FC<CustomerCardProps> = ({ cust }) => {
   return (
-    <Card>
+    <Card
+      sx={{
+        height: '10rem',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+      }}>
       <CardContent>
         <Typography textAlign="left" variant="subtitle2" color="text.secondary" gutterBottom>
           {cust.custId}
         </Typography>
         <Divider />
-        {cust.customerNames.map((name) => (
-          <Typography key={name} textAlign="left" variant="subtitle1" color="text.primary">
-            {name}
+        {cust.customerNames.length ? (
+          cust.customerNames.map((name) => (
+            <Typography key={name} textAlign="left" variant="subtitle1" color="text.primary">
+              {name}
+            </Typography>
+          ))
+        ) : (
+          <Typography textAlign="left" variant="subtitle1" color="text.primary">
+            Inget namn registrerat.
           </Typography>
-        ))}
+        )}
       </CardContent>
       <Grid container alignItems="center" paddingX="16px">
         <Grid item></Grid>
@@ -42,12 +53,6 @@ const CustomerCard: React.FC<CustomerCardProps> = ({ cust }) => {
         </Typography>
         <Grid item marginLeft="auto">
           <CardActions sx={{ gap: '1px', paddingLeft: '20px' }}>
-            <Tooltip title={'Ändra kund'}>
-              <IconButton sx={{ p: '3px' }} component={Link} to={`${cust.custId}/edit`}>
-                <EditIcon />
-              </IconButton>
-            </Tooltip>
-
             <Tooltip title={'Titta på kund'}>
               <IconButton sx={{ p: '3px' }} component={Link} to={`${cust.custId}`}>
                 <VisibilityIcon />
