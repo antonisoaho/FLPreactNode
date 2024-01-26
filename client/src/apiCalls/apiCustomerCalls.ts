@@ -41,12 +41,19 @@ export const getSingleCustomerById = async (
   } catch (error) {
     const extendedError = error as ExtendedError;
     const errorMessage: ErrorResponse = <ErrorResponse>extendedError.response?.data;
-
-    return {
-      success: false,
-      status: extendedError.status,
-      error: errorMessage.error || 'Ett oväntat fel inträffade.',
-    };
+    if (extendedError.status === 403) {
+      return {
+        success: false,
+        status: extendedError.status,
+        error: errorMessage.error || 'Ett oväntat fel inträffade.',
+      };
+    } else {
+      return {
+        success: false,
+        status: extendedError.status,
+        error: errorMessage.error || 'Ett oväntat fel inträffade.',
+      };
+    }
   }
 };
 
@@ -96,7 +103,7 @@ export const getCustomerFormData = async (
     };
   }
 };
-//* Not tested
+
 export const updateCustomer = async (
   details: CustomerDataHandler
 ): Promise<ApiResponse<CustomerFormResponse>> => {
@@ -129,6 +136,37 @@ export const updateCustomer = async (
 export const deleteCustomerById = async (custId: string): Promise<ApiResponse<string>> => {
   try {
     const response = await axiosInstance.delete(`/customers/${custId}`);
+    return {
+      success: true,
+      status: response.status,
+      data: response.data,
+    };
+  } catch (error) {
+    const extendedError = error as ExtendedError;
+    const errorMessage: ErrorResponse = <ErrorResponse>extendedError.response?.data;
+
+    return {
+      success: false,
+      status: extendedError.status,
+      error: errorMessage.error || 'Ett oväntat fel inträffade.',
+    };
+  }
+};
+
+export const deleteCustSubDocument = async (
+  field: string,
+  custId: string,
+  subDocId: string,
+  subField?: string
+): Promise<ApiResponse<CustomerFormResponse>> => {
+  if (!subField !== undefined) {
+    subField = '';
+  }
+  try {
+    const response = await axiosInstance.patch(
+      `/customers/${custId}/remove/${field}/${subDocId}/${subField}`
+    );
+
     return {
       success: true,
       status: response.status,

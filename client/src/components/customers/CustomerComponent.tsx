@@ -26,7 +26,7 @@ const CustomerComponent = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedAdvisor, setSelectedAdvisor] = useState<any>(-1);
   const [advisorList, setAdvisorList] = useState<UserModel[] | null>(null);
-  const [searchTerm, setSearchTerm] = useState<string | undefined>();
+  const [searchTerm, setSearchTerm] = useState<string>('');
   const [sortOption, setSortOption] = useState<string>('updatedAt');
   const [openDialog, setOpenDialog] = useState(false);
   const { isAdmin } = useRecoilValue(userState);

@@ -59,7 +59,7 @@ router
 
     try {
       const result = await Customer.findById(customerId);
-      if (!isAdmin && userId !== result.advisor.advisorId) {
+      if (!isAdmin && userId != result.advisor) {
         return res.status(403).json({ error: 'Obehörig åtkomst till vald kund.' });
       }
 
@@ -83,7 +83,7 @@ router
       const customerField = await Customer.findById(customerId, { [fieldName]: 1, ['advisor']: 1 });
 
       if (!customerField) return res.status(404).json({ error: 'Kunde inte hitta kund.' });
-      if (!isAdmin && userId !== customerField.advisor) {
+      if (!isAdmin && userId != customerField.advisor) {
         return res.status(403).json({ error: 'Obehörig åtkomst till kund.' });
       }
 
@@ -101,7 +101,7 @@ router
     const field = req.params.field;
     const subField = req.params.subfield;
     const { userId, isAdmin } = req.user;
-    const newData = req.body;
+    const newData = Object.values(req.body);
 
     console.log('newData', newData);
     if (!mongoose.Types.ObjectId.isValid(customerId)) {
@@ -111,12 +111,12 @@ router
     try {
       const existingCustomer = await Customer.findById(customerId, { ['advisor']: 1 });
 
-      if (!isAdmin && userId !== existingCustomer.advisor) {
+      if (!isAdmin && userId != existingCustomer.advisor) {
         return res.status(403).json({ error: 'Obehörig åtkomst till vald kund.' });
       }
 
       const fieldPath = subField ? `${field}.${subField}` : field;
-      const updateQuery = { $push: { [fieldPath]: newData } };
+      const updateQuery = { $push: { [fieldPath]: { $each: newData } } };
 
       const updatedCustomer = await Customer.findByIdAndUpdate(customerId, updateQuery, {
         new: true,
@@ -132,6 +132,7 @@ router
         res.status(200).send(updatedCustomer[field]);
       }
     } catch (err) {
+      console.log('err.message', err.message);
       res
         .status(err.status || 500)
         .json({ error: err.message || 'Fel vid inmatning av kunddata.' });
@@ -145,12 +146,16 @@ router
     const subDoc = req.params.subDoc;
     const subField = req.params.subField;
     const dataPath = subField ? `${field}.${subField}` : field;
-
+    console.log('custId', custId);
+    console.log('field', field);
+    console.log('subDoc', subDoc);
+    console.log('subField', subField);
+    console.log('dataPath', dataPath);
     try {
       const updateQuery = {
         $pull: { [dataPath]: { _id: subDoc } },
       };
-
+      console.log('updateQuery', updateQuery);
       const result = await Customer.findByIdAndUpdate(custId, updateQuery, { new: true });
       console.log(result);
       if (!result) {
@@ -176,7 +181,7 @@ router
     try {
       const existingCustomer = await Customer.findById(customerId, { ['advisor']: 1 });
 
-      if (!isAdmin && userId !== existingCustomer.advisor) {
+      if (!isAdmin && userId != existingCustomer.advisor) {
         return res.status(403).json({ error: 'Obehörig åtkomst till vald kund.' });
       }
 

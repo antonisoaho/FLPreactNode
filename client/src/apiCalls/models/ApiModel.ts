@@ -15,7 +15,7 @@ export type CustomerDataHandler = {
   field: string;
   subField?: string;
   _id: string;
-  formData: CustomerFormData;
+  formData: CustomerFormData[];
 };
 
 export type DateFields = {

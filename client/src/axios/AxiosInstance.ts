@@ -29,23 +29,23 @@ axiosInstance.interceptors.response.use(
     return response;
   },
   (err: ExtendedError) => {
-    if (
-      err.response &&
-      (err.response.status === 401 || err.response.status === 403) &&
-      globalRouter.navigate
-    ) {
-      globalRouter.navigate('/login');
-      Logout();
+    if (err.response) {
+      if (err.response.status === 401 && globalRouter.navigate) {
+        globalRouter.navigate('/login');
+        Logout();
+      } else if (err.response.status === 403 && globalRouter.navigate) {
+        globalRouter.navigate(history.length - 2);
+      }
+
+      const errorWithSnackbarInfo: ExtendedError = {
+        ...err,
+        showSnackbar: true,
+        snackbarMessage: err.message || 'Ett fel inträffade.',
+        snackbarType: 'error',
+      };
+
+      return Promise.reject(errorWithSnackbarInfo);
     }
-
-    const errorWithSnackbarInfo: ExtendedError = {
-      ...err,
-      showSnackbar: true,
-      snackbarMessage: err.message || 'Ett fel inträffade.',
-      snackbarType: 'error',
-    };
-
-    return Promise.reject(errorWithSnackbarInfo);
   }
 );
 

@@ -18,8 +18,6 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import dayjs from 'dayjs';
 import 'dayjs/locale/sv';
 import ProtectedRoute from './components/RouteComponents/ProtectedRoute';
-import HomeComponent from './components/home/HomeComponent';
-import LoginComponent from './components/login/LoginComponent';
 import CustomerRoutes from './components/RouteComponents/CustomerRoutes';
 import UserRoutes from './components/RouteComponents/UserRoutes';
 import BasicRoutes from './components/RouteComponents/BasicRoutes';
