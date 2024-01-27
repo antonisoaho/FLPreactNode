@@ -61,16 +61,18 @@ const CustomerDetailsRow: React.FC<RowProps> = ({ fields }) => {
               <FormCountHandler
                 formCount={formCount}
                 setFormCount={(value) => setFormCount(value)}
-                colSpan={5}
+                colSpan={6}
               />
             </TableBody>
           </Table>
         </Box>
-        <CustomerDetailsForm
-          submitted={onSubmit}
-          formCount={formCount}
-          setFormCount={(value) => setFormCount(value)}
-        />
+        {formCount > 0 && (
+          <CustomerDetailsForm
+            submitted={onSubmit}
+            formCount={formCount}
+            setFormCount={(value) => setFormCount(value)}
+          />
+        )}
       </TableCell>
     </TableRow>
   );

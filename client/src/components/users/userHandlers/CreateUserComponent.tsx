@@ -20,6 +20,7 @@ import { useSetRecoilState } from 'recoil';
 import { snackbarState } from '../../../recoil/RecoilAtoms';
 import { createNewUser } from '../../../apiCalls/apiUserCalls';
 import CloseIcon from '@mui/icons-material/Close';
+import { SubmitHandler, useForm } from 'react-hook-form';
 
 interface CreateUserComponentProps {
   onUserCreated: () => void;
@@ -27,14 +28,13 @@ interface CreateUserComponentProps {
 }
 
 const CreateUserComponent: React.FC<CreateUserComponentProps> = ({ onUserCreated, onClose }) => {
-  const initialUserModel: CreateUserModel = {
-    name: '',
-    email: '',
-    password: '',
-    isAdmin: false,
-  };
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { isSubmitting },
+  } = useForm<CreateUserModel>();
 
-  const [userModel, setUserModel] = useState<CreateUserModel>(initialUserModel);
   const [showPassword, setShowPassword] = useState(false);
 
   const setSnackbarState = useSetRecoilState(snackbarState);
@@ -49,17 +49,12 @@ const CreateUserComponent: React.FC<CreateUserComponentProps> = ({ onUserCreated
     event.preventDefault();
   };
 
-  const handleInputChange = (field: string, value: string | boolean) => {
-    setUserModel((prevUserModel) => ({
-      ...prevUserModel,
-      [field]: value,
-    }));
+  const handleRoleChange = (role: string) => {
+    setValue('isAdmin', role === 'Admin');
   };
 
-  const CreateUser = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    const response = await createNewUser(userModel);
+  const onSubmit: SubmitHandler<CreateUserModel> = async (data) => {
+    const response = await createNewUser(data);
 
     if (response.success && response.status === 201) {
       setSnackbarState({
@@ -68,7 +63,6 @@ const CreateUserComponent: React.FC<CreateUserComponentProps> = ({ onUserCreated
         severity: 'success',
       });
 
-      setUserModel(initialUserModel);
       onUserCreated();
     } else {
       setSnackbarState({
@@ -105,7 +99,7 @@ const CreateUserComponent: React.FC<CreateUserComponentProps> = ({ onUserCreated
             <form
               id="newUser"
               name="newUserForm"
-              onSubmit={CreateUser}
+              onSubmit={handleSubmit(onSubmit)}
               style={{
                 height: '100%',
                 width: '100%',
@@ -119,10 +113,8 @@ const CreateUserComponent: React.FC<CreateUserComponentProps> = ({ onUserCreated
                 <OutlinedInput
                   id="name"
                   type="text"
-                  value={userModel.name}
-                  required
-                  onChange={(event) => handleInputChange('name', event.target.value)}
                   label="Namn"
+                  {...register('name', { required: 'Namn saknas.' })}
                   autoComplete="name"
                 />
               </FormControl>
@@ -131,9 +123,7 @@ const CreateUserComponent: React.FC<CreateUserComponentProps> = ({ onUserCreated
                 <OutlinedInput
                   id="email"
                   type="email"
-                  value={userModel.email}
-                  required
-                  onChange={(event) => handleInputChange('email', event.target.value)}
+                  {...register('email', { required: 'Email saknas.', pattern: /^\S+@\S+$/i })}
                   label="Email"
                   autoComplete="email"
                 />
@@ -143,7 +133,7 @@ const CreateUserComponent: React.FC<CreateUserComponentProps> = ({ onUserCreated
                 <OutlinedInput
                   id="password"
                   type={showPassword ? 'text' : 'password'}
-                  value={userModel.password}
+                  {...register('password', { required: 'Lösenord saknas.' })}
                   endAdornment={
                     <InputAdornment position="end">
                       <IconButton
@@ -155,8 +145,6 @@ const CreateUserComponent: React.FC<CreateUserComponentProps> = ({ onUserCreated
                       </IconButton>
                     </InputAdornment>
                   }
-                  required
-                  onChange={(event) => handleInputChange('password', event.target.value)}
                   label="Lösenord"
                   autoComplete="new-password"
                 />
@@ -166,9 +154,9 @@ const CreateUserComponent: React.FC<CreateUserComponentProps> = ({ onUserCreated
                 <Select
                   labelId="role"
                   id="createAdmin"
-                  value={userModel.isAdmin}
                   label="Roll"
-                  onChange={(event) => handleInputChange('isAdmin', event.target.value === 'true')}
+                  {...register('isAdmin', { required: 'Roll saknas.' })}
+                  onChange={(event) => handleRoleChange(event.target.value as string)}
                   sx={{ textAlign: 'left' }}>
                   <MenuItem value="false">Rådgivare</MenuItem>
                   <MenuItem value="true">Ansvarig</MenuItem>
@@ -178,8 +166,8 @@ const CreateUserComponent: React.FC<CreateUserComponentProps> = ({ onUserCreated
                 sx={{
                   marginTop: 'auto',
                 }}>
-                <Button variant="contained" color="primary" type="submit">
-                  Skapa konto
+                <Button variant="contained" color="primary" type="submit" disabled={isSubmitting}>
+                  {!isSubmitting ? 'Skapa konto' : 'Skapar...'}
                 </Button>
               </CardActions>
             </form>
