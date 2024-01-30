@@ -5,7 +5,9 @@ import {
   ApiResponse,
   CustomerDataHandler,
   CustomerFormResponse,
+  CustomerGetDataHandler,
   ErrorResponse,
+  SubDocRemoval,
 } from './models/ApiModel';
 
 export const getCustomerList = async (): Promise<ApiResponse<CustomerModel[]>> => {
@@ -80,7 +82,6 @@ export const getCustomerNames = async (id: string): Promise<ApiResponse<[]>> => 
   }
 };
 
-//* Not tested
 export const createNewCustomer = async (): Promise<ApiResponse<CustomerModel>> => {
   try {
     const response = await axiosInstance.post('/customers/create');
@@ -103,8 +104,11 @@ export const createNewCustomer = async (): Promise<ApiResponse<CustomerModel>> =
 };
 
 export const getCustomerFormData = async (
-  details: CustomerDataHandler
+  details: CustomerGetDataHandler
 ): Promise<ApiResponse<CustomerFormResponse>> => {
+  if (details.subField == undefined) {
+    details.subField = '';
+  }
   try {
     const response = await axiosInstance.get(
       `/customers/${details._id}/${details.field}/${details.subField}`
@@ -130,7 +134,7 @@ export const getCustomerFormData = async (
 export const updateCustomer = async (
   details: CustomerDataHandler
 ): Promise<ApiResponse<CustomerFormResponse>> => {
-  if (!details.subField !== undefined) {
+  if (details.subField == undefined) {
     details.subField = '';
   }
   try {
@@ -177,19 +181,15 @@ export const deleteCustomerById = async (custId: string): Promise<ApiResponse<st
 };
 
 export const deleteCustSubDocument = async (
-  field: string,
-  custId: string,
-  subDocId: string,
-  subField?: string
+  d: SubDocRemoval
 ): Promise<ApiResponse<CustomerFormResponse>> => {
-  if (!subField !== undefined) {
-    subField = '';
+  if (d.subField == undefined) {
+    d.subField = '';
   }
   try {
     const response = await axiosInstance.patch(
-      `/customers/${custId}/remove/${field}/${subDocId}/${subField}`
+      `/customers/${d.custId}/remove/${d.field}/${d.subDocId}/${d.subField}`
     );
-
     return {
       success: true,
       status: response.status,

@@ -28,6 +28,7 @@ import PropertyInsuranceRow from './expandedrows/insurances/InsurancePropertyRow
 import InsuranceAccidentRow from './expandedrows/insurances/InsuranceAccidentRow';
 import InsuranceLifeRow from './expandedrows/insurances/InsuranceDeathRow';
 import SpousalPensionRow from './expandedrows/pensions/SpousalPensionRow';
+import ChangeExpenseRow from './expandedrows/expenses/ChangeExpenseRow';
 
 interface TableProps {
   customer: CustomerOverview;
@@ -81,36 +82,31 @@ const CustomerTable: React.FC<TableProps> = ({ customer }) => {
               <CustomerTableRow
                 fieldName="Kundinformation"
                 fieldLength={currCustomer.customerDetails.length}>
-                <CustomerDetailsRow fields={currCustomer.customerDetails} />
+                <CustomerDetailsRow />
               </CustomerTableRow>
               <CustomerTableRow
                 fieldName={'Barn'}
                 fieldLength={currCustomer.customerChildren.length}>
-                <CustomerChildrenRow fields={currCustomer.customerChildren} />
+                <CustomerChildrenRow />
               </CustomerTableRow>
               <CustomerTableRow fieldName={'Inkomster'} fieldLength={incomeLength}>
                 <NestedRow fieldName={'Grund'} fieldLength={currCustomer.income.base.length}>
-                  <BaseIncomeRow fields={currCustomer.income.base} />
+                  <BaseIncomeRow />
                 </NestedRow>
                 <NestedRow
                   fieldName={'Planerade inkomstförändringar'}
                   fieldLength={currCustomer.income.change.length}>
-                  <ChangeIncomeRow fields={currCustomer.income.change} />
+                  <ChangeIncomeRow />
                 </NestedRow>
               </CustomerTableRow>
               <CustomerTableRow fieldName={'Utgifter'} fieldLength={expenseLength}>
                 <NestedRow fieldName={'Grund'} fieldLength={currCustomer.expenses.base.length}>
-                  <BaseExpenseRow
-                    fields={currCustomer.expenses.base}
-                    persons={Array.from(
-                      currCustomer.customerDetails!.map(({ name }) => name as string)
-                    )}
-                  />
+                  <BaseExpenseRow />
                 </NestedRow>
                 <NestedRow
                   fieldName={'Planerade utgifter'}
                   fieldLength={currCustomer.expenses.change.length | 0}>
-                  <ChangeIncomeRow fields={currCustomer.expenses.change} />
+                  <ChangeExpenseRow fields={currCustomer.expenses.change} />
                 </NestedRow>
               </CustomerTableRow>
 

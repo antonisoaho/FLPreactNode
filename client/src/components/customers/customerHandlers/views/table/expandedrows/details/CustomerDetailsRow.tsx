@@ -1,30 +1,59 @@
-import { TableCell, Box, Table, TableHead, TableRow, TableBody, Button } from '@mui/material';
-import React, { useState } from 'react';
+import {
+  TableCell,
+  Box,
+  Table,
+  TableHead,
+  TableRow,
+  TableBody,
+  ListItemButton,
+} from '@mui/material';
+import { useEffect, useState } from 'react';
 import { DateFields } from '../../../../../../../apiCalls/models/ApiModel';
 import { CustomerDetails } from '../../../forms/models/CustomerFormModels';
 import ColoredTableRow from '../../../../../../../commonComponents/coloredTableRow/ColoredTableRow';
-import CustomerDetailsForm from '../../../forms/CustomerDetailsForm';
+import CustomerDetailsForm from '../../../forms/details/CustomerDetailsForm';
 import FormCountHandler from '../../../forms/FormCountHandler';
-import { deleteCustSubDocument } from '../../../../../../../apiCalls/apiCustomerCalls';
+import {
+  deleteCustSubDocument,
+  getCustomerFormData,
+} from '../../../../../../../apiCalls/apiCustomerCalls';
 import { useParams } from 'react-router-dom';
+import TableLoader from '../../TableLoader';
 
-interface RowProps {
-  fields: [CustomerDetails & DateFields];
-}
-
-const CustomerDetailsRow: React.FC<RowProps> = ({ fields }) => {
+const CustomerDetailsRow = () => {
   const [formCount, setFormCount] = useState<number>(0);
-
   const { custId } = useParams();
+  const [fields, setFields] = useState<[CustomerDetails & DateFields]>();
+  const [loading, setLoading] = useState<boolean>(true);
 
   const onSubmit = () => {
-    console.log('refreshData');
+    updateCustomerFields();
   };
 
-  const removeSubDoc = async (subDocId: string) => {
-    const response = await deleteCustSubDocument('customerDetails', custId!, subDocId);
+  const updateCustomerFields = async () => {
+    const response = await getCustomerFormData({
+      field: 'customerDetails',
+      _id: custId as string,
+    });
 
-    console.log('response.data', response.data);
+    if (response.success) {
+      setFields(response.data!);
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    updateCustomerFields();
+  }, [custId]);
+
+  const removeSubDoc = async (subDocId: string) => {
+    const response = await deleteCustSubDocument({
+      field: 'customerDetails',
+      custId: custId!,
+      subDocId: subDocId,
+    });
+
+    if (response.success) setFields(response.data);
   };
 
   return (
@@ -43,21 +72,27 @@ const CustomerDetailsRow: React.FC<RowProps> = ({ fields }) => {
               </ColoredTableRow>
             </TableHead>
             <TableBody>
-              {fields!.map((person) => (
-                <TableRow key={person._id}>
-                  <TableCell />
+              {loading ? (
+                <TableLoader colSpan={6} />
+              ) : (
+                fields!.map((person) => (
+                  <TableRow key={person._id}>
+                    <TableCell />
 
-                  <TableCell>{person.name}</TableCell>
-                  <TableCell>{person.status}</TableCell>
-                  <TableCell>{person.yearMonth}</TableCell>
-                  <TableCell align="right">
-                    {new Date(person.updatedAt!).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell>
-                    <Button onClick={() => removeSubDoc(person._id)}>Ta bort</Button>
-                  </TableCell>
-                </TableRow>
-              ))}
+                    <TableCell>{person.name}</TableCell>
+                    <TableCell>{person.status}</TableCell>
+                    <TableCell>{person.yearMonth}</TableCell>
+                    <TableCell align="right">
+                      {new Date(person.updatedAt!).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell>
+                      <ListItemButton onClick={() => removeSubDoc(person._id)}>
+                        Ta bort
+                      </ListItemButton>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
               <FormCountHandler
                 formCount={formCount}
                 setFormCount={(value) => setFormCount(value)}

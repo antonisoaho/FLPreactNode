@@ -1,29 +1,60 @@
-import { TableCell, Box, Table, TableHead, TableRow, TableBody, Button } from '@mui/material';
-import React, { useState } from 'react';
+import {
+  TableCell,
+  Box,
+  Table,
+  TableHead,
+  TableRow,
+  TableBody,
+  ListItemButton,
+} from '@mui/material';
+import { useEffect, useState } from 'react';
 import { DateFields } from '../../../../../../../apiCalls/models/ApiModel';
 import { CustomerChildren } from '../../../forms/models/CustomerFormModels';
 import ColoredTableRow from '../../../../../../../commonComponents/coloredTableRow/ColoredTableRow';
 import FormCountHandler from '../../../forms/FormCountHandler';
-import CustomerChildForm from '../../../forms/CustomerChildForm';
-import { deleteCustSubDocument } from '../../../../../../../apiCalls/apiCustomerCalls';
+import CustomerChildForm from '../../../forms/details/CustomerChildForm';
+import {
+  deleteCustSubDocument,
+  getCustomerFormData,
+} from '../../../../../../../apiCalls/apiCustomerCalls';
 import { useParams } from 'react-router-dom';
+import TableLoader from '../../TableLoader';
 
-interface RowProps {
-  fields: [CustomerChildren & DateFields];
-}
-
-const CustomerChildrenRow: React.FC<RowProps> = ({ fields }) => {
+const CustomerChildrenRow = () => {
   const [formCount, setFormCount] = useState<number>(0);
   const { custId } = useParams();
+  const [fields, setFields] = useState<[CustomerChildren & DateFields]>();
+  const [loading, setLoading] = useState<boolean>(true);
+  const colSpan: number = 7;
 
   const onSubmit = () => {
-    console.log('refreshData');
+    updateCustomerFields();
   };
 
-  const removeSubDoc = async (subDocId: string) => {
-    const response = await deleteCustSubDocument('customerChildren', custId!, subDocId);
+  const updateCustomerFields = async () => {
+    const response = await getCustomerFormData({
+      field: 'customerChildren',
+      _id: custId as string,
+    });
 
-    console.log('response.data', response.data);
+    if (response.success) {
+      setFields(response.data!);
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    updateCustomerFields();
+  }, [custId]);
+
+  const removeSubDoc = async (subDocId: string) => {
+    const response = await deleteCustSubDocument({
+      field: 'customerChildren',
+      custId: custId!,
+      subDocId: subDocId,
+    });
+
+    if (response.success) setFields(response.data);
   };
 
   return (
@@ -43,33 +74,36 @@ const CustomerChildrenRow: React.FC<RowProps> = ({ fields }) => {
               </ColoredTableRow>
             </TableHead>
             <TableBody>
-              {fields!.map((child) => (
-                <TableRow key={child._id}>
-                  <TableCell>{child.name}</TableCell>
-                  <TableCell>{child.belongs || '-'}</TableCell>
-                  <TableCell>{child.childSupportCounts ? 'Ja' : 'Nej'}</TableCell>
-                  <TableCell>{child.yearMonth}</TableCell>
-                  <TableCell>{child.livesAtHomeToAge}</TableCell>
-                  <TableCell align="right">
-                    {new Date(child.updatedAt!).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell>
-                    <Button onClick={() => removeSubDoc(child._id)}>Ta bort</Button>
-                  </TableCell>
-                </TableRow>
-              ))}
+              {loading ? (
+                <TableLoader colSpan={colSpan} />
+              ) : (
+                fields!.map((child) => (
+                  <TableRow key={child._id}>
+                    <TableCell>{child.name}</TableCell>
+                    <TableCell>{child.belongs || '-'}</TableCell>
+                    <TableCell>{child.childSupportCounts ? 'Ja' : 'Nej'}</TableCell>
+                    <TableCell>{child.yearMonth}</TableCell>
+                    <TableCell>{child.livesAtHomeToAge}</TableCell>
+                    <TableCell align="right">
+                      {new Date(child.updatedAt!).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell>
+                      <ListItemButton onClick={() => removeSubDoc(child._id)}>
+                        Ta bort
+                      </ListItemButton>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
               <FormCountHandler
                 formCount={formCount}
                 setFormCount={(value) => setFormCount(value)}
-                colSpan={7}
+                colSpan={colSpan}
               />
             </TableBody>
           </Table>
         </Box>
         {formCount > 0 && (
-          /** Renders the CustomerChildForm component to allow
-           * adding a new child subdocument to the customer document.
-           */
           <CustomerChildForm
             submitted={onSubmit}
             formCount={formCount}

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { CustomerDetails } from './models/CustomerFormModels';
+import { CustomerDetails } from '../models/CustomerFormModels';
 import {
   Button,
   FormControl,
@@ -14,12 +14,12 @@ import {
   TextField,
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { formatDate } from './models/commonFunctions';
+import { formatDate } from '../models/commonFunctions';
 import { useForm, SubmitHandler } from 'react-hook-form';
-import { getCustomerNames, updateCustomer } from '../../../../../apiCalls/apiCustomerCalls';
+import { getCustomerNames, updateCustomer } from '../../../../../../apiCalls/apiCustomerCalls';
 import { useParams } from 'react-router-dom';
-import { removeFormByIndex } from './models/commonFunctions';
-import { CustomFormProps } from './models/FormProps';
+import { removeFormByIndex } from '../models/commonFunctions';
+import { CustomFormProps, FormSelectProps, FormTextFieldProps } from '../models/FormProps';
 
 const CustomerDetailsForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFormCount }) => {
   const {
@@ -39,7 +39,10 @@ const CustomerDetailsForm: React.FC<CustomFormProps> = ({ submitted, formCount, 
     });
 
     if (response.success) {
-      if (submitted) submitted();
+      if (submitted) {
+        submitted();
+        setFormCount(0);
+      }
     }
   };
 
@@ -87,47 +90,44 @@ const CustomerDetailsForm: React.FC<CustomFormProps> = ({ submitted, formCount, 
     setValue(`${index}.yearMonth`, newDate);
   };
 
-  const inputProps = {
-    sx: { m: 0, width: '100%' },
-  };
-
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <Table>
         <TableBody>
           {details.map((detail, index) => (
             <TableRow key={index}>
-              <TableCell>
+              <TableCell sx={{ width: '20%' }}>
                 <TextField
+                  required
                   label="Namn"
                   {...register(`${index}.name`, { required: 'Vänligen ange ett namn.' })}
-                  {...inputProps}
+                  {...FormTextFieldProps}
+                  className="form-input-field"
                 />
               </TableCell>
-              <TableCell>
-                <FormControl>
-                  <InputLabel id="status-label">Relationsstatus</InputLabel>
-                  <Select
-                    sx={{ minWidth: '10rem' }}
-                    {...register(`${index}.status`)}
-                    defaultValue={detail.status}
-                    labelId="status-label"
-                    label="Relationsstatus">
-                    {selectItems.map((item) => (
-                      <MenuItem value={item.value} key={item.value}>
-                        {item.label}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
+              <TableCell sx={{ width: '20%' }}>
+                <TextField
+                  select
+                  className="form-input-select"
+                  {...FormTextFieldProps}
+                  {...register(`${index}.status`)}
+                  defaultValue={detail.status}
+                  label="Relationsstatus">
+                  {selectItems.map((item) => (
+                    <MenuItem value={item.value} key={item.value}>
+                      {item.label}
+                    </MenuItem>
+                  ))}
+                </TextField>
               </TableCell>
               <TableCell>
                 <DatePicker
+                  className="form-input-field"
                   label="Födelsedatum"
                   views={['month', 'year']}
                   {...register(`${index}.yearMonth`, { required: 'Var vänlig välj ett datum.' })}
                   onChange={(date) => handleDateChange(date as Date, index)}
-                  {...inputProps}
+                  slotProps={{ textField: { ...FormTextFieldProps } }}
                 />
               </TableCell>
               <TableCell align="right">

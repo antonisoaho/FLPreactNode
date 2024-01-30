@@ -70,9 +70,10 @@ router
   })
 
   // get field from customer
-  .get('/:id/:field', async (req, res) => {
+  .get('/:id/:field/:subField?', async (req, res) => {
     const customerId = req.params.id;
     const fieldName = req.params.field;
+    const subField = req.params.subField;
     const { userId, isAdmin } = req.user;
 
     if (!mongoose.Types.ObjectId.isValid(customerId)) {
@@ -86,8 +87,11 @@ router
       if (!isAdmin && userId != customerField.advisor) {
         return res.status(403).json({ error: 'Obehörig åtkomst till kund.' });
       }
-
-      res.status(200).send(customerField[fieldName]);
+      if (subField) {
+        res.status(200).send(customerField[fieldName][subField]);
+      } else {
+        res.status(200).send(customerField[fieldName]);
+      }
     } catch (err) {
       res
         .status(err.status || 500)
@@ -96,14 +100,13 @@ router
   })
 
   //@ Update specific field
-  .patch('/:id/update/:field/:subfield?', async (req, res) => {
+  .patch('/:id/update/:field/:subField?', async (req, res) => {
     const customerId = req.params.id;
     const field = req.params.field;
-    const subField = req.params.subfield;
+    const subField = req.params.subField;
     const { userId, isAdmin } = req.user;
     const newData = Object.values(req.body);
 
-    console.log('newData', newData);
     if (!mongoose.Types.ObjectId.isValid(customerId)) {
       return res.status(400).json({ error: 'Ogiltigt kund-ID.' });
     }
@@ -116,6 +119,7 @@ router
       }
 
       const fieldPath = subField ? `${field}.${subField}` : field;
+      console.log('fieldPath', fieldPath);
       const updateQuery = { $push: { [fieldPath]: { $each: newData } } };
 
       const updatedCustomer = await Customer.findByIdAndUpdate(customerId, updateQuery, {
@@ -126,7 +130,6 @@ router
         return res.status(404).json({ error: 'Kunde inte hitta kund.' });
       }
       if (subField) {
-        console.log('updatedCustomer[field][subField]', updatedCustomer[field][subField]);
         res.status(200).send(updatedCustomer[field][subField]);
       } else {
         res.status(200).send(updatedCustomer[field]);
@@ -146,23 +149,21 @@ router
     const subDoc = req.params.subDoc;
     const subField = req.params.subField;
     const dataPath = subField ? `${field}.${subField}` : field;
-    console.log('custId', custId);
-    console.log('field', field);
-    console.log('subDoc', subDoc);
-    console.log('subField', subField);
-    console.log('dataPath', dataPath);
+
     try {
       const updateQuery = {
         $pull: { [dataPath]: { _id: subDoc } },
       };
-      console.log('updateQuery', updateQuery);
       const result = await Customer.findByIdAndUpdate(custId, updateQuery, { new: true });
-      console.log(result);
       if (!result) {
         return res.status(404).json({ error: 'Hittade inte dokumentet.' });
       }
 
-      res.json(result);
+      if (subField) {
+        res.status(200).send(result[field][subField]);
+      } else {
+        res.status(200).send(result[field]);
+      }
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: 'Internal Server Error' });

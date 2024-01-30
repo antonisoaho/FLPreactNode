@@ -18,10 +18,23 @@ export type CustomerDataHandler = {
   formData: CustomerFormData[];
 };
 
+export type CustomerGetDataHandler = {
+  field: string;
+  subField?: string;
+  _id: string;
+};
+
 export type DateFields = {
   createdAt: Date;
   updatedAt: Date;
   _id: string;
 };
 
-export type CustomerFormResponse = CustomerFormData & DateFields;
+export type SubDocRemoval = {
+  field: string;
+  custId: string;
+  subDocId: string;
+  subField?: string;
+};
+
+export type CustomerFormResponse = [CustomerFormData & DateFields];

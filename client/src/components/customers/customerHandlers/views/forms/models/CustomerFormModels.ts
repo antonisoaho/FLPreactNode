@@ -45,11 +45,11 @@ export type ExpensesBase = {
   values?: {
     expenseType?: string;
     mapped?: number;
-    pension?: [number];
-    activeEnd?: [number];
-    difPension?: [number];
-    difActiveEnd?: [number];
-    difDeath?: [number];
+    pension?: number[];
+    activeEnd?: number[];
+    difPension?: number[];
+    difActiveEnd?: number[];
+    difDeath?: number[];
   };
 };
 
