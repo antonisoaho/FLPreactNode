@@ -2,11 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { CustomerDetails } from '../models/CustomerFormModels';
 import {
   Button,
-  FormControl,
-  InputLabel,
   ListItemButton,
   MenuItem,
-  Select,
   Table,
   TableBody,
   TableCell,
@@ -19,7 +16,7 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import { getCustomerNames, updateCustomer } from '../../../../../../apiCalls/apiCustomerCalls';
 import { useParams } from 'react-router-dom';
 import { removeFormByIndex } from '../models/commonFunctions';
-import { CustomFormProps, FormSelectProps, FormTextFieldProps } from '../models/FormProps';
+import { CustomFormProps, FormTextFieldProps } from '../models/FormProps';
 
 const CustomerDetailsForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFormCount }) => {
   const {

@@ -7,13 +7,9 @@ import {
   TableBody,
   ListItemButton,
 } from '@mui/material';
-import React, { Fragment, useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { DateFields } from '../../../../../../../apiCalls/models/ApiModel';
-import {
-  CustomerDetails,
-  ExpensesBase,
-  IncomeChange,
-} from '../../../forms/models/CustomerFormModels';
+import { CustomerDetails, ExpensesBase } from '../../../forms/models/CustomerFormModels';
 import ColoredTableRow from '../../../../../../../commonComponents/coloredTableRow/ColoredTableRow';
 import { useParams } from 'react-router-dom';
 import {

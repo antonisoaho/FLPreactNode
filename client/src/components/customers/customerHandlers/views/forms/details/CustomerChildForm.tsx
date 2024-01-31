@@ -3,11 +3,9 @@ import { CustomerChildren } from '../models/CustomerFormModels';
 import {
   Button,
   Checkbox,
-  FormControl,
   InputLabel,
   ListItemButton,
   MenuItem,
-  Select,
   Table,
   TableBody,
   TableCell,
@@ -17,7 +15,7 @@ import {
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { formatDate, removeFormByIndex } from '../models/commonFunctions';
 import { useParams } from 'react-router-dom';
-import { CustomFormProps, FormSelectProps, FormTextFieldProps } from '../models/FormProps';
+import { CustomFormProps, FormTextFieldProps } from '../models/FormProps';
 import { getCustomerNames, updateCustomer } from '../../../../../../apiCalls/apiCustomerCalls';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { useSetRecoilState } from 'recoil';

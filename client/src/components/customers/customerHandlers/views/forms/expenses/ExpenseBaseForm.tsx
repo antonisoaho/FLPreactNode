@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
 import { useSetRecoilState } from 'recoil';
@@ -23,13 +23,12 @@ const ExpenseBaseForm: React.FC<CustomFormProps> = ({ submitted, formCount, setF
   const {
     register,
     handleSubmit,
-    setValue,
     formState: { isSubmitting },
   } = useForm<ExpensesBase[]>();
   const [details, setDetails] = useState<ExpensesBase[]>([]);
   const setSnackbarState = useSetRecoilState(snackbarState);
   const { custId } = useParams();
-  const [persons, setPersons] = useState<Array<string>>([]);
+  const [persons, setPersons] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
   const populateSelectItems = async () => {
@@ -38,12 +37,13 @@ const ExpenseBaseForm: React.FC<CustomFormProps> = ({ submitted, formCount, setF
       setPersons((prev) => {
         const currentNames = prev.map((item) => item);
         const newNames = response
-          .data!.filter((name) => !currentNames.includes(name))
-          .map((name) => name);
+          .data!.filter((name: any) => !currentNames.includes(name.split(' ')[0]))
+          .map((name: string) => name.split(' ')[0]);
 
         setLoading(false);
         return [...prev, ...newNames];
       });
+      console.log('persons', persons);
     } else {
       setSnackbarState({
         open: true,
@@ -55,10 +55,10 @@ const ExpenseBaseForm: React.FC<CustomFormProps> = ({ submitted, formCount, setF
 
   const onSubmit: SubmitHandler<ExpensesBase[]> = async (data) => {
     const response = await updateCustomer({
-      field: 'income',
+      field: 'expense',
       _id: custId as string,
       formData: data,
-      subField: 'change',
+      subField: 'base',
     });
 
     if (response.success) {
@@ -84,7 +84,6 @@ const ExpenseBaseForm: React.FC<CustomFormProps> = ({ submitted, formCount, setF
         },
       });
     }
-    getCustomerNames(custId!);
     setDetails(newDetails);
   }, [formCount]);
 
@@ -121,34 +120,114 @@ const ExpenseBaseForm: React.FC<CustomFormProps> = ({ submitted, formCount, setF
           ) : (
             persons.length &&
             details.map((detail, index) => (
-              <TableRow key={index}>
-                <TableCell width="20%">
-                  <TextField
-                    className="form-input-select"
-                    {...FormTextFieldProps}
-                    select
-                    required
-                    defaultValue={detail.values!.expenseType}
-                    label="Utgiftstyp"
-                    {...register(`${index}.values.expenseType`, {
-                      required: 'Vänligen fyll i typ av utgift',
-                    })}>
-                    {expenseTypeSelect.map((item) => (
-                      <MenuItem key={item} value={item}>
-                        {item}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                </TableCell>
-                <TableCell width="20%"></TableCell>
-                <TableCell width="20%"></TableCell>
-                <TableCell width="20%"></TableCell>
-                <TableCell width="10%" align="right">
-                  <ListItemButton onClick={() => removeDetail(index)}>Ta bort</ListItemButton>
-                </TableCell>
-              </TableRow>
+              <Fragment key={index}>
+                <TableRow>
+                  <TableCell width="20%">
+                    <TextField
+                      className="form-input-select"
+                      {...FormTextFieldProps}
+                      select
+                      required
+                      defaultValue={detail.values!.expenseType}
+                      label="Utgiftstyp"
+                      {...register(`${index}.values.expenseType`, {
+                        required: 'Vänligen fyll i typ av utgift',
+                      })}>
+                      {expenseTypeSelect.map((item) => (
+                        <MenuItem key={item} value={item}>
+                          {item}
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                  </TableCell>
+                  <TableCell width="20%">
+                    <TextField
+                      className="form-input-field"
+                      {...FormTextFieldProps}
+                      required
+                      type="number"
+                      label="Kartlaggt belopp"
+                      placeholder="Ange belopp"
+                    />
+                  </TableCell>
+                  <TableCell width="20%" />
+                  <TableCell width="20%" />
+                  <TableCell width="10%" align="right">
+                    <ListItemButton onClick={() => removeDetail(index)}>Ta bort</ListItemButton>
+                  </TableCell>
+                </TableRow>
+                {persons.map((person, idx) => (
+                  <TableRow key={person}>
+                    <TableCell width="20%">
+                      <TextField
+                        className="form-input-field"
+                        {...FormTextFieldProps}
+                        required
+                        type="number"
+                        defaultValue={detail.values!.pension![idx]}
+                        label={`Pensionsålder ${person}`}
+                        placeholder="Ange belopp"
+                        {...register(`${index}.values.pension.${idx}`, {
+                          required: 'Vänligen fyll i pensionsålder',
+                        })}
+                      />
+                    </TableCell>
+                    <TableCell width="20%">
+                      <TextField
+                        className="form-input-field"
+                        {...FormTextFieldProps}
+                        required
+                        type="number"
+                        defaultValue={detail.values!.activeEnd![idx]}
+                        label={`Aktiv tid slut ${person}`}
+                        placeholder="Ange belopp"
+                        {...register(`${index}.values.activeEnd.${idx}`, {
+                          required: 'Vänligen fyll i pensionsålder',
+                        })}
+                      />
+                    </TableCell>
+                    <TableCell width="20%">
+                      <TextField
+                        className="form-input-field"
+                        {...FormTextFieldProps}
+                        type="number"
+                        label={`Dif ${person} pension`}
+                        placeholder="Ange belopp"
+                        {...register(`${index}.values.difPension.${idx}`, {
+                          required: 'Vänligen fyll i pensionsålder',
+                        })}
+                      />
+                    </TableCell>
+                    <TableCell width="20%">
+                      <TextField
+                        className="form-input-field"
+                        {...FormTextFieldProps}
+                        type="number"
+                        label={`Dif ${person} aktivt slut`}
+                        placeholder="Ange belopp"
+                        {...register(`${index}.values.difActiveEnd.${idx}`, {
+                          required: 'Vänligen fyll i pensionsålder',
+                        })}
+                      />
+                    </TableCell>
+                    <TableCell width="20%">
+                      <TextField
+                        className="form-input-field"
+                        {...FormTextFieldProps}
+                        type="number"
+                        label={`Dif ${person} död`}
+                        placeholder="Ange belopp"
+                        {...register(`${index}.values.difDeath.${idx}`, {
+                          required: 'Vänligen fyll i pensionsålder',
+                        })}
+                      />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </Fragment>
             ))
           )}
+
           {formCount > 0 && (
             <TableRow>
               <TableCell colSpan={5} align="right">

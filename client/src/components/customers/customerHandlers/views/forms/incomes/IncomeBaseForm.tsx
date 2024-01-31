@@ -24,7 +24,6 @@ const IncomeBaseForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFo
   const {
     register,
     handleSubmit,
-    setValue,
     formState: { isSubmitting },
   } = useForm<IncomeBase[]>();
   const [details, setDetails] = useState<IncomeBase[]>([]);

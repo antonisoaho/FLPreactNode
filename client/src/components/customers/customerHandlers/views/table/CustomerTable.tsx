@@ -106,7 +106,7 @@ const CustomerTable: React.FC<TableProps> = ({ customer }) => {
                 <NestedRow
                   fieldName={'Planerade utgifter'}
                   fieldLength={currCustomer.expenses.change.length | 0}>
-                  <ChangeExpenseRow fields={currCustomer.expenses.change} />
+                  <ChangeExpenseRow />
                 </NestedRow>
               </CustomerTableRow>
 

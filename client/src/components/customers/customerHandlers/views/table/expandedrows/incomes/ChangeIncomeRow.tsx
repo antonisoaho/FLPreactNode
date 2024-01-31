@@ -7,9 +7,9 @@ import {
   TableBody,
   ListItemButton,
 } from '@mui/material';
-import React, { Fragment, useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { DateFields } from '../../../../../../../apiCalls/models/ApiModel';
-import { IncomeBase, IncomeChange } from '../../../forms/models/CustomerFormModels';
+import { IncomeChange } from '../../../forms/models/CustomerFormModels';
 import ColoredTableRow from '../../../../../../../commonComponents/coloredTableRow/ColoredTableRow';
 import TableLoader from '../../TableLoader';
 import FormCountHandler from '../../../forms/FormCountHandler';
