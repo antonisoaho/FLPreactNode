@@ -5,12 +5,11 @@ const expensesBaseSchema = new Schema(
     values: {
       expenseType: { type: String },
       mapped: { type: Number },
-      correction: { type: Number },
-      difCrisis: { type: Number },
-      difPension: { type: Number },
-      difActiveEnd: { type: Number },
-      difDeath: [{ type: Number }],
-      childMovesOut: { type: Number },
+      pension: [Number],
+      activeEnd: [Number],
+      difPension: [Number],
+      difActiveEnd: [Number],
+      difDeath: [Number],
     },
   },
   { timestamps: true }

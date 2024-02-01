@@ -94,19 +94,19 @@ const IncomeChangeForm: React.FC<CustomFormProps> = ({ submitted, formCount, set
 
   const changeValueSelect = [
     {
-      value: 'serviceIncome',
+      value: 'Ink. Av tjänst',
       label: 'Ink. Av tjänst',
     },
     {
-      value: 'soleTraderIncome',
+      value: 'NE Inkomst',
       label: 'NE Inkomst',
     },
     {
-      value: 'k10.amount',
+      value: 'K10',
       label: 'K10',
     },
     {
-      value: 'taxFree',
+      value: 'Skattefritt',
       label: 'Skattefritt',
     },
   ];

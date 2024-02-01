@@ -55,7 +55,7 @@ const ExpenseBaseForm: React.FC<CustomFormProps> = ({ submitted, formCount, setF
 
   const onSubmit: SubmitHandler<ExpensesBase[]> = async (data) => {
     const response = await updateCustomer({
-      field: 'expense',
+      field: 'expenses',
       _id: custId as string,
       formData: data,
       subField: 'base',
@@ -78,9 +78,6 @@ const ExpenseBaseForm: React.FC<CustomFormProps> = ({ submitted, formCount, setF
           mapped: 0,
           pension: [65, 65],
           activeEnd: [85, 85],
-          difPension: [0, 0],
-          difActiveEnd: [0, 0],
-          difDeath: [0, 0],
         },
       });
     }
@@ -148,6 +145,9 @@ const ExpenseBaseForm: React.FC<CustomFormProps> = ({ submitted, formCount, setF
                       type="number"
                       label="Kartlaggt belopp"
                       placeholder="Ange belopp"
+                      {...register(`${index}.values.mapped`, {
+                        required: 'Vänligen fyll i kartlaggt belopp',
+                      })}
                     />
                   </TableCell>
                   <TableCell width="20%" />
@@ -176,13 +176,12 @@ const ExpenseBaseForm: React.FC<CustomFormProps> = ({ submitted, formCount, setF
                       <TextField
                         className="form-input-field"
                         {...FormTextFieldProps}
-                        required
                         type="number"
                         defaultValue={detail.values!.activeEnd![idx]}
                         label={`Aktiv tid slut ${person}`}
                         placeholder="Ange belopp"
                         {...register(`${index}.values.activeEnd.${idx}`, {
-                          required: 'Vänligen fyll i pensionsålder',
+                          required: 'Vänligen fyll i ålder för aktiv tid slut',
                         })}
                       />
                     </TableCell>
@@ -193,9 +192,7 @@ const ExpenseBaseForm: React.FC<CustomFormProps> = ({ submitted, formCount, setF
                         type="number"
                         label={`Dif ${person} pension`}
                         placeholder="Ange belopp"
-                        {...register(`${index}.values.difPension.${idx}`, {
-                          required: 'Vänligen fyll i pensionsålder',
-                        })}
+                        {...register(`${index}.values.difPension.${idx}`)}
                       />
                     </TableCell>
                     <TableCell width="20%">
@@ -205,9 +202,7 @@ const ExpenseBaseForm: React.FC<CustomFormProps> = ({ submitted, formCount, setF
                         type="number"
                         label={`Dif ${person} aktivt slut`}
                         placeholder="Ange belopp"
-                        {...register(`${index}.values.difActiveEnd.${idx}`, {
-                          required: 'Vänligen fyll i pensionsålder',
-                        })}
+                        {...register(`${index}.values.difActiveEnd.${idx}`)}
                       />
                     </TableCell>
                     <TableCell width="20%">
@@ -217,9 +212,7 @@ const ExpenseBaseForm: React.FC<CustomFormProps> = ({ submitted, formCount, setF
                         type="number"
                         label={`Dif ${person} död`}
                         placeholder="Ange belopp"
-                        {...register(`${index}.values.difDeath.${idx}`, {
-                          required: 'Vänligen fyll i pensionsålder',
-                        })}
+                        {...register(`${index}.values.difDeath.${idx}`)}
                       />
                     </TableCell>
                   </TableRow>

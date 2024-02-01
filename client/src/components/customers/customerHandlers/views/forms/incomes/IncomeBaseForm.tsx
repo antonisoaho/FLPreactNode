@@ -205,7 +205,7 @@ const IncomeBaseForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFo
                   <TableCell>
                     <TextField
                       type="number"
-                      label="Sparad fördelning"
+                      label="Sparad utdelning"
                       {...register(`${index}.values.k10.savedDistribution`, { min: 0 })}
                       {...FormTextFieldProps}
                       className="form-input-field"
@@ -214,7 +214,7 @@ const IncomeBaseForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFo
                   <TableCell>
                     <TextField
                       type="number"
-                      label="Lönebas"
+                      label="Löneunderlag"
                       {...register(`${index}.values.k10.salaryBasis`, { min: 0 })}
                       {...FormTextFieldProps}
                       className="form-input-field"

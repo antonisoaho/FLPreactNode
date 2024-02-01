@@ -82,6 +82,29 @@ export const getCustomerNames = async (id: string): Promise<ApiResponse<[]>> => 
   }
 };
 
+export const getCustomerChildNames = async (id: string): Promise<ApiResponse<[]>> => {
+  try {
+    const response = await axiosInstance.get(`/customers/${id}/customerChildren`);
+
+    const customerNames = response.data.map((cust: { name: string }) => cust.name);
+
+    return {
+      success: true,
+      status: response.status,
+      data: customerNames,
+    };
+  } catch (error) {
+    const extendedError = error as ExtendedError;
+    const errorMessage: ErrorResponse = <ErrorResponse>extendedError.response?.data;
+
+    return {
+      success: false,
+      status: extendedError.status,
+      error: errorMessage.error || 'Ett oväntat fel inträffade.',
+    };
+  }
+};
+
 export const createNewCustomer = async (): Promise<ApiResponse<CustomerModel>> => {
   try {
     const response = await axiosInstance.post('/customers/create');
