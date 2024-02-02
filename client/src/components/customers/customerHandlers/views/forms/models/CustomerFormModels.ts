@@ -83,7 +83,7 @@ export type Investment = {
 
 export type BankFund = {
   belongs?: string;
-  accounType?: string;
+  accountType?: string;
   institution?: string;
   name?: string;
   value?: number;
@@ -102,7 +102,7 @@ export type LiabilityBase = {
   debt?: number;
   interest?: number;
   monthlyAmortization?: number;
-  lockInterestDate: Date;
+  lockInterestDate?: Date;
   loanProtection?: boolean;
 };
 

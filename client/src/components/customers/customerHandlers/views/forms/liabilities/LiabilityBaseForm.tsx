@@ -1,31 +1,39 @@
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TextField,
+  MenuItem,
+  ListItemButton,
+  TableRow,
+  Button,
+  Checkbox,
+  InputLabel,
+} from '@mui/material';
 import { useState, useEffect, Fragment } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
 import { useSetRecoilState } from 'recoil';
-import { getCustomerNames, updateCustomer } from '../../../../../../apiCalls/apiCustomerCalls';
-import { snackbarState } from '../../../../../../recoil/RecoilAtoms';
-import { BankFund } from '../models/CustomerFormModels';
-import { removeFormByIndex } from '../models/commonFunctions';
-import { CustomFormProps, FormTextFieldProps } from '../models/FormProps';
 import {
-  Button,
-  ListItemButton,
-  MenuItem,
-  Table,
-  TableBody,
-  TableCell,
-  TableRow,
-  TextField,
-} from '@mui/material';
+  getCustomerNames,
+  getCustomerChildNames,
+  updateCustomer,
+} from '../../../../../../apiCalls/apiCustomerCalls';
 import ColoredTableRow from '../../../../../../commonComponents/coloredTableRow/ColoredTableRow';
+import { snackbarState } from '../../../../../../recoil/RecoilAtoms';
+import { LiabilityBase } from '../models/CustomerFormModels';
+import { CustomFormProps, FormTextFieldProps } from '../models/FormProps';
+import { removeFormByIndex } from '../models/commonFunctions';
+import { DatePicker } from '@mui/x-date-pickers';
 
-const BankFundForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFormCount }) => {
+const LiabilityBaseForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFormCount }) => {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { isSubmitting },
-  } = useForm<BankFund[]>();
-  const [details, setDetails] = useState<BankFund[]>([]);
+  } = useForm<LiabilityBase[]>();
+  const [details, setDetails] = useState<LiabilityBase[]>([]);
   const setSnackbarState = useSetRecoilState(snackbarState);
   const { custId } = useParams();
   const [selectItems, setSelectItems] = useState<Array<{ value: string; label: string }>>([
@@ -33,15 +41,20 @@ const BankFundForm: React.FC<CustomFormProps> = ({ submitted, formCount, setForm
   ]);
 
   const populateSelectItems = async () => {
-    const response = await getCustomerNames(custId!);
-    if (response.success) {
+    const persons = await getCustomerNames(custId!);
+    const children = await getCustomerChildNames(custId!);
+
+    if (persons.success || children.success) {
       setSelectItems((prev) => {
         const currentLabels = prev.map((item) => item.label);
-        const newItems = response
+        const newPersons = persons
           .data!.filter((name: string) => !currentLabels.includes(name.split(' ')[0]))
           .map((name: string) => ({ value: name, label: name.split(' ')[0] }));
+        const newChildren = children
+          .data!.filter((name) => !currentLabels.includes(name))
+          .map((name) => ({ value: name, label: name }));
 
-        return [...prev, ...newItems];
+        return [...prev, ...newPersons, ...newChildren];
       });
     } else {
       setSnackbarState({
@@ -52,11 +65,13 @@ const BankFundForm: React.FC<CustomFormProps> = ({ submitted, formCount, setForm
     }
   };
 
-  const onSubmit: SubmitHandler<BankFund[]> = async (data) => {
+  const onSubmit: SubmitHandler<LiabilityBase[]> = async (data) => {
+    console.log('data[0].lockInterestDate', data[0].lockInterestDate);
     const response = await updateCustomer({
-      field: 'bankFunds',
+      field: 'liabilities',
       _id: custId as string,
       formData: data,
+      subField: 'base',
     });
 
     if (response.success) {
@@ -71,11 +86,9 @@ const BankFundForm: React.FC<CustomFormProps> = ({ submitted, formCount, setForm
     const newDetails = [];
     for (let i = 0; i < formCount; i++) {
       newDetails.push({
+        loanType: '',
         belongs: '',
-        accountType: '',
         institution: '',
-        timePerspective: '',
-        name: '',
       });
     }
     getCustomerNames(custId!);
@@ -93,53 +106,26 @@ const BankFundForm: React.FC<CustomFormProps> = ({ submitted, formCount, setForm
     }
   };
 
-  const accountTypeSelect = [
+  const liabilityTypeSelect = [
     {
-      value: 'Privatkonto',
-      label: 'Privatkonto',
+      value: 'Pantbrevslån',
+      label: 'Pantbrevslån',
     },
     {
-      value: 'Lönekonto',
-      label: 'Lönekonto',
+      value: 'Banklån',
+      label: 'Banklån',
     },
     {
-      value: 'Sparkonto',
-      label: 'Sparkonto',
+      value: 'Billån',
+      label: 'Billån',
     },
     {
-      value: 'Fasträntekonto',
-      label: 'Fasträntekonto',
+      value: 'Checkkredit',
+      label: 'Checkkredit',
     },
     {
-      value: 'Rörelsekonto',
-      label: 'Rörelsekonto',
-    },
-  ];
-
-  const timePerspectiveSelect = [
-    {
-      value: 'Krishink',
-      label: 'Krishink',
-    },
-    {
-      value: '12 Månader',
-      label: '12 Månader',
-    },
-    {
-      value: '5 år',
-      label: '5 år',
-    },
-    {
-      value: 'Sen',
-      label: 'Sen',
-    },
-    {
-      value: 'Oidentifierat',
-      label: 'Oidentifierat',
-    },
-    {
-      value: 'Barnspar',
-      label: 'Barnspar',
+      value: 'CSN',
+      label: 'CSN',
     },
   ];
 
@@ -150,7 +136,7 @@ const BankFundForm: React.FC<CustomFormProps> = ({ submitted, formCount, setForm
           {details.map((detail, index) => (
             <Fragment key={index}>
               <ColoredTableRow>
-                <TableCell colSpan={4}>
+                <TableCell colSpan={3}>
                   <TextField
                     className="form-input-select"
                     select
@@ -159,7 +145,7 @@ const BankFundForm: React.FC<CustomFormProps> = ({ submitted, formCount, setForm
                     defaultValue={detail.belongs}
                     label="Tillhör"
                     {...register(`${index}.belongs`, {
-                      required: 'Vänligen välj ägare av bankmedel.',
+                      required: 'Vänligen välj ägare av sparande.',
                     })}>
                     {selectItems.map((item) => (
                       <MenuItem key={item.value} value={item.value}>
@@ -178,13 +164,13 @@ const BankFundForm: React.FC<CustomFormProps> = ({ submitted, formCount, setForm
                     className="form-input-select"
                     required
                     select
-                    value={detail.accountType}
-                    label="Kontotyp"
+                    label="Lånetyp"
+                    defaultValue={detail.loanType}
                     {...FormTextFieldProps}
-                    {...register(`${index}.accountType`, {
-                      required: 'Vänligen ange vilken typ av konto du har.',
+                    {...register(`${index}.loanType`, {
+                      required: 'Vänligen ange vilken lånetyp som gäller.',
                     })}>
-                    {accountTypeSelect.map((item) => (
+                    {liabilityTypeSelect.map((item) => (
                       <MenuItem key={item.value} value={item.value}>
                         {item.label}
                       </MenuItem>
@@ -194,9 +180,9 @@ const BankFundForm: React.FC<CustomFormProps> = ({ submitted, formCount, setForm
                 <TableCell width="20%">
                   <TextField
                     className="form-input-field"
-                    label="Bank/Institut"
+                    label="Långivare"
                     {...FormTextFieldProps}
-                    {...register(`${index}.institution`)}
+                    {...register(`${index}.lender`)}
                   />
                 </TableCell>
                 <TableCell width="20%">
@@ -209,32 +195,11 @@ const BankFundForm: React.FC<CustomFormProps> = ({ submitted, formCount, setForm
                 </TableCell>
                 <TableCell width="20%">
                   <TextField
-                    required
-                    select
                     className="form-input-field"
-                    label="Tidsperspektiv"
-                    defaultValue={detail.timePerspective}
-                    fullWidth
-                    {...FormTextFieldProps}
-                    {...register(`${index}.timePerspective`)}>
-                    {timePerspectiveSelect.map((item) => (
-                      <MenuItem key={item.value} value={item.value}>
-                        {item.label}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                </TableCell>
-                <TableCell width="20%">
-                  <TextField
-                    className="form-input-field"
-                    label="Saldo"
+                    label="Skuld"
                     type="number"
-                    required
                     {...FormTextFieldProps}
-                    {...register(`${index}.value`, {
-                      required: 'Vänligen ange värdet på bankmedel.',
-                      min: 0,
-                    })}
+                    {...register(`${index}.debt`, { min: 0 })}
                   />
                 </TableCell>
               </TableRow>
@@ -242,46 +207,42 @@ const BankFundForm: React.FC<CustomFormProps> = ({ submitted, formCount, setForm
                 <TableCell width="20%">
                   <TextField
                     className="form-input-field"
-                    label="Månadsspar"
-                    type="number"
-                    {...FormTextFieldProps}
-                    {...register(`${index}.monthlySavings`)}
-                  />
-                </TableCell>
-                <TableCell width="20%">
-                  <TextField
-                    className="form-input-field"
-                    label="Spartid (år)"
-                    type="number"
-                    {...FormTextFieldProps}
-                    {...register(`${index}.saveForHowLong`)}
-                  />
-                </TableCell>
-                <TableCell width="20%">
-                  <TextField
-                    className="form-input-field"
                     label="Ränta"
+                    inputProps={{ step: 0.01 }}
+                    required
                     type="number"
                     {...FormTextFieldProps}
-                    {...register(`${index}.interestRate`)}
+                    {...register(`${index}.interest`, { min: 0 })}
                   />
                 </TableCell>
                 <TableCell width="20%">
                   <TextField
                     className="form-input-field"
-                    label="Tänkt tillväxt"
+                    label="Amort (kr/mån)"
                     type="number"
                     {...FormTextFieldProps}
-                    {...register(`${index}.projectedGrowth`)}
+                    {...register(`${index}.monthlyAmortization`)}
                   />
                 </TableCell>
-                <TableCell />
+                <TableCell width="20%">
+                  <DatePicker
+                    views={['year', 'month', 'day']}
+                    {...register(`${index}.lockInterestDate`)}
+                    onChange={(date) => {
+                      setValue(`${index}.lockInterestDate`, date as Date);
+                    }}
+                  />
+                </TableCell>
+                <TableCell width="20%">
+                  <InputLabel shrink>Låneskydd</InputLabel>
+                  <Checkbox {...register(`${index}.loanProtection`)} />
+                </TableCell>
               </TableRow>
             </Fragment>
           ))}
           {formCount > 0 && (
             <TableRow>
-              <TableCell colSpan={5} align="right">
+              <TableCell colSpan={4} align="right">
                 <Button type="submit" disabled={isSubmitting}>
                   {!isSubmitting ? 'Spara' : 'Sparar...'}
                 </Button>
@@ -294,4 +255,4 @@ const BankFundForm: React.FC<CustomFormProps> = ({ submitted, formCount, setForm
   );
 };
 
-export default BankFundForm;
+export default LiabilityBaseForm;

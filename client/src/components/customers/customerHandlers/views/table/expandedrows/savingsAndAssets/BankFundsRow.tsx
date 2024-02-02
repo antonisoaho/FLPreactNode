@@ -97,7 +97,7 @@ const BankFundsRow = () => {
                   </TableHead>
                   <TableBody>
                     <TableRow>
-                      <TableCell>{f.accounType || '-'}</TableCell>
+                      <TableCell>{f.accountType || '-'}</TableCell>
                       <TableCell>{f.institution || '-'}</TableCell>
                       <TableCell>{f.name || f._id}</TableCell>
                       <TableCell>{f.timePerspective || '-'}</TableCell>

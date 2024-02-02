@@ -1,4 +1,12 @@
-import { TableCell, Box, Table, TableHead, TableRow, TableBody } from '@mui/material';
+import {
+  TableCell,
+  Box,
+  Table,
+  TableHead,
+  TableRow,
+  TableBody,
+  ListItemButton,
+} from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { DateFields } from '../../../../../../../apiCalls/models/ApiModel';
 import { Investment } from '../../../forms/models/CustomerFormModels';
@@ -115,7 +123,11 @@ const InvestmentsRow = () => {
                     </TableRow>
                     <TableRow>
                       <TableCell colSpan={colSpan - 1} />
-                      <TableCell onClick={() => removeSubDoc(inv._id)}>Ta bort</TableCell>
+                      <TableCell>
+                        <ListItemButton onClick={() => removeSubDoc(inv._id)}>
+                          Ta bort
+                        </ListItemButton>
+                      </TableCell>
                     </TableRow>
                   </TableBody>
                 </React.Fragment>

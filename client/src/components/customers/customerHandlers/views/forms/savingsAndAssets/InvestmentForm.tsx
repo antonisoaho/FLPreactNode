@@ -83,7 +83,8 @@ const InvestmentForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFo
         belongs: '',
         investmentType: '',
         institution: '',
-        name: '',
+        value: 0,
+        timePerspective: '',
       });
     }
     getCustomerNames(custId!);
@@ -183,6 +184,7 @@ const InvestmentForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFo
                     required
                     select
                     label="Kontotyp"
+                    value={detail.investmentType}
                     {...FormTextFieldProps}
                     {...register(`${index}.investmentType`, {
                       required: 'Vänligen ange vilken typ av investering.',
@@ -237,6 +239,7 @@ const InvestmentForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFo
                     className="form-input-select"
                     required
                     select
+                    defaultValue={detail.timePerspective}
                     label="Tidsperspektiv"
                     {...FormTextFieldProps}
                     {...register(`${index}.timePerspective`)}>

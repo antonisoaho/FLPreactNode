@@ -88,12 +88,10 @@ const CustomerChildForm: React.FC<CustomFormProps> = ({ submitted, formCount, se
   }, [formCount]);
 
   const removeDetail = (index: number) => {
-    console.log('details', details);
     if (details.length > 0) {
       setDetails(removeFormByIndex(details, index));
       setFormCount(formCount - 1);
     }
-    console.log('details', details);
   };
 
   const handleDateChange = (date: Date, index: number) => {

@@ -5,36 +5,12 @@ const liabilityBaseSchema = new Schema(
     loanType: { type: String },
     lender: { type: String },
     name: { type: String },
-    belongs: {
-      type: String,
-      required: function () {
-        return this.baseValues.loanType != null;
-      },
-    },
-    debt: {
-      type: Number,
-      required: function () {
-        return this.baseValues.loanType != null;
-      },
-    },
-    interest: {
-      type: Number,
-      required: function () {
-        return this.baseValues.loanType != null;
-      },
-    },
-    monthlyAmortization: {
-      type: Number,
-      required: function () {
-        return this.baseValues.loanType != null;
-      },
-    },
-    loanProtection: {
-      death: { type: Boolean },
-      sickness: { type: Boolean },
-      unemployment: { type: Boolean },
-      maximumAmount: { type: Number },
-    },
+    belongs: { type: String },
+    debt: { type: Number },
+    interest: { type: Number },
+    monthlyAmortization: { type: Number },
+    loanProtection: { type: Boolean },
+    lockInterestDate: { type: Date },
   },
   { timestamps: true }
 );
