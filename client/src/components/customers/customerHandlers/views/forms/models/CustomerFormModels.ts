@@ -133,7 +133,7 @@ export type InsuranceProperty = {
   expiryDate?: Date;
   premiumCost?: number;
   paymentPeriod?: string;
-  lastControl?: string;
+  lastControl?: Date;
 };
 
 export type InsuranceSickness = {
@@ -145,8 +145,8 @@ export type InsuranceSickness = {
   compensationAmount?: number;
   compensationPeriod?: string;
   premiumCost?: number;
-  expiryDate?: string;
-  lastUpdated?: string;
+  expiryDate?: Date;
+  lastUpdated?: Date;
 };
 
 export type InsuranceAccident = {
@@ -155,8 +155,8 @@ export type InsuranceAccident = {
   insuranceType?: string;
   compensationAmount?: number;
   premiumCost?: number;
-  expiryDate?: string;
-  lastControl?: string;
+  expiryDate?: Date;
+  lastControl?: Date;
 };
 
 export type InsuranceLife = {
@@ -165,9 +165,9 @@ export type InsuranceLife = {
   insuranceType?: string;
   compensationAmount?: number;
   premiumCost?: number;
-  expiryDate?: string;
+  expiryDate?: Date;
   beneficiary?: string;
-  lastControl?: string;
+  lastControl?: Date;
 };
 
 export type InsuranceWork = {
@@ -183,13 +183,15 @@ export type CustomerPension = {
   pensionValue?: number;
   pensionAge?: number;
   monthlyPension?: number;
-  compensationPeriod?: string;
+  compensationPeriod?: number;
   shellFee?: number;
   riskClass?: number;
   fundFee?: number;
   estIncreasedValue?: number;
   annualSavings?: number;
   commitmentPowers?: boolean;
+  spousalProtection?: number;
+  timeAfterDeath?: number;
   beneficiary?: string;
 };
 

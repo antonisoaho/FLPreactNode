@@ -84,7 +84,6 @@ const CustomerChildForm: React.FC<CustomFormProps> = ({ submitted, formCount, se
       });
     }
     setDetails(newDetails);
-    console.log('details', details);
   }, [formCount]);
 
   const removeDetail = (index: number) => {

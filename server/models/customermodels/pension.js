@@ -9,7 +9,7 @@ const pensionSchema = new Schema(
     pensionValue: { type: Number },
     pensionAge: { type: Number },
     monthlyPension: { type: Number },
-    compensationPeriod: { type: String },
+    compensationPeriod: { type: Number },
     altPaymentAge: { type: Number },
     impactPercent: { type: Number },
     shellFee: { type: Number },
@@ -18,6 +18,8 @@ const pensionSchema = new Schema(
     estIncreasedValue: { type: Number },
     annualSavings: { type: Number },
     commitmentPowers: { type: Boolean },
+    spousalProtection: { type: Number },
+    timeAfterDeath: { type: Number },
     beneficiary: { type: String },
   },
   { timestamps: true }

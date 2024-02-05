@@ -13,7 +13,7 @@ import {
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { formatDate } from '../models/commonFunctions';
 import { useForm, SubmitHandler } from 'react-hook-form';
-import { getCustomerNames, updateCustomer } from '../../../../../../apiCalls/apiCustomerCalls';
+import { updateCustomer } from '../../../../../../apiCalls/apiCustomerCalls';
 import { useParams } from 'react-router-dom';
 import { removeFormByIndex } from '../models/commonFunctions';
 import { CustomFormProps, FormTextFieldProps } from '../models/FormProps';
@@ -52,7 +52,6 @@ const CustomerDetailsForm: React.FC<CustomFormProps> = ({ submitted, formCount, 
         yearMonth: '',
       });
     }
-    getCustomerNames(custId!);
     setDetails(newDetails);
   }, [formCount]);
 

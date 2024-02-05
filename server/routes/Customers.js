@@ -106,6 +106,7 @@ router
     const subField = req.params.subField;
     const { userId, isAdmin } = req.user;
     const newData = Object.values(req.body);
+    console.log('newData', newData);
 
     if (!mongoose.Types.ObjectId.isValid(customerId)) {
       return res.status(400).json({ error: 'Ogiltigt kund-ID.' });
@@ -121,7 +122,7 @@ router
       const fieldPath = subField ? `${field}.${subField}` : field;
       console.log('fieldPath', fieldPath);
       const updateQuery = { $push: { [fieldPath]: { $each: newData } } };
-
+      console.log('updateQuery', updateQuery);
       const updatedCustomer = await Customer.findByIdAndUpdate(customerId, updateQuery, {
         new: true,
       });

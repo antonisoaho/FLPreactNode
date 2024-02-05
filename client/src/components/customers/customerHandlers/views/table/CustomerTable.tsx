@@ -29,6 +29,7 @@ import InsuranceAccidentRow from './expandedrows/insurances/InsuranceAccidentRow
 import InsuranceLifeRow from './expandedrows/insurances/InsuranceDeathRow';
 import SpousalPensionRow from './expandedrows/pensions/SpousalPensionRow';
 import ChangeExpenseRow from './expandedrows/expenses/ChangeExpenseRow';
+import InsuranceWorkRow from './expandedrows/insurances/InsuranceWorkRow';
 
 interface TableProps {
   customer: CustomerOverview;
@@ -56,7 +57,6 @@ const CustomerTable: React.FC<TableProps> = ({ customer }) => {
     );
 
     setLoading(false);
-    console.log('currCustomer', currCustomer);
   }, [customer]);
 
   return (
@@ -113,27 +113,27 @@ const CustomerTable: React.FC<TableProps> = ({ customer }) => {
               <CustomerTableRow
                 fieldName={'Sparande & placeringar'}
                 fieldLength={currCustomer.investments.length | 0}>
-                <InvestmentsRow fields={currCustomer.investments} />
+                <InvestmentsRow />
               </CustomerTableRow>
               <CustomerTableRow
                 fieldName={'Bankmedel'}
                 fieldLength={currCustomer.bankFunds.length | 0}>
-                <BankFundsRow fields={currCustomer.bankFunds} />
+                <BankFundsRow />
               </CustomerTableRow>
               <CustomerTableRow fieldName={'Skulder'} fieldLength={liabilitiesLength}>
                 <NestedRow
                   fieldName={'Grund'}
                   fieldLength={currCustomer.liabilities?.base?.length | 0}>
-                  <BaseLiabilitiesRow fields={currCustomer.liabilities.base} />
+                  <BaseLiabilitiesRow />
                 </NestedRow>
                 <NestedRow
                   fieldName={'Framåtplanering skulder'}
                   fieldLength={currCustomer.liabilities?.planned?.length | 0}>
-                  <PlannedLiabilitiesRow fields={currCustomer.liabilities.planned} />
+                  <PlannedLiabilitiesRow />
                 </NestedRow>
               </CustomerTableRow>
               <CustomerTableRow fieldName={'Egendomar'} fieldLength={currCustomer.assets.length}>
-                <AssetsRow fields={currCustomer.assets} />
+                <AssetsRow />
               </CustomerTableRow>
               <CustomerTableRow fieldName={'Försäkringar'} fieldLength={insuranceLength}>
                 <NestedRow
@@ -159,16 +159,16 @@ const CustomerTable: React.FC<TableProps> = ({ customer }) => {
                 <NestedRow
                   fieldName={'Avtalsenliga försäkringar'}
                   fieldLength={currCustomer.insurances.work.length}>
-                  <></>
+                  <InsuranceWorkRow />
                 </NestedRow>
               </CustomerTableRow>
               <CustomerTableRow
                 fieldName={'Efterlevandepensioner'}
                 fieldLength={currCustomer.spousalPension.length}>
-                <SpousalPensionRow fields={currCustomer.spousalPension} />
+                <SpousalPensionRow />
               </CustomerTableRow>
               <CustomerTableRow fieldName={'Pensioner'} fieldLength={currCustomer.pension.length}>
-                <PensionRow fields={currCustomer.pension} />
+                <PensionRow />
               </CustomerTableRow>
             </TableBody>
           </Table>

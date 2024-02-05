@@ -91,7 +91,6 @@ const LiabilityBaseForm: React.FC<CustomFormProps> = ({ submitted, formCount, se
         institution: '',
       });
     }
-    getCustomerNames(custId!);
     setDetails(newDetails);
   }, [formCount]);
 
@@ -234,7 +233,9 @@ const LiabilityBaseForm: React.FC<CustomFormProps> = ({ submitted, formCount, se
                   />
                 </TableCell>
                 <TableCell width="20%">
-                  <InputLabel shrink>Låneskydd</InputLabel>
+                  <InputLabel shrink className="form-checkbox-label">
+                    Låneskydd
+                  </InputLabel>
                   <Checkbox {...register(`${index}.loanProtection`)} />
                 </TableCell>
               </TableRow>

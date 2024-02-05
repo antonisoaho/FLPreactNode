@@ -1,42 +1,43 @@
 import {
   Table,
   TableBody,
+  TableRow,
   TableCell,
+  ListItemButton,
   TextField,
   MenuItem,
-  ListItemButton,
-  TableRow,
   Button,
+  InputLabel,
+  Checkbox,
 } from '@mui/material';
 import React, { Fragment, useEffect, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
 import { useSetRecoilState } from 'recoil';
 import {
+  updateCustomer,
   getCustomerNames,
   getCustomerChildNames,
-  updateCustomer,
 } from '../../../../../../apiCalls/apiCustomerCalls';
 import ColoredTableRow from '../../../../../../commonComponents/coloredTableRow/ColoredTableRow';
 import { snackbarState } from '../../../../../../recoil/RecoilAtoms';
-import { Assets } from '../models/CustomerFormModels';
+import { InsuranceSickness } from '../models/CustomerFormModels';
 import { CustomFormProps, FormTextFieldProps } from '../models/FormProps';
 import { removeFormByIndex } from '../models/commonFunctions';
 import { DatePicker } from '@mui/x-date-pickers';
 
-const AssetsForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFormCount }) => {
+const SickInsuranceForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFormCount }) => {
   const {
     register,
     handleSubmit,
     setValue,
     formState: { isSubmitting },
-  } = useForm<Assets[]>();
-  const [details, setDetails] = useState<Assets[]>([]);
+  } = useForm<InsuranceSickness[]>();
+  const [details, setDetails] = useState<InsuranceSickness[]>([]);
   const setSnackbarState = useSetRecoilState(snackbarState);
   const { custId } = useParams();
-  const [selectItems, setSelectItems] = useState<Array<{ value: string; label: string }>>([
-    { value: 'Gemensam', label: 'Gemensam' },
-  ]);
+  const [selectItems, setSelectItems] = useState<Array<{ value: string; label: string }>>([]);
+  const colSpan: number = 5;
 
   const populateSelectItems = async () => {
     const persons = await getCustomerNames(custId!);
@@ -63,11 +64,12 @@ const AssetsForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFormCo
     }
   };
 
-  const onSubmit: SubmitHandler<Assets[]> = async (data) => {
+  const onSubmit: SubmitHandler<InsuranceSickness[]> = async (data) => {
     const response = await updateCustomer({
-      field: 'assets',
+      field: 'insurances',
       _id: custId as string,
       formData: data,
+      subField: 'sickness',
     });
 
     if (response.success) {
@@ -83,6 +85,8 @@ const AssetsForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFormCo
     for (let i = 0; i < formCount; i++) {
       newDetails.push({
         belongs: '',
+        company: '',
+        insuranceType: '',
       });
     }
     setDetails(newDetails);
@@ -99,34 +103,71 @@ const AssetsForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFormCo
     }
   };
 
-  const AssetsTypeSelect = [
+  const insuranceTypeSelect = [
     {
-      value: 'Bostad',
-      label: 'Bostad',
+      value: 'Sjukförs. Arbete',
+      label: 'Sjukförs. Arbete',
     },
     {
-      value: 'Fastighet',
-      label: 'Fastighet',
+      value: 'Privat sjukförs.',
+      label: 'Privat sjukförs.',
     },
     {
-      value: 'Skog',
-      label: 'Skog',
+      value: 'Diagnosförs.',
+      label: 'Diagnosförs.',
     },
     {
-      value: 'Fordon',
-      label: 'Fordon',
+      value: 'Privatvårdsförs.',
+      label: 'Privatvårdsförs.',
     },
     {
-      value: 'Företag',
-      label: 'Företag',
+      value: 'Förtidskapital',
+      label: 'Förtidskapital',
+    },
+  ];
+  const qualifyingPeriodSelect = [
+    {
+      value: -1,
+      label: 'Ingen',
     },
     {
-      value: 'Antikviteter',
-      label: 'Antikviteter',
+      value: 0,
+      label: 'Sjukersättning',
     },
     {
-      value: 'Övrigt',
-      label: 'Övrigt',
+      value: 1,
+      label: '1 Månad',
+    },
+    {
+      value: 3,
+      label: '3 Månader',
+    },
+    {
+      value: 12,
+      label: '12 Månader',
+    },
+    {
+      value: 18,
+      label: '18 Månader',
+    },
+    {
+      value: 36,
+      label: '36 Månader',
+    },
+  ];
+
+  const compensationPeriodSelect = [
+    {
+      value: 0,
+      label: 'Sjukers.',
+    },
+    {
+      value: 1,
+      label: '-dag 360',
+    },
+    {
+      value: 2,
+      label: '36 Månader',
     },
   ];
 
@@ -137,17 +178,18 @@ const AssetsForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFormCo
           {details.map((detail, index) => (
             <Fragment key={index}>
               <ColoredTableRow>
-                <TableCell colSpan={4}>
+                <TableCell colSpan={colSpan - 1}>
                   <TextField
                     className="form-input-select"
                     select
                     required
                     {...FormTextFieldProps}
                     defaultValue={detail.belongs}
-                    label="Tillhör"
+                    label="Försäkrad"
                     {...register(`${index}.belongs`, {
-                      required: 'Vänligen välj ägare av egendom.',
-                    })}>
+                      required: 'Vänligen välj vem försäkringen gäller.',
+                    })}
+                    fullWidth>
                     {selectItems.map((item) => (
                       <MenuItem key={item.value} value={item.value}>
                         {item.label}
@@ -163,14 +205,41 @@ const AssetsForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFormCo
                 <TableCell width="20%">
                   <TextField
                     className="form-input-select"
-                    required
-                    select
-                    label="Tillgångstyp"
+                    label="Bolag"
                     {...FormTextFieldProps}
-                    {...register(`${index}.assetType`, {
-                      required: 'Vänligen ange vilken typ av investering.',
-                    })}>
-                    {AssetsTypeSelect.map((item) => (
+                    {...register(`${index}.company`)}></TextField>
+                </TableCell>
+                <TableCell width="20%">
+                  <TextField
+                    className="form-input-select"
+                    label="Benämning"
+                    fullWidth
+                    defaultValue={detail.insuranceType}
+                    {...FormTextFieldProps}
+                    {...register(`${index}.insuranceType`)}>
+                    {insuranceTypeSelect.map((item) => (
+                      <MenuItem key={item.value} value={item.value}>
+                        {item.label}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                </TableCell>
+                <TableCell width="20%">
+                  <InputLabel shrink className="form-input-label">
+                    Skattefri
+                  </InputLabel>
+                  <Checkbox {...register(`${index}.taxFree`)} />
+                </TableCell>
+                <TableCell width="20%">
+                  <TextField
+                    className="form-input-field"
+                    label="Karens"
+                    defaultValue=""
+                    select
+                    fullWidth
+                    {...FormTextFieldProps}
+                    {...register(`${index}.qualifyingPeriod`)}>
+                    {qualifyingPeriodSelect.map((item) => (
                       <MenuItem key={item.value} value={item.value}>
                         {item.label}
                       </MenuItem>
@@ -180,89 +249,80 @@ const AssetsForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFormCo
                 <TableCell width="20%">
                   <TextField
                     className="form-input-field"
-                    label="Benämning"
-                    {...FormTextFieldProps}
-                    {...register(`${index}.name`)}
-                  />
-                </TableCell>
-                <TableCell width="20%">
-                  <TextField
-                    className="form-input-field"
-                    type="Number"
-                    label="Värde"
+                    label="Ersättning"
+                    type="number"
                     required
                     {...FormTextFieldProps}
-                    {...register(`${index}.value`, { min: 0 })}
-                  />
-                </TableCell>
-                <TableCell width="20%">
-                  <TextField
-                    className="form-input-field"
-                    label="Insats"
-                    type="number"
-                    {...FormTextFieldProps}
-                    {...register(`${index}.stake`, { min: 0 })}
-                  />
-                </TableCell>
-                <TableCell width="20%">
-                  <TextField
-                    className="form-input-field"
-                    label="Pantbrev"
-                    type="number"
-                    {...FormTextFieldProps}
-                    {...register(`${index}.mortgageDeed`, { min: 0 })}
+                    {...register(`${index}.compensationAmount`, { min: 0 })}
                   />
                 </TableCell>
               </TableRow>
               <TableRow>
                 <TableCell width="20%">
+                  <TextField
+                    className="form-input-field"
+                    label="Premie (kr/år)"
+                    type="number"
+                    required
+                    {...FormTextFieldProps}
+                    {...register(`${index}.premiumCost`, { min: 0 })}
+                  />
+                </TableCell>
+                <TableCell width="20%">
                   <DatePicker
                     className="form-input-field"
                     slotProps={{ textField: { ...FormTextFieldProps } }}
-                    label="Värderingsår"
-                    views={['year']}
-                    {...register(`${index}.valueYear`, { max: new Date().getFullYear() })}
+                    label="Förfallodatum"
+                    views={['year', 'month', 'day']}
+                    {...register(`${index}.expiryDate`)}
                     onChange={(date) => {
                       const newDate = date as Date;
-                      const newDateValue = newDate.getFullYear();
-                      setValue(`${index}.valueYear`, newDateValue);
+                      setValue(`${index}.expiryDate`, newDate);
                     }}
                   />
                 </TableCell>
                 <TableCell width="20%">
                   <TextField
-                    className="form-input-field"
-                    label="Skatt"
-                    type="number"
+                    className="form-input-select"
+                    select
+                    required
+                    fullWidth
                     {...FormTextFieldProps}
-                    {...register(`${index}.tax`, { min: 0, max: 100 })}
-                  />
+                    defaultValue=""
+                    label="Ersättningstid"
+                    {...register(`${index}.compensationPeriod`, {
+                      required: 'Vänligen välj vem pensionen gäller.',
+                    })}>
+                    {compensationPeriodSelect.map((item) => (
+                      <MenuItem key={item.value} value={item.value}>
+                        {item.label}
+                      </MenuItem>
+                    ))}
+                  </TextField>
                 </TableCell>
                 <TableCell width="20%">
-                  <TextField
+                  <DatePicker
                     className="form-input-field"
-                    label="Taxeringsvärde"
-                    type="number"
-                    {...FormTextFieldProps}
-                    {...register(`${index}.assessedValue`, { min: 0 })}
+                    slotProps={{ textField: { ...FormTextFieldProps } }}
+                    label="Senaste uppdatering"
+                    views={['year', 'month', 'day']}
+                    {...register(`${index}.lastUpdated`)}
+                    onChange={(date) => {
+                      const newDate = date as Date;
+                      setValue(`${index}.lastUpdated`, newDate);
+                    }}
                   />
                 </TableCell>
-                <TableCell width="20%">
-                  <TextField
-                    className="form-input-field"
-                    label="Rot"
-                    type="number"
-                    {...FormTextFieldProps}
-                    {...register(`${index}.base`)}
-                  />
+
+                <TableCell>
+                  <ListItemButton onClick={() => removeDetail(index)}>Ta bort</ListItemButton>
                 </TableCell>
-                <TableCell />
               </TableRow>
             </Fragment>
           ))}
-          {formCount > 0 && (
+          {formCount > 0 && selectItems.length > 0 && (
             <TableRow>
-              <TableCell colSpan={5} align="right">
+              <TableCell colSpan={colSpan} align="right">
                 <Button type="submit" disabled={isSubmitting}>
                   {!isSubmitting ? 'Spara' : 'Sparar...'}
                 </Button>
@@ -275,4 +335,4 @@ const AssetsForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFormCo
   );
 };
 
-export default AssetsForm;
+export default SickInsuranceForm;

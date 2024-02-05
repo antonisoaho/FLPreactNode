@@ -87,7 +87,6 @@ const InvestmentForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFo
         timePerspective: '',
       });
     }
-    getCustomerNames(custId!);
     setDetails(newDetails);
   }, [formCount]);
 

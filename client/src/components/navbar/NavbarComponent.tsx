@@ -150,8 +150,9 @@ const ResponsiveAppBar = () => {
           </Box>
           {token ? (
             <Box sx={{ flexGrow: 0 }}>
+              {username}
               <Tooltip title="Öppna inställningar">
-                <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                <IconButton onClick={handleOpenUserMenu} sx={{ p: 0, m: 1 }}>
                   <Avatar>{username ? username.substring(0, 1).toUpperCase() : '-'}</Avatar>
                 </IconButton>
               </Tooltip>

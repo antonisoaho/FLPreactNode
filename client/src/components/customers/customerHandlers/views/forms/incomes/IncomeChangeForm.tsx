@@ -77,7 +77,6 @@ const IncomeChangeForm: React.FC<CustomFormProps> = ({ submitted, formCount, set
         },
       });
     }
-    getCustomerNames(custId!);
     setDetails(newDetails);
   }, [formCount]);
 
