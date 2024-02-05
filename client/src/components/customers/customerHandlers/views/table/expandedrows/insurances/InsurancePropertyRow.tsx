@@ -1,14 +1,53 @@
 import { TableCell, Box, Table, TableHead, TableRow, TableBody } from '@mui/material';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { DateFields } from '../../../../../../../apiCalls/models/ApiModel';
 import { InsuranceProperty } from '../../../forms/models/CustomerFormModels';
 import ColoredTableRow from '../../../../../../../commonComponents/coloredTableRow/ColoredTableRow';
+import { useParams } from 'react-router-dom';
+import {
+  deleteCustSubDocument,
+  getCustomerFormData,
+} from '../../../../../../../apiCalls/apiCustomerCalls';
 
-interface RowProps {
-  fields: [InsuranceProperty & DateFields];
-}
+const InsurancePropertyRow = () => {
+  const [formCount, setFormCount] = useState<number>(0);
+  const { custId } = useParams();
+  const [fields, setFields] = useState<[InsuranceProperty & DateFields]>();
+  const [loading, setLoading] = useState<boolean>(true);
+  const colSpan: number = 4;
 
-const InsurancePropertyRow: React.FC<RowProps> = ({ fields }) => {
+  const onSubmit = () => {
+    updateCustomerFields();
+  };
+
+  const removeSubDoc = async (subDocId: string) => {
+    const response = await deleteCustSubDocument({
+      field: 'insurances',
+      custId: custId!,
+      subField: 'life',
+      subDocId: subDocId,
+    });
+
+    if (response.success) {
+      setFields(response.data as [InsuranceProperty & DateFields]);
+    }
+  };
+
+  const updateCustomerFields = async () => {
+    const response = await getCustomerFormData({
+      field: 'insurances',
+      _id: custId as string,
+      subField: 'property',
+    });
+    if (response.success) {
+      setFields(response.data as [InsuranceProperty & DateFields]);
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    updateCustomerFields();
+  }, [custId]);
   return (
     <TableRow>
       <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={7}>

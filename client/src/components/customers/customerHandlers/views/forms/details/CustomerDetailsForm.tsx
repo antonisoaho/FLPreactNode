@@ -11,7 +11,7 @@ import {
   TextField,
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { formatDate } from '../models/commonFunctions';
+import { formatDateYearMonth } from '../models/commonFunctions';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { updateCustomer } from '../../../../../../apiCalls/apiCustomerCalls';
 import { useParams } from 'react-router-dom';
@@ -82,7 +82,7 @@ const CustomerDetailsForm: React.FC<CustomFormProps> = ({ submitted, formCount, 
   ];
 
   const handleDateChange = (date: Date, index: number) => {
-    const newDate = formatDate(date);
+    const newDate = formatDateYearMonth(date);
     setValue(`${index}.yearMonth`, newDate);
   };
 

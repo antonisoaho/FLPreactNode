@@ -26,7 +26,7 @@ import PensionRow from './expandedrows/pensions/PensionRow';
 import InsuranceSickRow from './expandedrows/insurances/InsuranceSickRow';
 import PropertyInsuranceRow from './expandedrows/insurances/InsurancePropertyRow';
 import InsuranceAccidentRow from './expandedrows/insurances/InsuranceAccidentRow';
-import InsuranceLifeRow from './expandedrows/insurances/InsuranceDeathRow';
+import InsuranceLifeRow from './expandedrows/insurances/InsuranceLifeRow';
 import SpousalPensionRow from './expandedrows/pensions/SpousalPensionRow';
 import ChangeExpenseRow from './expandedrows/expenses/ChangeExpenseRow';
 import InsuranceWorkRow from './expandedrows/insurances/InsuranceWorkRow';
@@ -144,7 +144,7 @@ const CustomerTable: React.FC<TableProps> = ({ customer }) => {
                 <NestedRow
                   fieldName={'Olycksfallsförsäkringar'}
                   fieldLength={currCustomer.insurances.accident.length}>
-                  <InsuranceAccidentRow fields={currCustomer.insurances.accident} />
+                  <InsuranceAccidentRow />
                 </NestedRow>
                 <NestedRow
                   fieldName={'Sjuk- och olycksfallsförsäkringar'}
@@ -154,7 +154,7 @@ const CustomerTable: React.FC<TableProps> = ({ customer }) => {
                 <NestedRow
                   fieldName={'Livförsäkringar'}
                   fieldLength={currCustomer.insurances.life.length}>
-                  <InsuranceLifeRow fields={currCustomer.insurances.life} />
+                  <InsuranceLifeRow />
                 </NestedRow>
                 <NestedRow
                   fieldName={'Avtalsenliga försäkringar'}

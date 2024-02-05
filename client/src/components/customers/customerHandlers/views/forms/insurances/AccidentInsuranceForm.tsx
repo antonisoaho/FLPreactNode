@@ -39,7 +39,7 @@ const AccidentInsuranceForm: React.FC<CustomFormProps> = ({
   const setSnackbarState = useSetRecoilState(snackbarState);
   const { custId } = useParams();
   const [selectItems, setSelectItems] = useState<Array<{ value: string; label: string }>>([]);
-  const colSpan: number = 6;
+  const colSpan: number = 4;
 
   const populateSelectItems = async () => {
     const persons = await getCustomerNames(custId!);
@@ -126,8 +126,8 @@ const AccidentInsuranceForm: React.FC<CustomFormProps> = ({
         <TableBody>
           {details.map((detail, index) => (
             <Fragment key={index}>
-              <ColoredTableRow>
-                <TableCell colSpan={colSpan - 1}>
+              <TableRow>
+                <TableCell width="25%">
                   <TextField
                     className="form-input-select"
                     select
@@ -145,11 +145,6 @@ const AccidentInsuranceForm: React.FC<CustomFormProps> = ({
                     ))}
                   </TextField>
                 </TableCell>
-                <TableCell>
-                  <ListItemButton onClick={() => removeDetail(index)}>Ta bort</ListItemButton>
-                </TableCell>
-              </ColoredTableRow>
-              <TableRow>
                 <TableCell width="25%">
                   <TextField
                     className="form-input-select"
@@ -181,6 +176,8 @@ const AccidentInsuranceForm: React.FC<CustomFormProps> = ({
                     {...register(`${index}.compensationAmount`, { min: 0 })}
                   />
                 </TableCell>
+              </TableRow>
+              <TableRow>
                 <TableCell width="25%">
                   <TextField
                     className="form-input-field"
@@ -191,14 +188,12 @@ const AccidentInsuranceForm: React.FC<CustomFormProps> = ({
                     {...register(`${index}.premiumCost`, { min: 0 })}
                   />
                 </TableCell>
-              </TableRow>
-              <TableRow>
                 <TableCell width="25%">
                   <DatePicker
                     className="form-input-field"
                     slotProps={{ textField: { ...FormTextFieldProps } }}
                     label="Förfallodatum"
-                    views={['year', 'month', 'day']}
+                    views={['day', 'month', 'year']}
                     {...register(`${index}.expiryDate`)}
                     onChange={(date) => {
                       const newDate = date as Date;
@@ -211,7 +206,7 @@ const AccidentInsuranceForm: React.FC<CustomFormProps> = ({
                     className="form-input-field"
                     slotProps={{ textField: { ...FormTextFieldProps } }}
                     label="Senast kontroll"
-                    views={['year', 'month', 'day']}
+                    views={['day', 'month', 'year']}
                     {...register(`${index}.lastControl`)}
                     onChange={(date) => {
                       const newDate = date as Date;
@@ -219,7 +214,6 @@ const AccidentInsuranceForm: React.FC<CustomFormProps> = ({
                     }}
                   />
                 </TableCell>
-                <TableCell />
                 <TableCell>
                   <ListItemButton onClick={() => removeDetail(index)}>Ta bort</ListItemButton>
                 </TableCell>
