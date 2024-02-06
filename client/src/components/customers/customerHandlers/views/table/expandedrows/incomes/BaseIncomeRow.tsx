@@ -46,7 +46,7 @@ const BaseIncomeRow = () => {
 
   useEffect(() => {
     updateCustomerFields();
-  }, [custId, updateCustomerFields]);
+  }, [custId]);
 
   const removeSubDoc = async (subDocId: string) => {
     const response = await deleteCustSubDocument({

@@ -58,7 +58,7 @@ const InsurancePropertyRow = () => {
 
   useEffect(() => {
     updateCustomerFields();
-  }, [custId, updateCustomerFields]);
+  }, [custId]);
   return (
     <TableRow>
       <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={colSpan}>

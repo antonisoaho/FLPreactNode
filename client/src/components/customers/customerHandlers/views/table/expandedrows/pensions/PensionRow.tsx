@@ -56,7 +56,7 @@ const PensionRow = () => {
 
   useEffect(() => {
     updateCustomerFields();
-  }, [custId, updateCustomerFields]);
+  }, [custId]);
 
   return (
     <TableRow>

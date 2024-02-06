@@ -1,18 +1,15 @@
 {
-  "name": "flp_capfor",
+  "name": "golife",
   "version": "1.0.0",
   "description": "golife",
-  "engines": {
-    "node": "21.1.0"
-  },
+ 
   "main": "index.js",
   "scripts": {
     "debug": "concurrently \"npm run debug:server\" \"npm run debug:client\"",
     "start": "nodemon server/index.js",
     "build": "cd client && npm install && npm run build",
     "debug:client": "cd client && npm install && npm run dev",
-    "debug:server": "npm i && nodemon server/index.js",
-    "heroku-postbuild": "cd client && npm install && npm run build"
+    "debug:server": "npm i && nodemon server/index.js"
   },
   "author": "",
   "license": "ISC",
@@ -29,5 +26,8 @@
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": "21.1.0"
   }
 }

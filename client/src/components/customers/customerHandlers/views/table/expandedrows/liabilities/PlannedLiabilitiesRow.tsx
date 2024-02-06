@@ -58,7 +58,7 @@ const PlannedLiabilitesRow = () => {
 
   useEffect(() => {
     updateCustomerFields();
-  }, [custId, updateCustomerFields]);
+  }, [custId]);
 
   return (
     <TableRow>
