@@ -1,11 +1,13 @@
 const { Schema, model } = require('mongoose');
+
+const customerDetailsSchema = require('./customerModels/details');
 const childSchema = require('./customerModels/children');
-const workConditionSchema = require('./customerModels/workConditions');
-const { expensesBaseSchema, expensesChangeSchema } = require('./customerModels/expenses');
+const workConditionsSchema = require('./customerModels/workConditions');
 const { incomeBaseSchema, incomeChangeSchema } = require('./customerModels/income');
+const { expensesBaseSchema, expensesChangeSchema } = require('./customerModels/expenses');
+const bankFundSchema = require('./customerModels/bankFunds');
 const investmentSchema = require('./customerModels/investments');
 const { liabilityBaseSchema, liabilityPlannedSchema } = require('./customerModels/liabilities');
-const { pensionSchema, spousalPensionSchema } = require('./customerModels/pension');
 const assetSchema = require('./customerModels/assets');
 const {
   propertyInsuranceSchema,
@@ -14,8 +16,8 @@ const {
   lifeInsuranceSchema,
   workInsuranceSchema,
 } = require('./customerModels/insurances');
-const bankFundSchema = require('./customerModels/bankFunds');
-const customerDetailsSchema = require('./customerModels/details');
+const { pensionSchema, spousalPensionSchema } = require('./customerModels/pension');
+
 const customerSchema = new Schema(
   {
     advisor: {
@@ -25,7 +27,7 @@ const customerSchema = new Schema(
     },
     customerDetails: [customerDetailsSchema],
     customerChildren: [childSchema],
-    workConditions: [workConditionSchema],
+    workConditions: [workConditionsSchema],
     income: {
       base: [incomeBaseSchema],
       change: [incomeChangeSchema],
