@@ -7,7 +7,7 @@
     "debug": "concurrently \"npm run debug:server\" \"npm run debug:client\"",
     "start": "node server/index.js",
     "build": "cd client && npm install && npm run build",
-    "debug:client": "cd client && npm install && npm run dev",
+    "debug:client": "cd client && npm i && npm run dev",
     "debug:server": "npm i && nodemon server/index.js"
   },
   "author": "",
