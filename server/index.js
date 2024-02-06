@@ -15,15 +15,13 @@ const app = express();
 //config
 dotenv.config();
 
-console.log('process.env.NODE_ENV', process.env.NODE_ENV);
-
 if (process.env.NODE_ENV === 'development') {
   app.use(cors({ origin: `http://localhost:8000`, credentials: true }));
   dbURI = process.env.DB_URI_DEV;
 } else {
   app.use(
     cors({
-      origin: 'https://golife-frontend.onrender.com/',
+      origin: 'https://golife-frontend.onrender.com',
     })
   );
   dbURI = process.env.DB_URI;
