@@ -8,7 +8,8 @@ export interface ExtendedError extends AxiosError {
 }
 
 const loc = window.location;
-const baseURL = `${loc.protocol}//${loc.hostname}${loc.hostname === 'localhost' ? ':3001' : ''}`;
+const baseURL =
+  loc.hostname === 'localhost' ? 'http://localhost:3001' : process.env.REACT_APP_API_URL;
 
 const axiosInstance = axios.create({
   baseURL,
