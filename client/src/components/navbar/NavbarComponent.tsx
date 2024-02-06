@@ -135,7 +135,7 @@ const ResponsiveAppBar = () => {
           </Typography>
           <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
             {pages.map((page) =>
-              (page.protected && token) || !page.protected ? (
+              (page.protected && token !== undefined) || !page.protected ? (
                 <Button
                   LinkComponent={Link}
                   key={page.title}
