@@ -23,8 +23,7 @@ if (process.env.NODE_ENV === 'development') {
 } else {
   app.use(
     cors({
-      origin: ['https://golife-frontend.onrender.com/', 'golife-frontend.onrender.com/'],
-      credentials: true,
+      origin: 'https://golife-frontend.onrender.com/',
     })
   );
   dbURI = process.env.DB_URI;
