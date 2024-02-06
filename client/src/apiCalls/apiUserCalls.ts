@@ -4,7 +4,6 @@ import LoginResponse from '../components/login/models/LoginResponse';
 import UserModel from '../components/users/models/UserModel';
 import UpdateUserModel from '../components/users/userHandlers/models/UpdateUserModel';
 import CreateUserModel from '../components/users/userHandlers/models/CreateUserModel';
-import AccountModel from '../components/account/models/AccountModel';
 
 export const loginAPI = async (
   email: string,
