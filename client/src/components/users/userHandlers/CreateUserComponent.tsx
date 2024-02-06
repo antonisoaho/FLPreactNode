@@ -155,6 +155,7 @@ const CreateUserComponent: React.FC<CreateUserComponentProps> = ({ onUserCreated
                   labelId="role"
                   id="createAdmin"
                   label="Roll"
+                  defaultValue=""
                   {...register('isAdmin', { required: 'Roll saknas.' })}
                   onChange={(event) => handleRoleChange(event.target.value as string)}
                   sx={{ textAlign: 'left' }}>

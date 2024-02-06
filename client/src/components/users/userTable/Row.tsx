@@ -75,10 +75,11 @@ const Row: React.FC<RowProps> = ({ row, onUserPrefsOpen, setUsers }) => {
         <TableCell component="th" scope="row">
           {row.isAdmin ? 'Ansvarig' : 'Rådgivare'}
         </TableCell>
-        <TableCell align="right"></TableCell>
+        <TableCell />
+        <TableCell />
       </TableRow>
       <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={3}>
+        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={5}>
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Box sx={{ margin: 1 }}>
               <Table size="small" aria-label="more-info">

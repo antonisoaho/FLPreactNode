@@ -1,5 +1,5 @@
 // LogoutComponent.jsx
-import React, { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Logout } from '../../axios/AxiosInstance';
 import { Container } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
@@ -23,7 +23,7 @@ const LogoutComponent = () => {
     setTimeout(() => {
       navigate('/');
     }, 1200);
-  }, []);
+  });
 
   return <Container></Container>;
 };

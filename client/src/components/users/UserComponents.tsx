@@ -39,6 +39,7 @@ const UserComponent: React.FC = () => {
 
   const getUsers = async () => {
     setLoading(true);
+
     const response = await getUserList();
 
     if (response.success && response.status === 200) {

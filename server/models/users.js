@@ -63,7 +63,6 @@ const getUserByEmail = async (email) => {
   try {
     const user = await User.findOne({ email });
 
-    // console.log('User found by email:', user);
     return user;
   } catch (error) {
     console.error('Error fetching user by email:', error);

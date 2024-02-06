@@ -27,9 +27,6 @@ const CustomerPrintversion = () => {
     }
   };
 
-  const totalIncome: number =
-    customer?.income.base.reduce((sum, inc) => inc.values.serviceIncome + sum, 0) || 0;
-
   useEffect(() => {
     getCustomer();
   }, []);

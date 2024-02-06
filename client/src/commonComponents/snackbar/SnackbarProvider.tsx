@@ -8,8 +8,8 @@ const SnackbarComponent = () => {
   const snackbar = useRecoilValue(snackbarState);
   const setSnackbarState = useSetRecoilState(snackbarState);
 
-  const handleClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
-    if (reason === 'clickaway') {
+  const handleClose = (event?: React.SyntheticEvent | Event) => {
+    if ((event as React.MouseEvent).type === 'clickaway') {
       return;
     }
     setSnackbarState((prevSnackbarState) => ({

@@ -43,7 +43,6 @@ const ExpenseBaseForm: React.FC<CustomFormProps> = ({ submitted, formCount, setF
         setLoading(false);
         return [...prev, ...newNames];
       });
-      console.log('persons', persons);
     } else {
       setSnackbarState({
         open: true,

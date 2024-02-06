@@ -7,7 +7,7 @@ import {
   TableBody,
   ListItemButton,
 } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { DateFields } from '../../../../../../../apiCalls/models/ApiModel';
 import { Investment } from '../../../forms/models/CustomerFormModels';
 import ColoredTableRow from '../../../../../../../commonComponents/coloredTableRow/ColoredTableRow';
@@ -43,7 +43,7 @@ const InvestmentsRow = () => {
     }
   };
 
-  const updateCustomerFields = async () => {
+  const updateCustomerFields = useCallback(async () => {
     const response = await getCustomerFormData({
       field: 'investments',
       _id: custId as string,
@@ -52,10 +52,11 @@ const InvestmentsRow = () => {
       setFields(response.data as [Investment & DateFields]);
       setLoading(false);
     }
-  };
+  }, []);
+
   useEffect(() => {
     updateCustomerFields();
-  }, [custId]);
+  }, [custId, updateCustomerFields]);
 
   return (
     <TableRow>

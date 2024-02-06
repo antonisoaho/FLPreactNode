@@ -66,7 +66,6 @@ const SickInsuranceForm: React.FC<CustomFormProps> = ({ submitted, formCount, se
   };
 
   const onSubmit: SubmitHandler<InsuranceSickness[]> = async (data) => {
-    console.log('data', data);
     const response = await updateCustomer({
       field: 'insurances',
       _id: custId as string,

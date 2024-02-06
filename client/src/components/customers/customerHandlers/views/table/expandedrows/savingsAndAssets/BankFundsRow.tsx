@@ -7,7 +7,7 @@ import {
   TableBody,
   ListItemButton,
 } from '@mui/material';
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, useCallback, useEffect, useState } from 'react';
 import { DateFields } from '../../../../../../../apiCalls/models/ApiModel';
 import { BankFund } from '../../../forms/models/CustomerFormModels';
 import ColoredTableRow from '../../../../../../../commonComponents/coloredTableRow/ColoredTableRow';
@@ -52,7 +52,7 @@ const BankFundsRow = () => {
     }
   };
 
-  const updateCustomerFields = async () => {
+  const updateCustomerFields = useCallback(async () => {
     const response = await getCustomerFormData({
       field: 'bankFunds',
       _id: custId as string,
@@ -62,10 +62,11 @@ const BankFundsRow = () => {
       if (fields) sortFieldsBelongs();
       setLoading(false);
     }
-  };
+  }, []);
+
   useEffect(() => {
     updateCustomerFields();
-  }, [custId]);
+  }, [custId, updateCustomerFields]);
 
   return (
     <TableRow>

@@ -37,8 +37,8 @@ const UserCredentialsComponent: React.FC<UserCredentialsProps> = ({
   _id,
 }) => {
   const [userModel, setUserModel] = useState<UpdateUserModel>();
-  const [showPassword, setShowPassword] = useState<Boolean>(false);
-  const [loading, isLoading] = useState<Boolean>(true);
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [loading, isLoading] = useState<boolean>(true);
   const setSnackbarState = useSetRecoilState(snackbarState);
 
   const getSelectedUser = async () => {
@@ -63,7 +63,7 @@ const UserCredentialsComponent: React.FC<UserCredentialsProps> = ({
   };
   useEffect(() => {
     getSelectedUser();
-  }, []);
+  });
 
   const handleClose = () => {
     onClose();

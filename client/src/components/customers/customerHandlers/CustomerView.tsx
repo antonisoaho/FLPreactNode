@@ -19,7 +19,6 @@ const CustomerView = () => {
     const response = await getSingleCustomerById(custId!);
     if (response.success && response.status === 200) {
       setCustomer(response.data as CustomerOverview);
-      console.log('customer', customer);
       setLoading(false);
     } else {
       setSnackbarState({

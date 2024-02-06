@@ -101,7 +101,6 @@ const CustomerSidebar = () => {
 
   const customerDeleteCanceled = () => {
     handleDialogOpen();
-    console.log('custId not deleted:', custId);
   };
 
   return (

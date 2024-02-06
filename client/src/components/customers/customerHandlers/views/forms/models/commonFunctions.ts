@@ -9,7 +9,6 @@ export const formatDateYearMonth = (date: Date): string => {
 };
 
 export const formatDate = (date: Date): string => {
-  console.log('dayjs(date)', dayjs(date));
   return dayjs(date).format('YYYY-MM-DD');
 };
 

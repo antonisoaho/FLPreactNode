@@ -4,7 +4,6 @@ const router = express.Router();
 router
   .get('/', (req, res) => {
     try {
-      console.log('OK det hämtas här');
       res.status(200).send();
     } catch (err) {
       console.log(err.status);
@@ -17,10 +16,7 @@ router
 
     try {
       // Validate current password
-      const currentPasswordMatch = await login(
-        req.session.loggedInUser.email,
-        currentPassword
-      );
+      const currentPasswordMatch = await login(req.session.loggedInUser.email, currentPassword);
 
       if (!currentPasswordMatch) {
         return res.render('account', {

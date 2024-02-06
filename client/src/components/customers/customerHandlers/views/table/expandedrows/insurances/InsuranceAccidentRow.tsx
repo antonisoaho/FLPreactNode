@@ -58,7 +58,7 @@ const InsuranceAccidentRow = () => {
 
   useEffect(() => {
     updateCustomerFields();
-  }, [custId]);
+  }, [custId, updateCustomerFields]);
 
   return (
     <TableRow>

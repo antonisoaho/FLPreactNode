@@ -52,7 +52,6 @@ const CustomerComponent = () => {
     const response = await getCustomerList();
 
     if (response.success && response.status === 200) {
-      console.log('response.data', response.data);
       setCustomers(response.data!);
     } else {
       setSnackbarState({

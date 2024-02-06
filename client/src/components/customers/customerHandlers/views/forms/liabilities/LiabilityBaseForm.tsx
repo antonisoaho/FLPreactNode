@@ -66,7 +66,6 @@ const LiabilityBaseForm: React.FC<CustomFormProps> = ({ submitted, formCount, se
   };
 
   const onSubmit: SubmitHandler<LiabilityBase[]> = async (data) => {
-    console.log('data[0].lockInterestDate', data[0].lockInterestDate);
     const response = await updateCustomer({
       field: 'liabilities',
       _id: custId as string,

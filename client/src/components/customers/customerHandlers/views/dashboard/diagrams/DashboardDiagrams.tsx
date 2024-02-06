@@ -8,9 +8,9 @@ interface DiagramProps {
 
 const DashboardDiagrams: React.FC<DiagramProps> = ({ customer }) => {
   const totalIncome: number =
-    customer?.income.base.reduce((sum, inc) => inc.values.serviceIncome + sum, 0) || 0;
+    customer?.income.base.reduce((sum, inc) => inc.values!.serviceIncome! + sum, 0) || 0;
   const totalExpense: number =
-    customer?.expenses.base.reduce((sum, inc) => inc.values.mapped + sum, 0) || 0;
+    customer?.expenses.base.reduce((sum, inc) => inc.values!.mapped! + sum, 0) || 0;
 
   const data = [
     {

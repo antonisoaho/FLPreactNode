@@ -43,12 +43,13 @@ const UserListTable: React.FC<UserListTableProps> = ({
             <TableCell>Namn</TableCell>
             <TableCell>Roll</TableCell>
             <TableCell />
+            <TableCell />
           </TableRow>
         </TableHead>
         <TableBody>
           {loading ? (
             <TableRow>
-              <TableCell colSpan={4} sx={loaderStyles}>
+              <TableCell colSpan={5} sx={loaderStyles}>
                 <CircularProgress />
               </TableCell>
             </TableRow>
