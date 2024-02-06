@@ -8,7 +8,7 @@ import { Route, Routes, useNavigate } from 'react-router-dom';
 import globalRouter from './globalRouter';
 import ResponsiveAppBar from './components/navbar/NavbarComponent';
 import { ThemeProvider } from './theme/ThemeProvider';
-import axiosInstance, { Logout } from './axios/AxiosInstance';
+import { Logout } from './axios/AxiosInstance';
 import { CircularProgress } from '@mui/material';
 import { useSetRecoilState } from 'recoil';
 import { userState } from './recoil/RecoilAtoms';
@@ -22,6 +22,7 @@ import CustomerRoutes from './components/RouteComponents/CustomerRoutes';
 import UserRoutes from './components/RouteComponents/UserRoutes';
 import BasicRoutes from './components/RouteComponents/BasicRoutes';
 import PageNotFound from './components/RouteComponents/PageNotFound';
+import { userInfoGetMe } from './apiCalls/apiUserCalls';
 
 dayjs.locale('sv');
 
@@ -35,12 +36,17 @@ const App = () => {
     const checkUserLogin = async () => {
       if (localStorage.getItem('TOKEN')) {
         try {
-          const userRoleData = await axiosInstance.get('users/getme');
-          setUser({
-            loggedIn: true,
-            isAdmin: userRoleData.data.isAdmin,
-            userId: userRoleData.data.roleId,
-          });
+          const userRoleData = await userInfoGetMe();
+
+          if (userRoleData.success) {
+            setUser({
+              loggedIn: true,
+              isAdmin: userRoleData.data!.isAdmin,
+              userId: userRoleData.data!.userId,
+            });
+          } else {
+            Logout();
+          }
         } catch (error) {
           Logout();
         }

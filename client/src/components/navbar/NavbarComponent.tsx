@@ -18,6 +18,8 @@ import MenuIcon from '@mui/icons-material/Menu';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
 import { useTheme } from '../../theme/ThemeProvider';
+import { userState } from '../../recoil/RecoilAtoms';
+import { useRecoilValue } from 'recoil';
 
 const pages = [
   { title: 'Start', link: '/', protected: false },
@@ -31,7 +33,7 @@ const settings = [
 
 const ResponsiveAppBar = () => {
   const username = localStorage.getItem('USERNAME');
-  const token = localStorage.getItem('TOKEN');
+  const { loggedIn } = useRecoilValue(userState);
 
   const { toggleTheme, isDarkMode } = useTheme();
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
@@ -104,7 +106,7 @@ const ResponsiveAppBar = () => {
                 display: { xs: 'block', md: 'none' },
               }}>
               {pages.map((page) =>
-                (page.protected && token != undefined) || !page.protected ? (
+                (page.protected && loggedIn) || !page.protected ? (
                   <MenuItem
                     key={page.title}
                     onClick={handleCloseNavMenu}
@@ -135,7 +137,7 @@ const ResponsiveAppBar = () => {
           </Typography>
           <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
             {pages.map((page) =>
-              (page.protected && token != undefined) || !page.protected ? (
+              (page.protected && loggedIn) || !page.protected ? (
                 <Button
                   LinkComponent={Link}
                   key={page.title}
@@ -148,7 +150,7 @@ const ResponsiveAppBar = () => {
               ) : null
             )}
           </Box>
-          {token != undefined ? (
+          {loggedIn ? (
             <Box sx={{ flexGrow: 0 }}>
               {username}
               <Tooltip title="Öppna inställningar">

@@ -148,7 +148,7 @@ export const deleteUserById = async (id: string): Promise<ApiResponse<string>> =
   }
 };
 
-export const userInfoGetMe = async (): Promise<ApiResponse<AccountModel>> => {
+export const userInfoGetMe = async (): Promise<ApiResponse<LoginResponse>> => {
   try {
     const response = await axiosInstance.get(`/users/getme`);
 
