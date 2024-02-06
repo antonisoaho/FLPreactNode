@@ -1,5 +1,4 @@
 const { Schema, model } = require('mongoose');
-const customerDetailsSchema = require('./customerModels/details');
 const childSchema = require('./customerModels/children');
 const workConditionSchema = require('./customerModels/workConditions');
 const { expensesBaseSchema, expensesChangeSchema } = require('./customerModels/expenses');
@@ -16,7 +15,7 @@ const {
   workInsuranceSchema,
 } = require('./customerModels/insurances');
 const bankFundSchema = require('./customerModels/bankFunds');
-
+const customerDetailsSchema = require('./customerModels/details');
 const customerSchema = new Schema(
   {
     advisor: {
