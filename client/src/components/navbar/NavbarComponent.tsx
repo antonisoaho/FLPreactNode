@@ -148,7 +148,7 @@ const ResponsiveAppBar = () => {
               ) : null
             )}
           </Box>
-          {token ? (
+          {token !== undefined ? (
             <Box sx={{ flexGrow: 0 }}>
               {username}
               <Tooltip title="Öppna inställningar">

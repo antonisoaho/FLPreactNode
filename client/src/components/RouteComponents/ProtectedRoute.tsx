@@ -4,7 +4,7 @@ export const ProtectedRoute = () => {
   const token = localStorage.getItem('TOKEN');
   const location = useLocation();
 
-  return token ? <Outlet /> : <Navigate to="/login" state={{ from: location }} />;
+  return token !== undefined ? <Outlet /> : <Navigate to="/login" state={{ from: location }} />;
 };
 
 export default ProtectedRoute;
