@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "debug": "concurrently \"npm run debug:server\" \"npm run debug:client\"",
-    "start": "nodemon server/index.js",
+    "start": "node server/index.js",
     "build": "cd client && npm install && npm run build",
     "debug:client": "cd client && npm install && npm run dev",
     "debug:server": "npm i && nodemon server/index.js"
@@ -21,7 +21,8 @@
     "jsonwebtoken": "^9.0.2",
     "lodash": "^4.17.21",
     "mongoose": "^8.0.0",
-    "morgan": "^1.10.0"
+    "morgan": "^1.10.0",
+    "nodemon": "^3.0.3"
   },
   "devDependencies": {
     "concurrently": "^8.2.2",
