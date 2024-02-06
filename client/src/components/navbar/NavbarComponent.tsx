@@ -104,7 +104,7 @@ const ResponsiveAppBar = () => {
                 display: { xs: 'block', md: 'none' },
               }}>
               {pages.map((page) =>
-                (page.protected && token) || !page.protected ? (
+                (page.protected && token != undefined) || !page.protected ? (
                   <MenuItem
                     key={page.title}
                     onClick={handleCloseNavMenu}
@@ -135,7 +135,7 @@ const ResponsiveAppBar = () => {
           </Typography>
           <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
             {pages.map((page) =>
-              (page.protected && token !== undefined) || !page.protected ? (
+              (page.protected && token != undefined) || !page.protected ? (
                 <Button
                   LinkComponent={Link}
                   key={page.title}
@@ -148,7 +148,7 @@ const ResponsiveAppBar = () => {
               ) : null
             )}
           </Box>
-          {token !== undefined ? (
+          {token != undefined ? (
             <Box sx={{ flexGrow: 0 }}>
               {username}
               <Tooltip title="Öppna inställningar">
