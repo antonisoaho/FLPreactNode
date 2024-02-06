@@ -13,11 +13,13 @@ import {
 export const getCustomerList = async (): Promise<ApiResponse<CustomerModel[]>> => {
   try {
     const response = await axiosInstance.get('/customers');
-    return {
-      success: true,
-      status: response.status,
-      data: response.data,
-    };
+    if (response.status === 200) {
+      return {
+        success: true,
+        status: response.status,
+        data: response.data,
+      };
+    } else throw new Error('Ett oväntat fel inträffade, försök igen senare.');
   } catch (error) {
     const extendedError = error as ExtendedError;
     const errorMessage: ErrorResponse = <ErrorResponse>extendedError.response?.data;

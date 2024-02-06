@@ -20,7 +20,7 @@ router
         lastUpdate: cust.updatedAt,
       }));
 
-      res.send(parsedResult);
+      res.status(200).send(parsedResult);
     } catch (err) {
       console.error(err);
       res.status(500).json({ error: 'Fel vid inhämtning av kunder.' });

@@ -15,7 +15,7 @@ router
           isAdmin: person.isAdmin,
         }));
 
-        res.send(parsedResult);
+        res.status(200).send(parsedResult);
       })
       .catch((err) => {
         res.status(500).json({ error: 'Ett fel inträffade vid hämtning av användare.' });

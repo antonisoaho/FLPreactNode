@@ -14,12 +14,13 @@ export const loginAPI = async (
       email: email,
       password: password,
     });
-
-    return {
-      success: true,
-      status: response.status,
-      data: response.data,
-    };
+    if (response.status === 200) {
+      return {
+        success: true,
+        status: response.status,
+        data: response.data,
+      };
+    } else throw new Error('Ett oväntat fel inträffade, försök igen senare.');
   } catch (error) {
     const extendedError = error as ExtendedError;
     const errorMessage: ErrorResponse = <ErrorResponse>extendedError.response?.data;
@@ -35,11 +36,13 @@ export const loginAPI = async (
 export const getUserList = async (): Promise<ApiResponse<UserModel[]>> => {
   try {
     const response = await axiosInstance.get('/users');
-    return {
-      success: true,
-      status: response.status,
-      data: response.data,
-    };
+    if (response.status === 200) {
+      return {
+        success: true,
+        status: response.status,
+        data: response.data,
+      };
+    } else throw new Error('Ett oväntat fel inträffade, försök igen senare.');
   } catch (error) {
     const extendedError = error as ExtendedError;
     const errorMessage: ErrorResponse = <ErrorResponse>extendedError.response?.data;
