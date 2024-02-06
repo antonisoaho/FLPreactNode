@@ -6,7 +6,6 @@ const userRoute = require('./routes/Users');
 const customerRoute = require('./routes/Customers');
 const loginRoute = require('./routes/Login');
 const { auth } = require('./middleware/auth');
-const path = require('path');
 const dotenv = require('dotenv');
 const cors = require('cors');
 
