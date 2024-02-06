@@ -69,12 +69,8 @@ const Row: React.FC<RowProps> = ({ row, onUserPrefsOpen, setUsers }) => {
             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
         </TableCell>
-        <TableCell component="th" scope="row">
-          {row.name}
-        </TableCell>
-        <TableCell component="th" scope="row">
-          {row.isAdmin ? 'Ansvarig' : 'Rådgivare'}
-        </TableCell>
+        <TableCell>{row.name}</TableCell>
+        <TableCell>{row.isAdmin ? 'Ansvarig' : 'Rådgivare'}</TableCell>
         <TableCell />
         <TableCell />
       </TableRow>

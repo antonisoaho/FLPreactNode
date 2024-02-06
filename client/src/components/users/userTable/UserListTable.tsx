@@ -1,7 +1,6 @@
 // UserListTable.tsx
 import React from 'react';
 import {
-  CircularProgress,
   Table,
   TableBody,
   TableCell,
@@ -12,6 +11,7 @@ import {
 } from '@mui/material';
 import UserModel from '../models/UserModel';
 import Row from './Row';
+import TableLoader from '../../customers/customerHandlers/views/table/TableLoader';
 
 interface UserListTableProps {
   users: UserModel[];
@@ -26,33 +26,27 @@ const UserListTable: React.FC<UserListTableProps> = ({
   setUsers,
   handleUserPrefsOpen,
 }) => {
-  const loaderStyles = {
-    minWidth: 650,
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    p: 6,
-  };
-
   return (
     <TableContainer component={Paper}>
-      <Table sx={{ minWidth: 450 }} aria-label="collapsible table">
+      <Table sx={{ minWidth: 450 }}>
         <TableHead>
           <TableRow>
-            <TableCell style={{ width: 'fit-content', whiteSpace: 'nowrap', maxWidth: '20px' }} />
+            <TableCell
+              style={{
+                width: 'fit-content',
+                whiteSpace: 'nowrap',
+                maxWidth: '10px',
+                padding: 0,
+                paddingLeft: '16px',
+              }}
+            />
             <TableCell>Namn</TableCell>
-            <TableCell>Roll</TableCell>
-            <TableCell />
-            <TableCell />
+            <TableCell colSpan={3}>Roll</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           {loading ? (
-            <TableRow>
-              <TableCell colSpan={5} sx={loaderStyles}>
-                <CircularProgress />
-              </TableCell>
-            </TableRow>
+            <TableLoader colSpan={5} />
           ) : (
             users.map((user) => (
               <Row

@@ -9,6 +9,7 @@ const { auth } = require('./middleware/auth');
 const dotenv = require('dotenv');
 const cors = require('cors');
 
+let dbURI;
 // express app
 const app = express();
 //config
@@ -18,6 +19,7 @@ console.log('process.env.NODE_ENV', process.env.NODE_ENV);
 
 if (process.env.NODE_ENV === 'development') {
   app.use(cors({ origin: `http://localhost:8000`, credentials: true }));
+  dbURI = process.env.DB_URI_DEV;
 } else {
   app.use(
     cors({
@@ -25,11 +27,11 @@ if (process.env.NODE_ENV === 'development') {
       credentials: true,
     })
   );
+  dbURI = process.env.DB_URI;
 }
 
 app.use(cors());
 
-const dbURI = process.env.DB_URI;
 const port = process.env.PORT || 3001;
 
 // connect to mongodb

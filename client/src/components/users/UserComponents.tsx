@@ -40,7 +40,6 @@ const UserComponent: React.FC = () => {
     setLoading(true);
 
     const response = await getUserList();
-
     if (response.success && response.status === 200) {
       setUsers(response.data!);
       setLoading(false);
