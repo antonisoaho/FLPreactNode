@@ -76,7 +76,7 @@ export type Investment = {
   timePerspective?: string;
   monthlySavings?: number;
   saveForHowLong?: number;
-  additinalInvestment?: number;
+  additionalInvestment?: number;
   when?: number;
   projectedGrowth?: number;
 };
@@ -141,9 +141,9 @@ export type InsuranceSickness = {
   company?: string;
   insuranceType?: string;
   taxFree?: boolean;
-  qualifyingPeriod?: string;
+  qualifyingPeriod?: number;
   compensationAmount?: number;
-  compensationPeriod?: string;
+  compensationPeriod?: number;
   premiumCost?: number;
   expiryDate?: Date;
   lastUpdated?: Date;

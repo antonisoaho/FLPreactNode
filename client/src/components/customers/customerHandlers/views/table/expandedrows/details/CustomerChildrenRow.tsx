@@ -69,14 +69,14 @@ const CustomerChildrenRow = () => {
                 <TableCell>Barnbidrag räknas</TableCell>
                 <TableCell>Född</TableCell>
                 <TableCell>Bor hemma till</TableCell>
+                <TableCell>Uppdaterad</TableCell>
                 <TableCell />
-                <TableCell align="right">Uppdaterad</TableCell>
               </ColoredTableRow>
             </TableHead>
             <TableBody>
               {loading ? (
                 <TableLoader colSpan={colSpan} />
-              ) : (
+              ) : fields!.length > 0 ? (
                 fields!.map((child) => (
                   <TableRow key={child._id}>
                     <TableCell>{child.name}</TableCell>
@@ -94,6 +94,12 @@ const CustomerChildrenRow = () => {
                     </TableCell>
                   </TableRow>
                 ))
+              ) : (
+                <TableRow>
+                  <TableCell align="center" colSpan={colSpan}>
+                    Inga barn registrerade.
+                  </TableCell>
+                </TableRow>
               )}
               <FormCountHandler
                 formCount={formCount}

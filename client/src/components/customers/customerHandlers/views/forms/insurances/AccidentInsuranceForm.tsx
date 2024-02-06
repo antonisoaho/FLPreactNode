@@ -17,7 +17,6 @@ import {
   getCustomerNames,
   getCustomerChildNames,
 } from '../../../../../../apiCalls/apiCustomerCalls';
-import ColoredTableRow from '../../../../../../commonComponents/coloredTableRow/ColoredTableRow';
 import { snackbarState } from '../../../../../../recoil/RecoilAtoms';
 import { InsuranceAccident } from '../models/CustomerFormModels';
 import { CustomFormProps, FormTextFieldProps } from '../models/FormProps';
@@ -157,6 +156,7 @@ const AccidentInsuranceForm: React.FC<CustomFormProps> = ({
                     className="form-input-select"
                     label="Benämning"
                     fullWidth
+                    select
                     {...FormTextFieldProps}
                     {...register(`${index}.insuranceType`)}>
                     {insuranceTypeSelect.map((item) => (
@@ -183,7 +183,6 @@ const AccidentInsuranceForm: React.FC<CustomFormProps> = ({
                     className="form-input-field"
                     label="Premie (kr/år)"
                     type="number"
-                    required
                     {...FormTextFieldProps}
                     {...register(`${index}.premiumCost`, { min: 0 })}
                   />

@@ -74,8 +74,6 @@ const InvestmentsRow = () => {
                       <TableCell>{inv.belongs}</TableCell>
                       <TableCell />
                       <TableCell />
-                      <TableCell />
-                      <TableCell />
                       <TableCell align="right">Uppdaterad:</TableCell>
                       <TableCell>{new Date(inv.updatedAt!).toLocaleDateString()}</TableCell>
                     </ColoredTableRow>
@@ -85,8 +83,6 @@ const InvestmentsRow = () => {
                       <TableCell>Benämning/ID</TableCell>
                       <TableCell>Insatt</TableCell>
                       <TableCell>Värde</TableCell>
-                      <TableCell>Tidsperspektiv</TableCell>
-                      <TableCell>Spartid</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -94,35 +90,51 @@ const InvestmentsRow = () => {
                       <TableCell>{inv.investmentType || '-'}</TableCell>
                       <TableCell>{inv.institution || '-'}</TableCell>
                       <TableCell>{inv.name || inv._id}</TableCell>
-                      <TableCell>{inv.depositedAmount?.toLocaleString() || '-'}</TableCell>
-                      <TableCell>{inv.value?.toLocaleString() || '-'}</TableCell>
-                      <TableCell>{inv.timePerspective || '-'}</TableCell>
-                      <TableCell>{inv.saveForHowLong || '-'}</TableCell>
+                      <TableCell>
+                        {inv.depositedAmount ? inv.depositedAmount.toLocaleString() + ' SEK' : '-'}
+                      </TableCell>
+                      <TableCell>{inv.value ? inv.value.toLocaleString() + ' SEK' : '-'}</TableCell>
                     </TableRow>
                   </TableBody>
                   <TableHead>
                     <TableRow>
+                      <TableCell>Tidsperspektiv</TableCell>
+                      <TableCell>Spartid</TableCell>
                       <TableCell>Vägd riskklass</TableCell>
                       <TableCell>Vägd förv. Avgift</TableCell>
                       <TableCell>Skalavgift</TableCell>
-                      <TableCell>Månadsspar</TableCell>
-                      <TableCell>Tilläggsinvestering</TableCell>
-                      <TableCell>När sker tillägget</TableCell>
-                      <TableCell>Tänkt tillväxt</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
                     <TableRow>
+                      <TableCell>{inv.timePerspective || '-'}</TableCell>
+                      <TableCell>{inv.saveForHowLong ? inv.saveForHowLong + ' år' : '-'}</TableCell>
                       <TableCell>{inv.riskClass || '-'}</TableCell>
-                      <TableCell>{inv.managementFee || '-'}</TableCell>
-                      <TableCell>{inv.shellFee || '-'}</TableCell>
-                      <TableCell>{inv.monthlySavings || '-'}</TableCell>
-                      <TableCell>{inv.additinalInvestment || '-'}</TableCell>
-                      <TableCell>{inv.when || '-'}</TableCell>
-                      <TableCell>{inv.projectedGrowth || '-'}</TableCell>
+                      <TableCell>{inv.managementFee ? inv.managementFee + '%' : '-'}</TableCell>
+                      <TableCell>{inv.shellFee ? inv.shellFee + '%' : '-'}</TableCell>
                     </TableRow>
+                  </TableBody>
+                  <TableHead>
                     <TableRow>
-                      <TableCell colSpan={colSpan - 1} />
+                      <TableCell>Månadsspar</TableCell>
+                      <TableCell>Tilläggsinvestering</TableCell>
+                      <TableCell>När sker tillägget</TableCell>
+                      <TableCell>Tänkt tillväxt</TableCell>
+                      <TableCell />
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell>
+                        {inv.monthlySavings ? inv.monthlySavings.toLocaleString() + ' SEK' : '-'}
+                      </TableCell>
+                      <TableCell>
+                        {inv.additionalInvestment
+                          ? inv.additionalInvestment.toLocaleString() + ' SEK'
+                          : '-'}
+                      </TableCell>
+                      <TableCell>{inv.when || '-'}</TableCell>
+                      <TableCell>{inv.projectedGrowth ? inv.projectedGrowth + '%' : '-'}</TableCell>
                       <TableCell>
                         <ListItemButton onClick={() => removeSubDoc(inv._id)}>
                           Ta bort

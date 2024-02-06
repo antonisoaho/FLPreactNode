@@ -37,6 +37,7 @@ const AssetsForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFormCo
   const [selectItems, setSelectItems] = useState<Array<{ value: string; label: string }>>([
     { value: 'Gemensam', label: 'Gemensam' },
   ]);
+  const colSpan: number = 5;
 
   const populateSelectItems = async () => {
     const persons = await getCustomerNames(custId!);
@@ -137,7 +138,7 @@ const AssetsForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFormCo
           {details.map((detail, index) => (
             <Fragment key={index}>
               <ColoredTableRow>
-                <TableCell colSpan={4}>
+                <TableCell colSpan={colSpan - 1}>
                   <TextField
                     className="form-input-select"
                     select
@@ -234,6 +235,7 @@ const AssetsForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFormCo
                     className="form-input-field"
                     label="Skatt"
                     type="number"
+                    inputProps={{ step: 0.01 }}
                     {...FormTextFieldProps}
                     {...register(`${index}.tax`, { min: 0, max: 100 })}
                   />
@@ -262,7 +264,7 @@ const AssetsForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFormCo
           ))}
           {formCount > 0 && (
             <TableRow>
-              <TableCell colSpan={5} align="right">
+              <TableCell colSpan={colSpan} align="right">
                 <Button type="submit" disabled={isSubmitting}>
                   {!isSubmitting ? 'Spara' : 'Sparar...'}
                 </Button>

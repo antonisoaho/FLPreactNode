@@ -3,7 +3,7 @@ const { Schema } = require('mongoose');
 const bankFundSchema = new Schema(
   {
     belongs: { type: String },
-    accounType: { type: String },
+    accountType: { type: String },
     institution: { type: String },
     name: { type: String },
     value: { type: Number },

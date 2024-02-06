@@ -25,6 +25,7 @@ import { InsuranceSickness } from '../models/CustomerFormModels';
 import { CustomFormProps, FormTextFieldProps } from '../models/FormProps';
 import { removeFormByIndex } from '../models/commonFunctions';
 import { DatePicker } from '@mui/x-date-pickers';
+import { compensationPeriodSickness, qualifyingPeriodSickness } from '../../variables/variables';
 
 const SickInsuranceForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFormCount }) => {
   const {
@@ -65,6 +66,7 @@ const SickInsuranceForm: React.FC<CustomFormProps> = ({ submitted, formCount, se
   };
 
   const onSubmit: SubmitHandler<InsuranceSickness[]> = async (data) => {
+    console.log('data', data);
     const response = await updateCustomer({
       field: 'insurances',
       _id: custId as string,
@@ -125,51 +127,6 @@ const SickInsuranceForm: React.FC<CustomFormProps> = ({ submitted, formCount, se
       label: 'Förtidskapital',
     },
   ];
-  const qualifyingPeriodSelect = [
-    {
-      value: -1,
-      label: 'Ingen',
-    },
-    {
-      value: 0,
-      label: 'Sjukersättning',
-    },
-    {
-      value: 1,
-      label: '1 Månad',
-    },
-    {
-      value: 3,
-      label: '3 Månader',
-    },
-    {
-      value: 12,
-      label: '12 Månader',
-    },
-    {
-      value: 18,
-      label: '18 Månader',
-    },
-    {
-      value: 36,
-      label: '36 Månader',
-    },
-  ];
-
-  const compensationPeriodSelect = [
-    {
-      value: 0,
-      label: 'Sjukers.',
-    },
-    {
-      value: 1,
-      label: '-dag 360',
-    },
-    {
-      value: 2,
-      label: '36 Månader',
-    },
-  ];
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -214,6 +171,7 @@ const SickInsuranceForm: React.FC<CustomFormProps> = ({ submitted, formCount, se
                     className="form-input-select"
                     label="Benämning"
                     fullWidth
+                    select
                     defaultValue={detail.insuranceType}
                     {...FormTextFieldProps}
                     {...register(`${index}.insuranceType`)}>
@@ -239,7 +197,7 @@ const SickInsuranceForm: React.FC<CustomFormProps> = ({ submitted, formCount, se
                     fullWidth
                     {...FormTextFieldProps}
                     {...register(`${index}.qualifyingPeriod`)}>
-                    {qualifyingPeriodSelect.map((item) => (
+                    {qualifyingPeriodSickness.map((item) => (
                       <MenuItem key={item.value} value={item.value}>
                         {item.label}
                       </MenuItem>
@@ -263,7 +221,6 @@ const SickInsuranceForm: React.FC<CustomFormProps> = ({ submitted, formCount, se
                     className="form-input-field"
                     label="Premie (kr/år)"
                     type="number"
-                    required
                     {...FormTextFieldProps}
                     {...register(`${index}.premiumCost`, { min: 0 })}
                   />
@@ -273,7 +230,7 @@ const SickInsuranceForm: React.FC<CustomFormProps> = ({ submitted, formCount, se
                     className="form-input-field"
                     slotProps={{ textField: { ...FormTextFieldProps } }}
                     label="Förfallodatum"
-                    views={['year', 'month', 'day']}
+                    views={['day', 'month', 'year']}
                     {...register(`${index}.expiryDate`)}
                     onChange={(date) => {
                       const newDate = date as Date;
@@ -285,15 +242,12 @@ const SickInsuranceForm: React.FC<CustomFormProps> = ({ submitted, formCount, se
                   <TextField
                     className="form-input-select"
                     select
-                    required
                     fullWidth
                     {...FormTextFieldProps}
                     defaultValue=""
                     label="Ersättningstid"
-                    {...register(`${index}.compensationPeriod`, {
-                      required: 'Vänligen välj vem pensionen gäller.',
-                    })}>
-                    {compensationPeriodSelect.map((item) => (
+                    {...register(`${index}.compensationPeriod`)}>
+                    {compensationPeriodSickness.map((item) => (
                       <MenuItem key={item.value} value={item.value}>
                         {item.label}
                       </MenuItem>
@@ -305,7 +259,7 @@ const SickInsuranceForm: React.FC<CustomFormProps> = ({ submitted, formCount, se
                     className="form-input-field"
                     slotProps={{ textField: { ...FormTextFieldProps } }}
                     label="Senaste uppdatering"
-                    views={['year', 'month', 'day']}
+                    views={['day', 'month', 'year']}
                     {...register(`${index}.lastUpdated`)}
                     onChange={(date) => {
                       const newDate = date as Date;

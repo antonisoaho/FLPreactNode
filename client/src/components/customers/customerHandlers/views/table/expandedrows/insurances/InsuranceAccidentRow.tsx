@@ -96,10 +96,20 @@ const InsuranceAccidentRow = () => {
                     <TableRow>
                       <TableCell>{f.company || '-'}</TableCell>
                       <TableCell>{f.insuranceType || '-'}</TableCell>
-                      <TableCell>{f.compensationAmount?.toLocaleString() || '-'}</TableCell>
-                      <TableCell>{f.premiumCost?.toLocaleString() || '-'}</TableCell>
-                      <TableCell>{new Date(f.expiryDate!).toLocaleDateString() || '-'}</TableCell>
-                      <TableCell>{new Date(f.lastControl!).toLocaleDateString() || '-'}</TableCell>
+                      <TableCell>
+                        {f.compensationAmount
+                          ? f.compensationAmount.toLocaleString() + ' SEK'
+                          : '-'}
+                      </TableCell>
+                      <TableCell>
+                        {f.premiumCost ? f.premiumCost.toLocaleString() + ' SEK' : '-'}
+                      </TableCell>
+                      <TableCell>
+                        {f.expiryDate ? new Date(f.expiryDate).toLocaleDateString() : '-'}
+                      </TableCell>
+                      <TableCell>
+                        {f.lastControl ? new Date(f.lastControl).toLocaleDateString() : '-'}
+                      </TableCell>
                       <TableCell>
                         <ListItemButton onClick={() => removeSubDoc(f._id)}>Ta bort</ListItemButton>
                       </TableCell>

@@ -76,7 +76,7 @@ const BaseExpenseRow = () => {
 
   return (
     <TableRow>
-      <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={5}>
+      <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={colSpan}>
         <Box sx={{ margin: 1 }}>
           <Table size="small" aria-label="more-info">
             {loading ? (
@@ -97,7 +97,7 @@ const BaseExpenseRow = () => {
                     <TableRow>
                       <TableCell colSpan={colSpan / 2}>{exp.values?.expenseType}</TableCell>
                       <TableCell colSpan={colSpan / 2}>
-                        {exp.values?.mapped?.toLocaleString() || '-'}
+                        {exp.values?.mapped ? exp.values!.mapped.toLocaleString() + ' SEK' : '-'}
                       </TableCell>
                       <TableCell />
                     </TableRow>
@@ -117,9 +117,21 @@ const BaseExpenseRow = () => {
                         <TableRow>
                           <TableCell>{exp.values?.pension?.[idx] || '-'}</TableCell>
                           <TableCell>{exp.values?.activeEnd?.[idx] || '-'}</TableCell>
-                          <TableCell>{exp.values?.difPension?.[idx] || 0}</TableCell>
-                          <TableCell>{exp.values?.difActiveEnd?.[idx] || 0}</TableCell>
-                          <TableCell>{exp.values?.difDeath?.[idx] || 0}</TableCell>
+                          <TableCell>
+                            {exp.values?.difPension?.[idx]
+                              ? exp.values?.difPension?.[idx].toLocaleString() + ' SEK'
+                              : 0}
+                          </TableCell>
+                          <TableCell>
+                            {exp.values?.difActiveEnd?.[idx]
+                              ? exp.values?.difActiveEnd?.[idx].toLocaleString() + ' SEK'
+                              : 0}
+                          </TableCell>
+                          <TableCell>
+                            {exp.values?.difDeath?.[idx]
+                              ? exp.values?.difDeath?.[idx].toLocaleString() + ' SEK'
+                              : 0}
+                          </TableCell>
                         </TableRow>
                       </TableBody>
                     </Fragment>
@@ -139,7 +151,9 @@ const BaseExpenseRow = () => {
             ) : (
               <TableBody>
                 <TableRow>
-                  <TableCell colSpan={colSpan}>Inga utgifter registrerade på kund.</TableCell>
+                  <TableCell align="center" colSpan={colSpan}>
+                    Inga utgifter registrerade på kund.
+                  </TableCell>
                 </TableRow>
               </TableBody>
             )}

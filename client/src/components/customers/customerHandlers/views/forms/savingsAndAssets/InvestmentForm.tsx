@@ -22,6 +22,7 @@ import { snackbarState } from '../../../../../../recoil/RecoilAtoms';
 import { Investment } from '../models/CustomerFormModels';
 import { CustomFormProps, FormTextFieldProps } from '../models/FormProps';
 import { removeFormByIndex } from '../models/commonFunctions';
+import { timePerspectiveSelect } from '../../variables/variables';
 
 const InvestmentForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFormCount }) => {
   const {
@@ -120,33 +121,6 @@ const InvestmentForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFo
     },
   ];
 
-  const timePerspectiveSelect = [
-    {
-      value: 'Krishink',
-      label: 'Krishink',
-    },
-    {
-      value: '12 Månader',
-      label: '12 Månader',
-    },
-    {
-      value: '5 år',
-      label: '5 år',
-    },
-    {
-      value: 'Sen',
-      label: 'Sen',
-    },
-    {
-      value: 'Oidentifierat',
-      label: 'Oidentifierat',
-    },
-    {
-      value: 'Barnspar',
-      label: 'Barnspar',
-    },
-  ];
-
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <Table>
@@ -154,7 +128,7 @@ const InvestmentForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFo
           {details.map((detail, index) => (
             <Fragment key={index}>
               <ColoredTableRow>
-                <TableCell colSpan={6}>
+                <TableCell colSpan={4}>
                   <TextField
                     className="form-input-select"
                     select
@@ -177,13 +151,13 @@ const InvestmentForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFo
                 </TableCell>
               </ColoredTableRow>
               <TableRow>
-                <TableCell width="15%">
+                <TableCell width="20%">
                   <TextField
                     className="form-input-select"
                     required
                     select
                     label="Kontotyp"
-                    value={detail.investmentType}
+                    defaultValue=""
                     {...FormTextFieldProps}
                     {...register(`${index}.investmentType`, {
                       required: 'Vänligen ange vilken typ av investering.',
@@ -195,7 +169,7 @@ const InvestmentForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFo
                     ))}
                   </TextField>
                 </TableCell>
-                <TableCell width="15%">
+                <TableCell width="20%">
                   <TextField
                     className="form-input-field"
                     label="Institut"
@@ -203,7 +177,7 @@ const InvestmentForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFo
                     {...register(`${index}.institution`)}
                   />
                 </TableCell>
-                <TableCell width="15%">
+                <TableCell width="20%">
                   <TextField
                     className="form-input-field"
                     label="Benämning"
@@ -211,7 +185,7 @@ const InvestmentForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFo
                     {...register(`${index}.name`)}
                   />
                 </TableCell>
-                <TableCell width="15%">
+                <TableCell width="20%">
                   <TextField
                     className="form-input-field"
                     label="Insatt"
@@ -220,7 +194,7 @@ const InvestmentForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFo
                     {...register(`${index}.depositedAmount`, { min: 0 })}
                   />
                 </TableCell>
-                <TableCell width="15%">
+                <TableCell width="20%">
                   <TextField
                     className="form-input-field"
                     label="Saldo"
@@ -233,10 +207,11 @@ const InvestmentForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFo
                     })}
                   />
                 </TableCell>
-                <TableCell width="15%">
+              </TableRow>
+              <TableRow>
+                <TableCell width="20%">
                   <TextField
                     className="form-input-select"
-                    required
                     select
                     defaultValue={detail.timePerspective}
                     label="Tidsperspektiv"
@@ -249,19 +224,16 @@ const InvestmentForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFo
                     ))}
                   </TextField>
                 </TableCell>
-                <TableCell width="15%">
+                <TableCell width="20%">
                   <TextField
                     className="form-input-field"
                     label="Spartid (år)"
-                    required
                     type="number"
                     {...FormTextFieldProps}
                     {...register(`${index}.saveForHowLong`)}
                   />
                 </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell width="15%">
+                <TableCell width="20%">
                   <TextField
                     className="form-input-field"
                     label="Riskklass"
@@ -270,25 +242,29 @@ const InvestmentForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFo
                     {...register(`${index}.riskClass`)}
                   />
                 </TableCell>
-                <TableCell width="15%">
+                <TableCell width="20%">
                   <TextField
                     className="form-input-field"
                     label="Förv. Avgift"
                     type="number"
+                    inputProps={{ step: 0.01 }}
                     {...FormTextFieldProps}
                     {...register(`${index}.managementFee`)}
                   />
                 </TableCell>
-                <TableCell width="15%">
+                <TableCell width="20%">
                   <TextField
                     className="form-input-field"
                     label="Skalavgift"
                     type="number"
+                    inputProps={{ step: 0.01 }}
                     {...FormTextFieldProps}
                     {...register(`${index}.shellFee`)}
                   />
                 </TableCell>
-                <TableCell width="15%">
+              </TableRow>
+              <TableRow>
+                <TableCell width="20%">
                   <TextField
                     className="form-input-field"
                     label="Månadsspar"
@@ -297,16 +273,16 @@ const InvestmentForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFo
                     {...register(`${index}.monthlySavings`)}
                   />
                 </TableCell>
-                <TableCell width="15%">
+                <TableCell width="20%">
                   <TextField
                     className="form-input-field"
                     label="Tilläggsinvestering"
                     type="number"
                     {...FormTextFieldProps}
-                    {...register(`${index}.additinalInvestment`)}
+                    {...register(`${index}.additionalInvestment`)}
                   />
                 </TableCell>
-                <TableCell width="15%">
+                <TableCell width="20%">
                   <TextField
                     className="form-input-field"
                     label="När tillägg"
@@ -315,21 +291,23 @@ const InvestmentForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFo
                     {...register(`${index}.when`)}
                   />
                 </TableCell>
-                <TableCell width="15%">
+                <TableCell width="20%">
                   <TextField
                     className="form-input-field"
                     label="Tänkt tillväxt"
                     type="number"
+                    inputProps={{ step: 0.01 }}
                     {...FormTextFieldProps}
                     {...register(`${index}.projectedGrowth`)}
                   />
                 </TableCell>
+                <TableCell />
               </TableRow>
             </Fragment>
           ))}
           {formCount > 0 && (
             <TableRow>
-              <TableCell colSpan={7} align="right">
+              <TableCell colSpan={5} align="right">
                 <Button type="submit" disabled={isSubmitting}>
                   {!isSubmitting ? 'Spara' : 'Sparar...'}
                 </Button>

@@ -25,7 +25,7 @@ const BaseLiabilitiesRow = () => {
   const { custId } = useParams();
   const [fields, setFields] = useState<[LiabilityBase & DateFields]>();
   const [loading, setLoading] = useState<boolean>(true);
-  const colSpan: number = 6;
+  const colSpan: number = 5;
 
   const onSubmit = () => {
     updateCustomerFields();
@@ -62,7 +62,7 @@ const BaseLiabilitiesRow = () => {
 
   return (
     <TableRow>
-      <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={5}>
+      <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={colSpan}>
         <Box sx={{ margin: 1 }}>
           <Table size="small" aria-label="more-info">
             {loading ? (
@@ -128,7 +128,9 @@ const BaseLiabilitiesRow = () => {
             ) : (
               <TableBody>
                 <TableRow>
-                  <TableCell colSpan={colSpan}>Inga skulder hittades registrerade.</TableCell>
+                  <TableCell align="center" colSpan={colSpan}>
+                    Inga skulder hittades registrerade.
+                  </TableCell>
                 </TableRow>
               </TableBody>
             )}

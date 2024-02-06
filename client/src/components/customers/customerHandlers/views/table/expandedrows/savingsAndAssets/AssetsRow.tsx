@@ -97,9 +97,11 @@ const AssetsRow = () => {
                     <TableRow>
                       <TableCell>{f.assetType || '-'}</TableCell>
                       <TableCell>{f.name || f._id}</TableCell>
-                      <TableCell>{f.value?.toLocaleString() || '-'}</TableCell>
-                      <TableCell>{f.stake?.toLocaleString() || '-'}</TableCell>
-                      <TableCell>{f.mortgageDeed?.toLocaleString() || '-'}</TableCell>
+                      <TableCell>{f.value ? f.value.toLocaleString() + ' SEK' : '-'}</TableCell>
+                      <TableCell>{f.stake ? f.stake.toLocaleString() + ' SEK' : '-'}</TableCell>
+                      <TableCell>
+                        {f.mortgageDeed ? f.mortgageDeed.toLocaleString() + ' SEK' : '-'}
+                      </TableCell>
                     </TableRow>
                   </TableBody>
                   <TableHead>
@@ -114,9 +116,11 @@ const AssetsRow = () => {
                   <TableBody>
                     <TableRow>
                       <TableCell>{f.valueYear?.toLocaleString() || '-'}</TableCell>
-                      <TableCell>{f.tax || '-'}</TableCell>
-                      <TableCell>{f.assessedValue?.toLocaleString() || '-'}</TableCell>
-                      <TableCell>{f.base?.toLocaleString() || '-'}</TableCell>
+                      <TableCell>{f.tax ? f.tax + '%' : '-'}</TableCell>
+                      <TableCell>
+                        {f.assessedValue ? f.assessedValue.toLocaleString() + ' SEK' : '-'}
+                      </TableCell>
+                      <TableCell>{f.base ? f.base.toLocaleString() + ' SEK' : '-'}</TableCell>
                       <TableCell>
                         <ListItemButton onClick={() => removeSubDoc(f._id)}>Ta bort</ListItemButton>
                       </TableCell>

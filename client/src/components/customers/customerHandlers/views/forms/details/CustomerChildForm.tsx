@@ -121,6 +121,7 @@ const CustomerChildForm: React.FC<CustomFormProps> = ({ submitted, formCount, se
                   className="form-input-select"
                   defaultValue={detail.belongs}
                   select
+                  fullWidth
                   label="Tillhör"
                   {...register(`${index}.belongs`, {
                     required: 'Vänligen välj ett alternativ.',

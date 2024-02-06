@@ -48,7 +48,7 @@ const InsuranceLifeRow = () => {
     const response = await getCustomerFormData({
       field: 'insurances',
       _id: custId as string,
-      subField: 'accident',
+      subField: 'life',
     });
     if (response.success) {
       setFields(response.data as [InsuranceLife & DateFields]);
@@ -89,8 +89,14 @@ const InsuranceLifeRow = () => {
                     <TableRow>
                       <TableCell>{f.company || '-'}</TableCell>
                       <TableCell>{f.insuranceType || '-'}</TableCell>
-                      <TableCell>{f.compensationAmount?.toLocaleString() || '-'}</TableCell>
-                      <TableCell>{f.premiumCost?.toLocaleString() || '-'}</TableCell>
+                      <TableCell>
+                        {f.compensationAmount
+                          ? f.compensationAmount.toLocaleString() + ' SEK'
+                          : '-'}
+                      </TableCell>
+                      <TableCell>
+                        {f.premiumCost ? f.premiumCost.toLocaleString() + ' SEK' : '-'}
+                      </TableCell>
                     </TableRow>
                   </TableBody>
                   <TableHead>
@@ -103,9 +109,13 @@ const InsuranceLifeRow = () => {
                   </TableHead>
                   <TableBody>
                     <TableRow>
-                      <TableCell>{new Date(f.expiryDate!).toLocaleDateString() || '-'}</TableCell>
+                      <TableCell>
+                        {f.expiryDate ? new Date(f.expiryDate).toLocaleDateString() : '-'}
+                      </TableCell>
                       <TableCell>{f.beneficiary || '-'}</TableCell>
-                      <TableCell>{new Date(f.lastControl!).toLocaleDateString() || '-'}</TableCell>
+                      <TableCell>
+                        {f.lastControl ? new Date(f.lastControl).toLocaleDateString() : '-'}
+                      </TableCell>
                       <TableCell>
                         <ListItemButton onClick={() => removeSubDoc(f._id)}>Ta bort</ListItemButton>
                       </TableCell>

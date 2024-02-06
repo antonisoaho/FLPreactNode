@@ -18,6 +18,7 @@ import {
   TextField,
 } from '@mui/material';
 import ColoredTableRow from '../../../../../../commonComponents/coloredTableRow/ColoredTableRow';
+import { timePerspectiveSelect } from '../../variables/variables';
 
 const BankFundForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFormCount }) => {
   const {
@@ -28,6 +29,7 @@ const BankFundForm: React.FC<CustomFormProps> = ({ submitted, formCount, setForm
   const [details, setDetails] = useState<BankFund[]>([]);
   const setSnackbarState = useSetRecoilState(snackbarState);
   const { custId } = useParams();
+  const colSpan: number = 5;
   const [selectItems, setSelectItems] = useState<Array<{ value: string; label: string }>>([
     { value: 'Gemensam', label: 'Gemensam' },
   ]);
@@ -116,33 +118,6 @@ const BankFundForm: React.FC<CustomFormProps> = ({ submitted, formCount, setForm
     },
   ];
 
-  const timePerspectiveSelect = [
-    {
-      value: 'Krishink',
-      label: 'Krishink',
-    },
-    {
-      value: '12 Månader',
-      label: '12 Månader',
-    },
-    {
-      value: '5 år',
-      label: '5 år',
-    },
-    {
-      value: 'Sen',
-      label: 'Sen',
-    },
-    {
-      value: 'Oidentifierat',
-      label: 'Oidentifierat',
-    },
-    {
-      value: 'Barnspar',
-      label: 'Barnspar',
-    },
-  ];
-
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <Table>
@@ -150,7 +125,7 @@ const BankFundForm: React.FC<CustomFormProps> = ({ submitted, formCount, setForm
           {details.map((detail, index) => (
             <Fragment key={index}>
               <ColoredTableRow>
-                <TableCell colSpan={4}>
+                <TableCell colSpan={colSpan - 1}>
                   <TextField
                     className="form-input-select"
                     select
@@ -178,7 +153,7 @@ const BankFundForm: React.FC<CustomFormProps> = ({ submitted, formCount, setForm
                     className="form-input-select"
                     required
                     select
-                    value={detail.accountType}
+                    defaultValue={detail.accountType}
                     label="Kontotyp"
                     {...FormTextFieldProps}
                     {...register(`${index}.accountType`, {
@@ -281,7 +256,7 @@ const BankFundForm: React.FC<CustomFormProps> = ({ submitted, formCount, setForm
           ))}
           {formCount > 0 && (
             <TableRow>
-              <TableCell colSpan={5} align="right">
+              <TableCell colSpan={colSpan} align="right">
                 <Button type="submit" disabled={isSubmitting}>
                   {!isSubmitting ? 'Spara' : 'Sparar...'}
                 </Button>

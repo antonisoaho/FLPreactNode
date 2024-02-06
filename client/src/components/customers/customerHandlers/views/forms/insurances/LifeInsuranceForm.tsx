@@ -169,6 +169,7 @@ const LifeInsuranceForm: React.FC<CustomFormProps> = ({ submitted, formCount, se
                     className="form-input-select"
                     label="Benämning"
                     fullWidth
+                    select
                     defaultValue={detail.insuranceType}
                     {...FormTextFieldProps}
                     {...register(`${index}.insuranceType`)}>
@@ -194,7 +195,6 @@ const LifeInsuranceForm: React.FC<CustomFormProps> = ({ submitted, formCount, se
                     className="form-input-field"
                     label="Premie (kr/år)"
                     type="number"
-                    required
                     {...FormTextFieldProps}
                     {...register(`${index}.premiumCost`, { min: 0 })}
                   />
@@ -206,7 +206,7 @@ const LifeInsuranceForm: React.FC<CustomFormProps> = ({ submitted, formCount, se
                     className="form-input-field"
                     slotProps={{ textField: { ...FormTextFieldProps } }}
                     label="Förfallodatum"
-                    views={['year', 'month', 'day']}
+                    views={['day', 'month', 'year']}
                     {...register(`${index}.expiryDate`)}
                     onChange={(date) => {
                       const newDate = date as Date;
@@ -221,7 +221,7 @@ const LifeInsuranceForm: React.FC<CustomFormProps> = ({ submitted, formCount, se
                     required
                     fullWidth
                     {...FormTextFieldProps}
-                    defaultValue={detail.beneficiary}
+                    defaultValue=""
                     label="Förmånstagare"
                     {...register(`${index}.beneficiary`, {
                       required: 'Vänligen välj vem pensionen gäller.',

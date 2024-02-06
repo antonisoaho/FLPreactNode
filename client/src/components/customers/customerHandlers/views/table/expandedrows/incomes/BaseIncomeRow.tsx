@@ -25,7 +25,7 @@ const BaseIncomeRow = () => {
   const { custId } = useParams();
   const [fields, setFields] = useState<[IncomeBase & DateFields]>();
   const [loading, setLoading] = useState<boolean>(true);
-  const colSpan: number = 7;
+  const colSpan: number = 6;
 
   const onSubmit = () => {
     updateCustomerFields();
@@ -77,12 +77,10 @@ const BaseIncomeRow = () => {
                       <TableCell />
                       <TableCell />
                       <TableCell />
-                      <TableCell />
                       <TableCell align="right">Uppdaterad:</TableCell>
                       <TableCell>{new Date(inc.updatedAt!).toLocaleDateString()}</TableCell>
                     </ColoredTableRow>
                     <TableRow>
-                      <TableCell />
                       <TableCell>Tjänsteink.</TableCell>
                       <TableCell>Varav eget AB</TableCell>
                       <TableCell>Tj. bilförmån</TableCell>
@@ -93,11 +91,20 @@ const BaseIncomeRow = () => {
                   </TableHead>
                   <TableBody>
                     <TableRow>
-                      <TableCell />
-                      <TableCell>{inc.values!.serviceIncome?.toLocaleString() || '-'}</TableCell>
-                      <TableCell>{inc.values!.ofWhichOwnAB?.toLocaleString() || '-'}</TableCell>
                       <TableCell>
-                        {inc.values!.companyCarBenefit?.amount?.toLocaleString() || '-'}
+                        {inc.values!.serviceIncome
+                          ? inc.values!.serviceIncome.toLocaleString() + ' SEK'
+                          : '-'}
+                      </TableCell>
+                      <TableCell>
+                        {inc.values!.ofWhichOwnAB
+                          ? inc.values!.ofWhichOwnAB.toLocaleString() + ' SEK'
+                          : '-'}
+                      </TableCell>
+                      <TableCell>
+                        {inc.values!.companyCarBenefit?.amount
+                          ? inc.values!.companyCarBenefit!.amount.toLocaleString() + ' SEK'
+                          : '-'}
                       </TableCell>
                       <TableCell>
                         {inc.values!.companyCarBenefit?.gross === true
@@ -106,13 +113,16 @@ const BaseIncomeRow = () => {
                           ? 'Netto'
                           : '-'}
                       </TableCell>
-                      <TableCell>{inc.values?.soleTraderIncome || '-'}</TableCell>
+                      <TableCell>
+                        {inc.values?.soleTraderIncome
+                          ? inc.values!.soleTraderIncome.toLocaleString() + ' SEK'
+                          : '-'}
+                      </TableCell>
                       <TableCell>{inc.values?.taxFree || '-'}</TableCell>
                     </TableRow>
                   </TableBody>
                   <TableHead>
                     <TableRow>
-                      <TableCell />
                       <TableCell>K10 ut</TableCell>
                       <TableCell>Sparad utd.</TableCell>
                       <TableCell>Löneunderlag</TableCell>
@@ -124,13 +134,26 @@ const BaseIncomeRow = () => {
                   </TableHead>
                   <TableBody>
                     <TableRow>
-                      <TableCell />
-                      <TableCell>{inc.values?.k10?.amount?.toLocaleString() || '-'}</TableCell>
                       <TableCell>
-                        {inc.values?.k10?.savedDistribution?.toLocaleString() || '-'}
+                        {inc.values?.k10?.amount
+                          ? inc.values!.k10!.amount.toLocaleString() + ' SEK'
+                          : '-'}
                       </TableCell>
-                      <TableCell>{inc.values?.k10?.salaryBasis?.toLocaleString() || '-'}</TableCell>
-                      <TableCell>{inc.values?.k10?.ownershipShare || '-'}</TableCell>
+                      <TableCell>
+                        {inc.values?.k10?.savedDistribution
+                          ? inc.values?.k10?.savedDistribution.toLocaleString() + ' SEK'
+                          : '-'}
+                      </TableCell>
+                      <TableCell>
+                        {inc.values?.k10?.salaryBasis
+                          ? inc.values?.k10?.salaryBasis.toLocaleString() + ' SEK'
+                          : '-'}
+                      </TableCell>
+                      <TableCell>
+                        {inc.values?.k10?.ownershipShare
+                          ? inc.values?.k10?.ownershipShare + '%'
+                          : '-'}
+                      </TableCell>
                       <TableCell />
                       <TableCell>
                         <ListItemButton onClick={() => removeSubDoc(inc._id)}>
@@ -144,7 +167,9 @@ const BaseIncomeRow = () => {
             ) : (
               <TableBody>
                 <TableRow>
-                  <TableCell colSpan={colSpan}>Inga inkomster</TableCell>
+                  <TableCell align="center" colSpan={colSpan}>
+                    Inga inkomster
+                  </TableCell>
                 </TableRow>
               </TableBody>
             )}

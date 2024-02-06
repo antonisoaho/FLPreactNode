@@ -25,7 +25,7 @@ const ChangeIncomeRow = () => {
   const { custId } = useParams();
   const [fields, setFields] = useState<[IncomeChange & DateFields]>();
   const [loading, setLoading] = useState<boolean>(true);
-  const colSpan: number = 5;
+  const colSpan: number = 4;
 
   const onSubmit = () => {
     updateCustomerFields();
@@ -61,7 +61,7 @@ const ChangeIncomeRow = () => {
 
   return (
     <TableRow>
-      <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={5}>
+      <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={colSpan}>
         <Box sx={{ margin: 1 }}>
           <Table size="small" aria-label="more-info">
             {loading ? (
@@ -75,13 +75,11 @@ const ChangeIncomeRow = () => {
                     <ColoredTableRow>
                       <TableCell>{inc.belongs}</TableCell>
                       <TableCell />
-                      <TableCell />
 
                       <TableCell align="right">Uppdaterad:</TableCell>
                       <TableCell>{new Date(inc.updatedAt!).toLocaleDateString()}</TableCell>
                     </ColoredTableRow>
                     <TableRow>
-                      <TableCell />
                       <TableCell>Typ av ändring</TableCell>
                       <TableCell>När</TableCell>
                       <TableCell>Nytt belopp</TableCell>
@@ -91,9 +89,14 @@ const ChangeIncomeRow = () => {
                   <TableBody>
                     <TableRow>
                       <TableCell>{inc.values!.changeType}</TableCell>
-                      <TableCell>{inc.values!.when?.toLocaleString() || '-'}</TableCell>
-                      <TableCell>{inc.values!.newAmount?.toLocaleString() || '-'}</TableCell>
-                      <TableCell />
+                      <TableCell>
+                        {inc.values!.when ? inc.values!.when.toLocaleString() + ' år' : '-'}
+                      </TableCell>
+                      <TableCell>
+                        {inc.values!.newAmount !== undefined
+                          ? inc.values!.newAmount.toLocaleString() + ' SEK'
+                          : '-'}
+                      </TableCell>
                       <TableCell align="right">
                         <ListItemButton onClick={() => removeSubDoc(inc._id)}>
                           Ta bort
@@ -106,7 +109,7 @@ const ChangeIncomeRow = () => {
             ) : (
               <TableBody>
                 <TableRow>
-                  <TableCell colSpan={colSpan}>
+                  <TableCell align="center" colSpan={colSpan}>
                     Inga planerade inkomstförändringar hittade.
                   </TableCell>
                 </TableRow>

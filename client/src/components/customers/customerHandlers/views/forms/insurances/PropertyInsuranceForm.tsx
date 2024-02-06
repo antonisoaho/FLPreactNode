@@ -16,6 +16,7 @@ import { InsuranceProperty } from '../models/CustomerFormModels';
 import { CustomFormProps, FormTextFieldProps } from '../models/FormProps';
 import { removeFormByIndex } from '../models/commonFunctions';
 import { DatePicker } from '@mui/x-date-pickers';
+import { paymentPeriodSelect } from '../../variables/variables';
 
 const PropertyInsuranceForm: React.FC<CustomFormProps> = ({
   submitted,
@@ -109,25 +110,6 @@ const PropertyInsuranceForm: React.FC<CustomFormProps> = ({
     },
   ];
 
-  const paymentPeriodSelect = [
-    {
-      value: 'Årsvis',
-      label: 'Årsvis',
-    },
-    {
-      value: 'Halvårsvis',
-      label: 'Halvårsvis',
-    },
-    {
-      value: 'Kvartalsvis',
-      label: 'Kvartalsvis',
-    },
-    {
-      value: 'Månadsvis',
-      label: 'Månadsvis - Autogiro',
-    },
-  ];
-
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <Table>
@@ -203,10 +185,10 @@ const PropertyInsuranceForm: React.FC<CustomFormProps> = ({
                 </TableCell>
                 <TableCell width="25%">
                   <DatePicker
-                    label="Förfallodag"
+                    label="Senast kontroll"
                     className="form-input-field"
                     slotProps={{ textField: { ...FormTextFieldProps } }}
-                    views={['year', 'month', 'day']}
+                    views={['day', 'month', 'year']}
                     {...register(`${index}.lastControl`)}
                     onChange={(date) => {
                       const newDate = date as Date;

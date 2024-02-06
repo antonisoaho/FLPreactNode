@@ -95,7 +95,9 @@ const InsuranceWorkRow = () => {
             ) : (
               <TableBody>
                 <TableRow>
-                  <TableCell colSpan={colSpan}>Inga försäkringar registrerade.</TableCell>
+                  <TableCell align="center" colSpan={colSpan}>
+                    Inga försäkringar registrerade.
+                  </TableCell>
                 </TableRow>
               </TableBody>
             )}

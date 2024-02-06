@@ -139,27 +139,27 @@ const CustomerTable: React.FC<TableProps> = ({ customer }) => {
                 <NestedRow
                   fieldName={'Egendomsförsäkringar'}
                   fieldLength={currCustomer.insurances.property.length}>
-                  <PropertyInsuranceRow fields={currCustomer.insurances.property} />
+                  <PropertyInsuranceRow />
                 </NestedRow>
                 <NestedRow
-                  fieldName={'Olycksfallsförsäkringar'}
-                  fieldLength={currCustomer.insurances.accident.length}>
-                  <InsuranceAccidentRow />
-                </NestedRow>
-                <NestedRow
-                  fieldName={'Sjuk- och olycksfallsförsäkringar'}
+                  fieldName={'Personförsäkringar Sjukdom'}
                   fieldLength={currCustomer.insurances.sickness.length}>
-                  <InsuranceSickRow fields={currCustomer.insurances.sickness} />
-                </NestedRow>
-                <NestedRow
-                  fieldName={'Livförsäkringar'}
-                  fieldLength={currCustomer.insurances.life.length}>
-                  <InsuranceLifeRow />
+                  <InsuranceSickRow />
                 </NestedRow>
                 <NestedRow
                   fieldName={'Avtalsenliga försäkringar'}
                   fieldLength={currCustomer.insurances.work.length}>
                   <InsuranceWorkRow />
+                </NestedRow>
+                <NestedRow
+                  fieldName={'Olycksfall'}
+                  fieldLength={currCustomer.insurances.accident.length}>
+                  <InsuranceAccidentRow />
+                </NestedRow>
+                <NestedRow
+                  fieldName={'Livförsäkringar'}
+                  fieldLength={currCustomer.insurances.life.length}>
+                  <InsuranceLifeRow />
                 </NestedRow>
               </CustomerTableRow>
               <CustomerTableRow

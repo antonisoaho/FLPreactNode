@@ -25,6 +25,7 @@ const CustomerDetailsRow = () => {
   const { custId } = useParams();
   const [fields, setFields] = useState<[CustomerDetails & DateFields]>();
   const [loading, setLoading] = useState<boolean>(true);
+  const colSpan: number = 5;
 
   const onSubmit = () => {
     updateCustomerFields();
@@ -58,12 +59,11 @@ const CustomerDetailsRow = () => {
 
   return (
     <TableRow>
-      <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={5}>
+      <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={colSpan}>
         <Box sx={{ margin: 1 }}>
           <Table size="small" aria-label="more-info">
             <TableHead>
               <ColoredTableRow>
-                <TableCell />
                 <TableCell>Namn</TableCell>
                 <TableCell>Status</TableCell>
                 <TableCell>Född</TableCell>
@@ -73,12 +73,10 @@ const CustomerDetailsRow = () => {
             </TableHead>
             <TableBody>
               {loading ? (
-                <TableLoader colSpan={6} />
-              ) : (
+                <TableLoader colSpan={colSpan} />
+              ) : fields!.length > 0 ? (
                 fields!.map((person) => (
                   <TableRow key={person._id}>
-                    <TableCell />
-
                     <TableCell>{person.name}</TableCell>
                     <TableCell>{person.status}</TableCell>
                     <TableCell>{person.yearMonth}</TableCell>
@@ -92,11 +90,17 @@ const CustomerDetailsRow = () => {
                     </TableCell>
                   </TableRow>
                 ))
+              ) : (
+                <TableRow>
+                  <TableCell align="center" colSpan={colSpan}>
+                    Inga personer registrerade.
+                  </TableCell>
+                </TableRow>
               )}
               <FormCountHandler
                 formCount={formCount}
                 setFormCount={(value) => setFormCount(value)}
-                colSpan={6}
+                colSpan={colSpan}
               />
             </TableBody>
           </Table>

@@ -101,7 +101,7 @@ const BankFundsRow = () => {
                       <TableCell>{f.institution || '-'}</TableCell>
                       <TableCell>{f.name || f._id}</TableCell>
                       <TableCell>{f.timePerspective || '-'}</TableCell>
-                      <TableCell>{f.value?.toLocaleString() || '-'}</TableCell>
+                      <TableCell>{f.value ? f.value.toLocaleString() + ' SEK' : '-'}</TableCell>
                     </TableRow>
                   </TableBody>
                   <TableHead>
@@ -115,10 +115,12 @@ const BankFundsRow = () => {
                   </TableHead>
                   <TableBody>
                     <TableRow>
-                      <TableCell>{f.monthlySavings?.toLocaleString() || '-'}</TableCell>
+                      <TableCell>
+                        {f.monthlySavings ? f.monthlySavings.toLocaleString() + ' SEK' : '-'}
+                      </TableCell>
                       <TableCell>{f.saveForHowLong || '-'}</TableCell>
-                      <TableCell>{f.interestRate || '-'}</TableCell>
-                      <TableCell>{f.projectedGrowth || '-'}</TableCell>
+                      <TableCell>{f.interestRate ? f.interestRate + '%' : '-'}</TableCell>
+                      <TableCell>{f.projectedGrowth ? f.projectedGrowth + '%' : '-'}</TableCell>
                       <TableCell>
                         <ListItemButton onClick={() => removeSubDoc(f._id)}>Ta bort</ListItemButton>
                       </TableCell>
@@ -129,7 +131,9 @@ const BankFundsRow = () => {
             ) : (
               <TableBody>
                 <TableRow>
-                  <TableCell colSpan={colSpan}>Inga bankmedel hittades regisrerade.</TableCell>
+                  <TableCell align="center" colSpan={colSpan}>
+                    Inga bankmedel hittades regisrerade.
+                  </TableCell>
                 </TableRow>
               </TableBody>
             )}

@@ -211,7 +211,7 @@ const LiabilityBaseForm: React.FC<CustomFormProps> = ({ submitted, formCount, se
                     required
                     type="number"
                     {...FormTextFieldProps}
-                    {...register(`${index}.interest`, { min: 0 })}
+                    {...register(`${index}.interest`, { min: 0, max: 100 })}
                   />
                 </TableCell>
                 <TableCell width="20%">
@@ -225,7 +225,9 @@ const LiabilityBaseForm: React.FC<CustomFormProps> = ({ submitted, formCount, se
                 </TableCell>
                 <TableCell width="20%">
                   <DatePicker
-                    views={['year', 'month', 'day']}
+                    slotProps={{ textField: { ...FormTextFieldProps } }}
+                    className="form-input-field"
+                    views={['day', 'month', 'year']}
                     {...register(`${index}.lockInterestDate`)}
                     onChange={(date) => {
                       setValue(`${index}.lockInterestDate`, date as Date);
