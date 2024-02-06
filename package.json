@@ -11,7 +11,8 @@
     "start": "nodemon server/index.js",
     "build": "cd client && npm install && npm run build",
     "debug:client": "cd client && npm install && npm run dev",
-    "debug:server": "npm i && nodemon server/index.js"
+    "debug:server": "npm i && nodemon server/index.js",
+    "heroku-postbuild": "cd client && npm install && npm run build"
   },
   "author": "",
   "license": "ISC",

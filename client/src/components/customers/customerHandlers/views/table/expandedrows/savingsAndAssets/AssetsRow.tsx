@@ -7,7 +7,7 @@ import {
   TableBody,
   ListItemButton,
 } from '@mui/material';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { DateFields } from '../../../../../../../apiCalls/models/ApiModel';
 import { Assets } from '../../../forms/models/CustomerFormModels';
 import ColoredTableRow from '../../../../../../../commonComponents/coloredTableRow/ColoredTableRow';
@@ -43,7 +43,7 @@ const AssetsRow = () => {
     }
   };
 
-  const updateCustomerFields = useCallback(async () => {
+  const updateCustomerFields = async () => {
     const response = await getCustomerFormData({
       field: 'assets',
       _id: custId as string,
@@ -59,11 +59,11 @@ const AssetsRow = () => {
       setFields(response.data as [Assets & DateFields]);
       setLoading(false);
     }
-  }, [custId]);
+  };
 
   useEffect(() => {
     updateCustomerFields();
-  }, [custId, updateCustomerFields]);
+  }, [custId]);
 
   return (
     <TableRow>

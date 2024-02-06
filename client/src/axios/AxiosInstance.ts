@@ -7,7 +7,8 @@ export interface ExtendedError extends AxiosError {
   snackbarType?: string;
 }
 
-const baseURL = 'http://localhost:3001/';
+const loc = window.location;
+const baseURL = `${loc.protocol}//${loc.hostname}${loc.hostname === 'localhost' ? ':3001' : ''}`;
 
 const axiosInstance = axios.create({
   baseURL,
