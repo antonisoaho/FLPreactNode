@@ -35,27 +35,29 @@ const CustomerView = () => {
 
   return (
     <>
-      {loading ? (
-        <CircularProgress />
-      ) : (
-        <>
-          <CustomerSidebar />
-          <Box
-            sx={{
-              maxWidth: 1600,
-              mx: '60px',
-              py: '20px',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: 2,
-            }}>
+      <CustomerSidebar />
+      <Box
+        sx={{
+          maxWidth: 1600,
+          minWidth: 800,
+          mx: '60px',
+          py: '20px',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: 2,
+          alignSelf: 'center',
+        }}>
+        {loading ? (
+          <CircularProgress sx={{ alignSelf: 'center' }} />
+        ) : (
+          <>
             <CustomerDashboard customer={customer!} />
             <Divider />
             <CustomerTable customer={customer!} />
-          </Box>
-        </>
-      )}
+          </>
+        )}
+      </Box>
     </>
   );
 };
