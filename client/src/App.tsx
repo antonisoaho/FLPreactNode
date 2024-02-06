@@ -21,6 +21,7 @@ import ProtectedRoute from './components/RouteComponents/ProtectedRoute';
 import CustomerRoutes from './components/RouteComponents/CustomerRoutes';
 import UserRoutes from './components/RouteComponents/UserRoutes';
 import BasicRoutes from './components/RouteComponents/BasicRoutes';
+import PageNotFound from './components/RouteComponents/PageNotFound';
 
 dayjs.locale('sv');
 
@@ -74,6 +75,7 @@ const App = () => {
                     {/* Customer related pages */}
                     {CustomerRoutes}
                   </Route>
+                  <Route path="*" element={<PageNotFound />} />
                 </Routes>
               </>
             </>

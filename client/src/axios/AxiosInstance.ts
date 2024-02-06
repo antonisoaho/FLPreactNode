@@ -37,6 +37,8 @@ axiosInstance.interceptors.response.use(
         Logout();
       } else if (err.response.status === 403 && globalRouter.navigate) {
         globalRouter.navigate(history.length - 2);
+      } else if (err.response.status === 404 && globalRouter.navigate) {
+        globalRouter.navigate('/404');
       }
 
       const errorWithSnackbarInfo: ExtendedError = {
