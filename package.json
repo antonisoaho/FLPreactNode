@@ -2,7 +2,6 @@
   "name": "golife",
   "version": "1.0.0",
   "description": "golife",
- 
   "main": "index.js",
   "scripts": {
     "debug": "concurrently \"npm run debug:server\" \"npm run debug:client\"",
@@ -25,7 +24,8 @@
     "morgan": "^1.10.0"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "vite": "^5.0.12"
   },
   "engines": {
     "node": "21.1.0"
