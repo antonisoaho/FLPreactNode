@@ -8,7 +8,6 @@ import { getUserList } from '../../apiCalls/apiUserCalls';
 import UserModel from './models/UserModel';
 import UserListTable from './userTable/UserListTable';
 import AddButton from '../../commonComponents/button/AddButton';
-// import Drawer from '@mui/joy/Drawer';
 
 const UserComponent: React.FC = () => {
   const [users, setUsers] = useState<Array<UserModel>>([]);

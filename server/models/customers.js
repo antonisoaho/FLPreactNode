@@ -1,20 +1,20 @@
-const customerDetailsSchema = require('./customerModels/details');
-const childSchema = require('./customerModels/children');
-const workConditionsSchema = require('./customerModels/workConditions');
-const { incomeBaseSchema, incomeChangeSchema } = require('./customerModels/income');
-const { expensesBaseSchema, expensesChangeSchema } = require('./customerModels/expenses');
-const bankFundSchema = require('./customerModels/bankFunds');
-const investmentSchema = require('./customerModels/investments');
-const { liabilityBaseSchema, liabilityPlannedSchema } = require('./customerModels/liabilities');
-const assetSchema = require('./customerModels/assets');
+const childSchema = require('./customermodels/children');
+const customerDetailsSchema = require('./customermodels/details');
+const workConditionsSchema = require('./customermodels/workConditions');
+const { incomeBaseSchema, incomeChangeSchema } = require('./customermodels/income');
+const { expensesBaseSchema, expensesChangeSchema } = require('./customermodels/expenses');
+const bankFundSchema = require('./customermodels/bankFunds');
+const investmentSchema = require('./customermodels/investments');
+const { liabilityBaseSchema, liabilityPlannedSchema } = require('./customermodels/liabilities');
+const assetSchema = require('./customermodels/assets');
 const {
   propertyInsuranceSchema,
   sickInsuranceSchema,
   accidentInsuranceSchema,
   lifeInsuranceSchema,
   workInsuranceSchema,
-} = require('./customerModels/insurances');
-const { pensionSchema, spousalPensionSchema } = require('./customerModels/pension');
+} = require('./customermodels/insurances');
+const { pensionSchema, spousalPensionSchema } = require('./customermodels/pension');
 
 const { Schema, model } = require('mongoose');
 
