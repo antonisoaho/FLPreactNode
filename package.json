@@ -1,7 +1,10 @@
 {
   "name": "flp_capfor",
   "version": "1.0.0",
-  "description": "",
+  "description": "golife",
+  "engines": {
+    "node": "21.1.0"
+  },
   "main": "index.js",
   "scripts": {
     "debug": "concurrently \"npm run debug:server\" \"npm run debug:client\"",
