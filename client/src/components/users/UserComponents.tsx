@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Drawer } from '@mui/material';
-import CreateUserComponent from './userHandlers/CreateUserComponent';
-import UserCredentialsComponent from './userHandlers/UserCredentialsComponent';
-import { snackbarState, userState } from '../../recoil/RecoilAtoms';
+import CreateUserComponent from './CreateUserComponent';
+import UserCredentialsComponent from './UserCredentialsComponent';
+import { snackbarState, userState } from '../../services/state/RecoilAtoms';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
-import { getUserList } from '../../apiCalls/apiUserCalls';
+import { getUserList } from '../../services/api/apiUserCalls';
 import UserModel from './models/UserModel';
-import UserListTable from './userTable/UserListTable';
-import AddButton from '../../commonComponents/button/AddButton';
+import UserListTable from './table/UserListTable';
+import AddButton from '../ui/button/AddButton';
 
 const UserComponent: React.FC = () => {
   const [users, setUsers] = useState<Array<UserModel>>([]);

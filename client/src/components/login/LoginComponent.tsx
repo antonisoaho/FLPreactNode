@@ -11,8 +11,8 @@ import {
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSetRecoilState } from 'recoil';
-import { snackbarState, userState } from '../../recoil/RecoilAtoms';
-import { loginAPI } from '../../apiCalls/apiUserCalls';
+import { snackbarState, userState } from '../../services/state/RecoilAtoms';
+import { loginAPI } from '../../services/api/apiUserCalls';
 import { SubmitHandler, useForm } from 'react-hook-form';
 
 type LoginForm = {

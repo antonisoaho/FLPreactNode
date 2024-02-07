@@ -17,8 +17,8 @@ import { Link } from 'react-router-dom';
 import MenuIcon from '@mui/icons-material/Menu';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
-import { useTheme } from '../../theme/ThemeProvider';
-import { userState } from '../../recoil/RecoilAtoms';
+import { useTheme } from '../../services/providers/ThemeProvider';
+import { userState } from '../../services/state/RecoilAtoms';
 import { useRecoilValue } from 'recoil';
 
 const pages = [

@@ -1,10 +1,10 @@
 // LogoutComponent.jsx
 import { useEffect } from 'react';
-import { Logout } from '../../axios/AxiosInstance';
+import { Logout } from '../../services/api/AxiosInstance';
 import { Container } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useSetRecoilState } from 'recoil';
-import { snackbarState, userState } from '../../recoil/RecoilAtoms';
+import { snackbarState, userState } from '../../services/state/RecoilAtoms';
 
 const LogoutComponent = () => {
   const navigate = useNavigate();

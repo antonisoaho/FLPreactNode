@@ -12,14 +12,14 @@ import {
 import { SetStateAction, useEffect, useState } from 'react';
 import CustomerModel from './models/CustomerModel';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
-import { snackbarState, userState } from '../../recoil/RecoilAtoms';
-import { getUserList } from '../../apiCalls/apiUserCalls';
+import { snackbarState, userState } from '../../services/state/RecoilAtoms';
+import { getUserList } from '../../services/api/apiUserCalls';
 import UserModel from '../users/models/UserModel';
-import { createNewCustomer, getCustomerList } from '../../apiCalls/apiCustomerCalls';
-import CustomerCard from './card/CustomerCard';
-import AddButton from '../../commonComponents/button/AddButton';
+import { createNewCustomer, getCustomerList } from '../../services/api/apiCustomerCalls';
+import CustomerCard from './cards/CustomerCard';
+import AddButton from '../ui/button/AddButton';
 import { useNavigate } from 'react-router-dom';
-import PromptDialog from '../../commonComponents/promtDialog/PromptDialog';
+import PromptDialog from '../ui/promtDialog/PromptDialog';
 
 const CustomerComponent = () => {
   const [customers, setCustomers] = useState<Array<CustomerModel>>([]);
