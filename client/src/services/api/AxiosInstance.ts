@@ -1,5 +1,5 @@
 import axios, { AxiosError } from 'axios';
-import globalRouter from '../../globalRouter';
+import globalRouter from '../providers/globalRouter';
 
 export interface ExtendedError extends AxiosError {
   showSnackbar?: boolean;

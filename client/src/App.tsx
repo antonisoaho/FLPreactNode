@@ -5,7 +5,7 @@ import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 import { Route, Routes, useNavigate } from 'react-router-dom';
-import globalRouter from './globalRouter';
+import globalRouter from './services/providers/globalRouter';
 import ResponsiveAppBar from './components/navbar/NavbarComponent';
 import { ThemeProvider } from './services/providers/ThemeProvider';
 import { Logout } from './services/api/AxiosInstance';
