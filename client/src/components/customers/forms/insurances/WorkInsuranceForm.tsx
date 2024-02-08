@@ -11,13 +11,12 @@ import {
 import React, { useEffect, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
-import { useSetRecoilState } from 'recoil';
 import { getCustomerNames, updateCustomer } from '../../../../services/api/apiCustomerCalls';
-import { snackbarState } from '../../../../services/state/RecoilAtoms';
 import TableLoader from '../../../ui/tableLoader/TableLoader';
 import { InsuranceWork } from '../../models/CustomerFormModels';
 import { CustomFormProps, FormTextFieldProps } from '../../models/FormProps';
-import { removeFormByIndex } from '../../../../utils/commonFunctions';
+import { removeFormByIndex } from '../../../../utils/formUtils';
+import { enqueueSnackbar } from 'notistack';
 
 const WorkInsuranceForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFormCount }) => {
   const {
@@ -26,7 +25,6 @@ const WorkInsuranceForm: React.FC<CustomFormProps> = ({ submitted, formCount, se
     formState: { isSubmitting },
   } = useForm<InsuranceWork[]>();
   const [details, setDetails] = useState<InsuranceWork[]>([]);
-  const setSnackbarState = useSetRecoilState(snackbarState);
   const { custId } = useParams();
   const [selectItems, setSelectItems] = useState<Array<{ value: string; label: string }>>([]);
   const colSpan: number = 3;
@@ -44,10 +42,8 @@ const WorkInsuranceForm: React.FC<CustomFormProps> = ({ submitted, formCount, se
         return [...prev, ...newPersons];
       });
     } else {
-      setSnackbarState({
-        open: true,
-        message: 'Kunde inte hitta kunders namn, vänligen kontrollera ifyllnad.',
-        severity: 'error',
+      enqueueSnackbar('Kunde inte hitta kunders namn, vänligen kontrollera ifyllnad.', {
+        variant: 'error',
       });
     }
   };

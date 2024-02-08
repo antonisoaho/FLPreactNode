@@ -11,9 +11,3 @@ export const formatDateYearMonth = (date: Date): string => {
 export const formatDate = (date: Date): string => {
   return dayjs(date).format('YYYY-MM-DD');
 };
-
-export const removeFormByIndex = (details: any[], indexToRemove: number) => {
-  const updatedDetails = [...details];
-  updatedDetails.splice(indexToRemove, 1);
-  return updatedDetails;
-};

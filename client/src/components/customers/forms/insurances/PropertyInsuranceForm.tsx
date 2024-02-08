@@ -14,7 +14,7 @@ import { useParams } from 'react-router-dom';
 import { updateCustomer } from '../../../../services/api/apiCustomerCalls';
 import { InsuranceProperty } from '../../models/CustomerFormModels';
 import { CustomFormProps, FormTextFieldProps } from '../../models/FormProps';
-import { removeFormByIndex } from '../../../../utils/commonFunctions';
+import { removeFormByIndex } from '../../../../utils/formUtils';
 import { DatePicker } from '@mui/x-date-pickers';
 import { paymentPeriodSelect } from '../../../../utils/formVariables';
 

@@ -17,8 +17,7 @@ import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import EditIcon from '@mui/icons-material/Edit';
 import UserModel from '../models/UserModel';
 import { getSingleUserById } from '../../../services/api/apiUserCalls';
-import { useSetRecoilState } from 'recoil';
-import { snackbarState } from '../../../services/state/RecoilAtoms';
+import { enqueueSnackbar } from 'notistack';
 
 interface RowProps {
   row: UserModel;
@@ -27,7 +26,6 @@ interface RowProps {
 }
 const Row: React.FC<RowProps> = ({ row, onUserPrefsOpen, setUsers }) => {
   const [open, setOpen] = useState(false);
-  const setSnackbarState = useSetRecoilState(snackbarState);
 
   const handleOpen = async () => {
     if (!open && !row.email) {
@@ -44,10 +42,8 @@ const Row: React.FC<RowProps> = ({ row, onUserPrefsOpen, setUsers }) => {
           return updatedUsers;
         });
       } else {
-        setSnackbarState({
-          open: true,
-          message: response.error!,
-          severity: 'error',
+        enqueueSnackbar(response.error!, {
+          variant: 'error',
         });
       }
     }

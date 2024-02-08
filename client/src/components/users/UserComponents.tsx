@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Container, Drawer } from '@mui/material';
 import CreateUserComponent from './CreateUserComponent';
 import UserCredentialsComponent from './UserCredentialsComponent';
-import { snackbarState, userState } from '../../services/state/RecoilAtoms';
-import { useRecoilValue, useSetRecoilState } from 'recoil';
+import { userState } from '../../services/state/RecoilAtoms';
+import { useRecoilValue } from 'recoil';
 import { getUserList } from '../../services/api/apiUserCalls';
 import UserModel from './models/UserModel';
 import UserListTable from './table/UserListTable';
 import AddButton from '../ui/button/AddButton';
+import { enqueueSnackbar } from 'notistack';
 
 const UserComponent: React.FC = () => {
   const [users, setUsers] = useState<Array<UserModel>>([]);
@@ -15,7 +16,6 @@ const UserComponent: React.FC = () => {
   const [createOpen, setCreateOpen] = useState<boolean>(false);
   const [changeOpen, setChangeOpen] = useState<boolean>(false);
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
-  const setSnackbarState = useSetRecoilState(snackbarState);
 
   const { isAdmin } = useRecoilValue(userState);
 
@@ -44,10 +44,8 @@ const UserComponent: React.FC = () => {
       setUsers(response.data!);
       setLoading(false);
     } else {
-      setSnackbarState({
-        open: true,
-        message: response.error!,
-        severity: 'error',
+      enqueueSnackbar(response.error!, {
+        variant: 'error',
       });
     }
   };

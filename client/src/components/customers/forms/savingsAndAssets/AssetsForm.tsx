@@ -11,18 +11,17 @@ import {
 import React, { Fragment, useEffect, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
-import { useSetRecoilState } from 'recoil';
 import {
   getCustomerNames,
   getCustomerChildNames,
   updateCustomer,
 } from '../../../../services/api/apiCustomerCalls';
 import ColoredTableRow from '../../../ui/coloredTableRow/ColoredTableRow';
-import { snackbarState } from '../../../../services/state/RecoilAtoms';
 import { Assets } from '../../models/CustomerFormModels';
 import { CustomFormProps, FormTextFieldProps } from '../../models/FormProps';
-import { removeFormByIndex } from '../../../../utils/commonFunctions';
+import { removeFormByIndex } from '../../../../utils/formUtils';
 import { DatePicker } from '@mui/x-date-pickers';
+import { enqueueSnackbar } from 'notistack';
 
 const AssetsForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFormCount }) => {
   const {
@@ -32,7 +31,6 @@ const AssetsForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFormCo
     formState: { isSubmitting },
   } = useForm<Assets[]>();
   const [details, setDetails] = useState<Assets[]>([]);
-  const setSnackbarState = useSetRecoilState(snackbarState);
   const { custId } = useParams();
   const [selectItems, setSelectItems] = useState<Array<{ value: string; label: string }>>([
     { value: 'Gemensam', label: 'Gemensam' },
@@ -56,10 +54,8 @@ const AssetsForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFormCo
         return [...prev, ...newPersons, ...newChildren];
       });
     } else {
-      setSnackbarState({
-        open: true,
-        message: 'Kunde inte hitta kunders namn, vänligen kontrollera ifyllnad.',
-        severity: 'error',
+      enqueueSnackbar('Kunde inte hitta kunders namn, vänligen kontrollera ifyllnad.', {
+        variant: 'error',
       });
     }
   };

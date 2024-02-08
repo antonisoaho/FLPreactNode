@@ -11,18 +11,17 @@ import {
 import { useState, useEffect, Fragment } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
-import { useSetRecoilState } from 'recoil';
 import {
   getCustomerNames,
   updateCustomer,
   getCustomerFormData,
 } from '../../../../services/api/apiCustomerCalls';
 import ColoredTableRow from '../../../ui/coloredTableRow/ColoredTableRow';
-import { snackbarState } from '../../../../services/state/RecoilAtoms';
 import { LiabilityBase, LiabilityPlanned } from '../../models/CustomerFormModels';
 import { CustomFormProps, FormTextFieldProps } from '../../models/FormProps';
-import { removeFormByIndex } from '../../../../utils/commonFunctions';
+import { removeFormByIndex } from '../../../../utils/formUtils';
 import { DateFields } from '../../../../services/api/models/ApiModel';
+import { enqueueSnackbar } from 'notistack';
 
 const LiabilityPlannedForm: React.FC<CustomFormProps> = ({
   submitted,
@@ -35,7 +34,6 @@ const LiabilityPlannedForm: React.FC<CustomFormProps> = ({
     formState: { isSubmitting },
   } = useForm<LiabilityPlanned[]>();
   const [details, setDetails] = useState<LiabilityPlanned[]>([]);
-  const setSnackbarState = useSetRecoilState(snackbarState);
   const { custId } = useParams();
   const [selectItems, setSelectItems] = useState<Array<{ value: string; label: string }>>([]);
 
@@ -59,11 +57,12 @@ const LiabilityPlannedForm: React.FC<CustomFormProps> = ({
         return [...prev, ...newLoans];
       });
     } else {
-      setSnackbarState({
-        open: true,
-        message: 'Kunde inte hitta kunders namn, vänligen kontrollera ifyllnad.',
-        severity: 'error',
-      });
+      enqueueSnackbar(
+        'Kunde inte hitta några befintliga lån att planera kring, vänligen lägg till ett nytt lån.',
+        {
+          variant: 'error',
+        }
+      );
     }
   };
 

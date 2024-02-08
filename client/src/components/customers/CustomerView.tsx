@@ -6,11 +6,9 @@ import { useParams } from 'react-router-dom';
 import { getSingleCustomerById } from '../../services/api/apiCustomerCalls';
 import { CustomerOverview } from './models/ViewCustomerModel';
 import { useEffect, useState } from 'react';
-import { useSetRecoilState } from 'recoil';
-import { snackbarState } from '../../services/state/RecoilAtoms';
+import { enqueueSnackbar } from 'notistack';
 
 const CustomerView = () => {
-  const setSnackbarState = useSetRecoilState(snackbarState);
   const [customer, setCustomer] = useState<CustomerOverview>();
   const { custId } = useParams();
   const [loading, setLoading] = useState<boolean>(true);
@@ -21,10 +19,8 @@ const CustomerView = () => {
       setCustomer(response.data as CustomerOverview);
       setLoading(false);
     } else {
-      setSnackbarState({
-        open: true,
-        message: response.error!,
-        severity: 'error',
+      enqueueSnackbar(response.error!, {
+        variant: 'error',
       });
     }
   };

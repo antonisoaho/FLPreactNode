@@ -11,8 +11,8 @@ import {
 } from '@mui/material';
 import { SetStateAction, useEffect, useState } from 'react';
 import CustomerModel from './models/CustomerModel';
-import { useRecoilValue, useSetRecoilState } from 'recoil';
-import { snackbarState, userState } from '../../services/state/RecoilAtoms';
+import { useRecoilValue } from 'recoil';
+import { userState } from '../../services/state/RecoilAtoms';
 import { getUserList } from '../../services/api/apiUserCalls';
 import UserModel from '../users/models/UserModel';
 import { createNewCustomer, getCustomerList } from '../../services/api/apiCustomerCalls';
@@ -20,6 +20,7 @@ import CustomerCard from './cards/CustomerCard';
 import AddButton from '../ui/button/AddButton';
 import { useNavigate } from 'react-router-dom';
 import PromptDialog from '../ui/promtDialog/PromptDialog';
+import { enqueueSnackbar } from 'notistack';
 
 const CustomerComponent = () => {
   const [customers, setCustomers] = useState<Array<CustomerModel>>([]);
@@ -30,7 +31,6 @@ const CustomerComponent = () => {
   const [sortOption, setSortOption] = useState<string>('updatedAt');
   const [openDialog, setOpenDialog] = useState(false);
   const { isAdmin } = useRecoilValue(userState);
-  const setSnackbarState = useSetRecoilState(snackbarState);
   const navigate = useNavigate();
 
   const populateAdvisors = async () => {
@@ -40,10 +40,8 @@ const CustomerComponent = () => {
       setAdvisorList(response.data!);
       setLoading(false);
     } else {
-      setSnackbarState({
-        open: true,
-        message: response.error!,
-        severity: 'error',
+      enqueueSnackbar(response.error!, {
+        variant: 'error',
       });
     }
   };
@@ -54,10 +52,8 @@ const CustomerComponent = () => {
     if (response.success && response.status === 200) {
       setCustomers(response.data!);
     } else {
-      setSnackbarState({
-        open: true,
-        message: response.error!,
-        severity: 'error',
+      enqueueSnackbar(response.error!, {
+        variant: 'error',
       });
     }
   };
@@ -105,18 +101,14 @@ const CustomerComponent = () => {
 
     if (response.success) {
       const newCustomerId = response.data?.custId;
-      setSnackbarState({
-        open: true,
-        message: 'Ny kund skapad!',
-        severity: 'success',
+      enqueueSnackbar('Kund skapad', {
+        variant: 'success',
       });
 
       navigate(`/customers/${newCustomerId}`);
     } else {
-      setSnackbarState({
-        open: true,
-        message: response.error!,
-        severity: 'error',
+      enqueueSnackbar(response.error!, {
+        variant: 'error',
       });
     }
   };

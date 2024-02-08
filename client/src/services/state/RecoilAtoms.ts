@@ -8,12 +8,3 @@ export const userState = atom({
     userId: '',
   },
 });
-
-export const snackbarState = atom({
-  key: 'snackbarState',
-  default: {
-    open: false,
-    message: '',
-    severity: 'info',
-  },
-});

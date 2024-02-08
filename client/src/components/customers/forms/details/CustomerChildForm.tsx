@@ -13,17 +13,16 @@ import {
   TextField,
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { formatDate, removeFormByIndex } from '../../../../utils/commonFunctions';
+import { formatDate } from '../../../../utils/formatting';
+import { removeFormByIndex } from '../../../../utils/formUtils';
 import { useParams } from 'react-router-dom';
 import { CustomFormProps, FormTextFieldProps } from '../../models/FormProps';
 import { getCustomerNames, updateCustomer } from '../../../../services/api/apiCustomerCalls';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import { useSetRecoilState } from 'recoil';
-import { snackbarState } from '../../../../services/state/RecoilAtoms';
+import { enqueueSnackbar } from 'notistack';
 
 const CustomerChildForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFormCount }) => {
   const [details, setDetails] = useState<CustomerChildren[]>([]);
-  const setSnackbarState = useSetRecoilState(snackbarState);
   const { custId } = useParams();
   const [selectItems, setSelectItems] = useState<Array<{ value: string; label: string }>>([
     { value: 'Gemensamt', label: 'Gemensamt' },
@@ -47,10 +46,8 @@ const CustomerChildForm: React.FC<CustomFormProps> = ({ submitted, formCount, se
         return [...prev, ...newItems];
       });
     } else {
-      setSnackbarState({
-        open: true,
-        message: 'Kunde inte hitta kunders namn, vänligen kontrollera ifyllnad.',
-        severity: 'error',
+      enqueueSnackbar('Kunde inte hitta kunders namn, vänligen kontrollera ifyllnad.', {
+        variant: 'error',
       });
     }
   };

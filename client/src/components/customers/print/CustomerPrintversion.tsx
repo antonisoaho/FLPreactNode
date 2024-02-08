@@ -1,13 +1,11 @@
 import { CircularProgress, Grid, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
-import { useSetRecoilState } from 'recoil';
-import { snackbarState } from '../../../services/state/RecoilAtoms';
 import { CustomerOverview } from '../models/ViewCustomerModel';
 import { getSingleCustomerById } from '../../../services/api/apiCustomerCalls';
 import { useParams } from 'react-router-dom';
+import { enqueueSnackbar } from 'notistack';
 
 const CustomerPrintversion = () => {
-  const setSnackbarState = useSetRecoilState(snackbarState);
   const [customer, setCustomer] = useState<CustomerOverview | undefined>();
   const [loading, setLoading] = useState<boolean>(true);
   const { custId } = useParams();
@@ -19,10 +17,8 @@ const CustomerPrintversion = () => {
 
       setLoading(false);
     } else {
-      setSnackbarState({
-        open: true,
-        message: response.error!,
-        severity: 'error',
+      enqueueSnackbar(response.error!, {
+        variant: 'error',
       });
     }
   };

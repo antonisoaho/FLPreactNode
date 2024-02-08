@@ -26,9 +26,8 @@ import MenuIcon from '@mui/icons-material/Menu';
 import MenuOpenIcon from '@mui/icons-material/MenuOpen';
 import GroupRemoveIcon from '@mui/icons-material/GroupRemove';
 import { deleteCustomerById } from '../../../services/api/apiCustomerCalls';
-import { useSetRecoilState } from 'recoil';
-import { snackbarState } from '../../../services/state/RecoilAtoms';
 import PromptDialog from '../../ui/promtDialog/PromptDialog';
+import { enqueueSnackbar } from 'notistack';
 
 const drawerWidth = 100;
 const closeWidth = 15;
@@ -37,7 +36,6 @@ const transDuration = 1000;
 const CustomerSidebar = () => {
   const [open, setOpen] = useState<boolean>(false);
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
-  const setSnackbarState = useSetRecoilState(snackbarState);
   const { custId } = useParams();
   const basePath = `/customers/${custId}/edit/`;
   const navigate = useNavigate();
@@ -83,18 +81,14 @@ const CustomerSidebar = () => {
     const response = await deleteCustomerById(custId!);
 
     if (response.success) {
-      setSnackbarState({
-        open: true,
-        message: 'Kund raderad.',
-        severity: 'success',
+      enqueueSnackbar('Kund raderad', {
+        variant: 'success',
       });
 
       navigate('/customers');
     } else {
-      setSnackbarState({
-        open: true,
-        message: response.error!,
-        severity: 'error',
+      enqueueSnackbar(response.error!, {
+        variant: 'error',
       });
     }
   };

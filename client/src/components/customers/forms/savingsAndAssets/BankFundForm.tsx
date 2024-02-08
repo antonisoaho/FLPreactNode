@@ -1,11 +1,9 @@
 import { useState, useEffect, Fragment } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
-import { useSetRecoilState } from 'recoil';
 import { getCustomerNames, updateCustomer } from '../../../../services/api/apiCustomerCalls';
-import { snackbarState } from '../../../../services/state/RecoilAtoms';
 import { BankFund } from '../../models/CustomerFormModels';
-import { removeFormByIndex } from '../../../../utils/commonFunctions';
+import { removeFormByIndex } from '../../../../utils/formUtils';
 import { CustomFormProps, FormTextFieldProps } from '../../models/FormProps';
 import {
   Button,
@@ -19,6 +17,7 @@ import {
 } from '@mui/material';
 import ColoredTableRow from '../../../ui/coloredTableRow/ColoredTableRow';
 import { timePerspectiveSelect } from '../../../../utils/formVariables';
+import { enqueueSnackbar } from 'notistack';
 
 const BankFundForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFormCount }) => {
   const {
@@ -27,7 +26,6 @@ const BankFundForm: React.FC<CustomFormProps> = ({ submitted, formCount, setForm
     formState: { isSubmitting },
   } = useForm<BankFund[]>();
   const [details, setDetails] = useState<BankFund[]>([]);
-  const setSnackbarState = useSetRecoilState(snackbarState);
   const { custId } = useParams();
   const colSpan: number = 5;
   const [selectItems, setSelectItems] = useState<Array<{ value: string; label: string }>>([
@@ -46,10 +44,8 @@ const BankFundForm: React.FC<CustomFormProps> = ({ submitted, formCount, setForm
         return [...prev, ...newItems];
       });
     } else {
-      setSnackbarState({
-        open: true,
-        message: 'Kunde inte hitta kunders namn, vänligen kontrollera ifyllnad.',
-        severity: 'error',
+      enqueueSnackbar('Kunde inte hitta kunders namn, vänligen kontrollera ifyllnad.', {
+        variant: 'error',
       });
     }
   };

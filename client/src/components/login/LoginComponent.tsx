@@ -11,9 +11,10 @@ import {
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSetRecoilState } from 'recoil';
-import { snackbarState, userState } from '../../services/state/RecoilAtoms';
+import { userState } from '../../services/state/RecoilAtoms';
 import { loginAPI } from '../../services/api/apiUserCalls';
 import { SubmitHandler, useForm } from 'react-hook-form';
+import { enqueueSnackbar } from 'notistack';
 
 type LoginForm = {
   email: string;
@@ -22,7 +23,6 @@ type LoginForm = {
 
 const LoginComponent: React.FC = () => {
   const setUser = useSetRecoilState(userState);
-  const setSnackbarState = useSetRecoilState(snackbarState);
 
   const navigate = useNavigate();
 
@@ -35,10 +35,8 @@ const LoginComponent: React.FC = () => {
   const onSubmit: SubmitHandler<LoginForm> = async (data) => {
     const response = await loginAPI(data.email, data.password);
     if (response.success && response.status === 200) {
-      setSnackbarState({
-        open: response.success,
-        message: `Välkommen, ${response.data?.name || 'inloggning lyckades'}.`,
-        severity: 'success',
+      enqueueSnackbar(`Välkommen, ${response.data?.name || 'inloggning lyckades'}.`, {
+        variant: 'success',
       });
 
       localStorage.setItem('TOKEN', response.data!.token);
@@ -52,10 +50,8 @@ const LoginComponent: React.FC = () => {
 
       if (navigate) navigate('/');
     } else {
-      setSnackbarState({
-        open: true,
-        message: response.error!,
-        severity: 'error',
+      enqueueSnackbar(response.error!, {
+        variant: 'error',
       });
     }
   };

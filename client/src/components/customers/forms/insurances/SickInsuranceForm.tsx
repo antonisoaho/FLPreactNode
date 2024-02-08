@@ -13,22 +13,21 @@ import {
 import React, { Fragment, useEffect, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
-import { useSetRecoilState } from 'recoil';
 import {
   updateCustomer,
   getCustomerNames,
   getCustomerChildNames,
 } from '../../../../services/api/apiCustomerCalls';
 import ColoredTableRow from '../../../ui/coloredTableRow/ColoredTableRow';
-import { snackbarState } from '../../../../services/state/RecoilAtoms';
 import { InsuranceSickness } from '../../models/CustomerFormModels';
 import { CustomFormProps, FormTextFieldProps } from '../../models/FormProps';
-import { removeFormByIndex } from '../../../../utils/commonFunctions';
+import { removeFormByIndex } from '../../../../utils/formUtils';
 import { DatePicker } from '@mui/x-date-pickers';
 import {
   compensationPeriodSickness,
   qualifyingPeriodSickness,
 } from '../../../../utils/formVariables';
+import { enqueueSnackbar } from 'notistack';
 
 const SickInsuranceForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFormCount }) => {
   const {
@@ -38,7 +37,6 @@ const SickInsuranceForm: React.FC<CustomFormProps> = ({ submitted, formCount, se
     formState: { isSubmitting },
   } = useForm<InsuranceSickness[]>();
   const [details, setDetails] = useState<InsuranceSickness[]>([]);
-  const setSnackbarState = useSetRecoilState(snackbarState);
   const { custId } = useParams();
   const [selectItems, setSelectItems] = useState<Array<{ value: string; label: string }>>([]);
   const colSpan: number = 5;
@@ -60,10 +58,8 @@ const SickInsuranceForm: React.FC<CustomFormProps> = ({ submitted, formCount, se
         return [...prev, ...newPersons, ...newChildren];
       });
     } else {
-      setSnackbarState({
-        open: true,
-        message: 'Kunde inte hitta kunders namn, vänligen kontrollera ifyllnad.',
-        severity: 'error',
+      enqueueSnackbar('Kunde inte hitta kunders namn, vänligen kontrollera ifyllnad.', {
+        variant: 'error',
       });
     }
   };

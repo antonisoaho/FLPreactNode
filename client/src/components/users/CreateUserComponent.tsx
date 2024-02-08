@@ -16,11 +16,10 @@ import {
 import React, { useState } from 'react';
 import CreateUserModel from './models/CreateUserModel';
 import { VisibilityOff, Visibility } from '@mui/icons-material';
-import { useSetRecoilState } from 'recoil';
-import { snackbarState } from '../../services/state/RecoilAtoms';
 import { createNewUser } from '../../services/api/apiUserCalls';
 import CloseIcon from '@mui/icons-material/Close';
 import { SubmitHandler, useForm } from 'react-hook-form';
+import { enqueueSnackbar } from 'notistack';
 
 interface CreateUserComponentProps {
   onUserCreated: () => void;
@@ -36,8 +35,6 @@ const CreateUserComponent: React.FC<CreateUserComponentProps> = ({ onUserCreated
   } = useForm<CreateUserModel>();
 
   const [showPassword, setShowPassword] = useState(false);
-
-  const setSnackbarState = useSetRecoilState(snackbarState);
 
   const handleClose = () => {
     onClose();
@@ -57,18 +54,14 @@ const CreateUserComponent: React.FC<CreateUserComponentProps> = ({ onUserCreated
     const response = await createNewUser(data);
 
     if (response.success && response.status === 201) {
-      setSnackbarState({
-        open: true,
-        message: `Konto åt ${response.data!.name} skapat.`,
-        severity: 'success',
+      enqueueSnackbar(`Konto åt ${response.data!.name} skapat.`, {
+        variant: 'success',
       });
 
       onUserCreated();
     } else {
-      setSnackbarState({
-        open: true,
-        message: response.error!,
-        severity: 'error',
+      enqueueSnackbar(response.error!, {
+        variant: 'error',
       });
     }
   };

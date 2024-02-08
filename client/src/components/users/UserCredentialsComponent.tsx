@@ -15,8 +15,6 @@ import {
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import React, { useEffect, useState } from 'react';
-import { useSetRecoilState } from 'recoil';
-import { snackbarState } from '../../services/state/RecoilAtoms';
 import {
   deleteUserById,
   getSingleUserById,
@@ -24,6 +22,7 @@ import {
 } from '../../services/api/apiUserCalls';
 import UpdateUserModel from './models/UpdateUserModel';
 import UserModel from './models/UserModel';
+import { enqueueSnackbar } from 'notistack';
 
 export interface UserCredentialsProps {
   onUserChanged: () => void;
@@ -39,7 +38,6 @@ const UserCredentialsComponent: React.FC<UserCredentialsProps> = ({
   const [userModel, setUserModel] = useState<UpdateUserModel>();
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [loading, isLoading] = useState<boolean>(true);
-  const setSnackbarState = useSetRecoilState(snackbarState);
 
   const getSelectedUser = async () => {
     const response = await getSingleUserById(_id);
@@ -53,10 +51,8 @@ const UserCredentialsComponent: React.FC<UserCredentialsProps> = ({
         isAdmin,
       });
     } else {
-      setSnackbarState({
-        open: true,
-        message: response.error!,
-        severity: 'error',
+      enqueueSnackbar(response.error!, {
+        variant: 'error',
       });
     }
     isLoading(false);
@@ -84,18 +80,14 @@ const UserCredentialsComponent: React.FC<UserCredentialsProps> = ({
     const response = await updateSingleUserById(_id, userModel!);
 
     if (response.success && response.status === 200) {
-      setSnackbarState({
-        open: true,
-        message: `${userModel!.name}'s konto ändrat.`,
-        severity: 'info',
+      enqueueSnackbar(`${userModel!.name}'s konto ändrat.`, {
+        variant: 'info',
       });
 
       onUserChanged();
     } else {
-      setSnackbarState({
-        open: true,
-        message: response.error!,
-        severity: 'error',
+      enqueueSnackbar(response.error!, {
+        variant: 'error',
       });
     }
   };
@@ -106,16 +98,12 @@ const UserCredentialsComponent: React.FC<UserCredentialsProps> = ({
     const response = await deleteUserById(_id);
 
     if (response.success && response.status === 200) {
-      setSnackbarState({
-        open: true,
-        message: `${userModel!.name}'s konto borttaget.`,
-        severity: 'info',
+      enqueueSnackbar(`${userModel!.name}'s konto borttaget.`, {
+        variant: 'info',
       });
     } else {
-      setSnackbarState({
-        open: true,
-        message: response.error!,
-        severity: 'error',
+      enqueueSnackbar(response.error!, {
+        variant: 'error',
       });
     }
 

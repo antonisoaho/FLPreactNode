@@ -15,10 +15,9 @@ import {
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { getCustomerNames, updateCustomer } from '../../../../services/api/apiCustomerCalls';
 import { useParams } from 'react-router-dom';
-import { removeFormByIndex } from '../../../../utils/commonFunctions';
+import { removeFormByIndex } from '../../../../utils/formUtils';
 import { CustomFormProps, FormTextFieldProps } from '../../models/FormProps';
-import { useSetRecoilState } from 'recoil';
-import { snackbarState } from '../../../../services/state/RecoilAtoms';
+import { enqueueSnackbar } from 'notistack';
 
 const IncomeBaseForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFormCount }) => {
   const {
@@ -27,7 +26,6 @@ const IncomeBaseForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFo
     formState: { isSubmitting },
   } = useForm<IncomeBase[]>();
   const [details, setDetails] = useState<IncomeBase[]>([]);
-  const setSnackbarState = useSetRecoilState(snackbarState);
   const { custId } = useParams();
   const [selectItems, setSelectItems] = useState<Array<{ value: string; label: string }>>([]);
   const [companyCarChecked, setCompanyCarChecked] = useState<boolean>(false);
@@ -45,10 +43,8 @@ const IncomeBaseForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFo
         return [...prev, ...newItems];
       });
     } else {
-      setSnackbarState({
-        open: true,
-        message: 'Kunde inte hitta kunders namn, vänligen kontrollera ifyllnad.',
-        severity: 'error',
+      enqueueSnackbar('Kunde inte hitta kunders namn, vänligen kontrollera ifyllnad.', {
+        variant: 'error',
       });
     }
   };

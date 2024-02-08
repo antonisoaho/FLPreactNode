@@ -1,9 +1,6 @@
-import { createContext, ReactNode, useContext, useState } from 'react';
+import { createContext, useContext, useState } from 'react';
 import { ThemeProvider as MuiThemeProvider, createTheme, CssBaseline } from '@mui/material';
-
-interface ThemeProviderProps {
-  children: ReactNode;
-}
+import { ProviderProps } from './ProviderProps';
 
 interface ThemeContextValue {
   isDarkMode: boolean;
@@ -22,7 +19,7 @@ const lightModeColors = {
   foreground: '#1c1c1c',
 };
 
-export const ThemeProvider = ({ children }: ThemeProviderProps) => {
+export const ThemeProvider = ({ children }: ProviderProps) => {
   const [isDarkMode, setIsDarkMode] = useState(() => {
     const storedDarkMode = localStorage.getItem('DARKMODE');
     return storedDarkMode ? JSON.parse(storedDarkMode) : false;

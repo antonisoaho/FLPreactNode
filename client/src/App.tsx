@@ -7,14 +7,10 @@ import '@fontsource/roboto/700.css';
 import { Route, Routes, useNavigate } from 'react-router-dom';
 import globalRouter from './services/providers/globalRouter';
 import ResponsiveAppBar from './components/navbar/NavbarComponent';
-import { ThemeProvider } from './services/providers/ThemeProvider';
 import { Logout } from './services/api/AxiosInstance';
 import { CircularProgress } from '@mui/material';
 import { useSetRecoilState } from 'recoil';
 import { userState } from './services/state/RecoilAtoms';
-import SnackbarComponent from './services/providers/SnackbarProvider';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import dayjs from 'dayjs';
 import 'dayjs/locale/sv';
 import ProtectedRoute from './routes/ProtectedRoute';
@@ -58,37 +54,32 @@ const App = () => {
   }, []);
 
   return (
-    <ThemeProvider>
-      <LocalizationProvider dateAdapter={AdapterDayjs}>
-        <div className="App" style={{ display: 'grid' }}>
-          {loading ? (
-            <>
-              <CircularProgress />
-            </>
-          ) : (
-            <>
-              <SnackbarComponent />
-              <ResponsiveAppBar />
-              <>
-                <Routes>
-                  {/* Home and Login */}
-                  {BasicRoutes}
+    <div className="App" style={{ display: 'grid' }}>
+      {loading ? (
+        <>
+          <CircularProgress />
+        </>
+      ) : (
+        <>
+          <ResponsiveAppBar />
+          <>
+            <Routes>
+              {/* Home and Login */}
+              {BasicRoutes}
 
-                  {/* Protected routes nested */}
-                  <Route element={<ProtectedRoute />}>
-                    {/* Logout, users and myaccount */}
-                    {UserRoutes}
-                    {/* Customer related pages */}
-                    {CustomerRoutes}
-                  </Route>
-                  <Route path="*" element={<PageNotFound />} />
-                </Routes>
-              </>
-            </>
-          )}
-        </div>
-      </LocalizationProvider>
-    </ThemeProvider>
+              {/* Protected routes nested */}
+              <Route element={<ProtectedRoute />}>
+                {/* Logout, users and myaccount */}
+                {UserRoutes}
+                {/* Customer related pages */}
+                {CustomerRoutes}
+              </Route>
+              <Route path="*" element={<PageNotFound />} />
+            </Routes>
+          </>
+        </>
+      )}
+    </div>
   );
 };
 

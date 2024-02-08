@@ -1,12 +1,10 @@
 import React, { Fragment, useEffect, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
-import { useSetRecoilState } from 'recoil';
 import { getCustomerNames, updateCustomer } from '../../../../services/api/apiCustomerCalls';
-import { snackbarState } from '../../../../services/state/RecoilAtoms';
 import { ExpensesBase } from '../../models/CustomerFormModels';
 import { CustomFormProps, FormTextFieldProps } from '../../models/FormProps';
-import { removeFormByIndex } from '../../../../utils/commonFunctions';
+import { removeFormByIndex } from '../../../../utils/formUtils';
 import {
   Table,
   TableBody,
@@ -18,6 +16,7 @@ import {
   ListItemButton,
 } from '@mui/material';
 import TableLoader from '../../../ui/tableLoader/TableLoader';
+import { enqueueSnackbar } from 'notistack';
 
 const ExpenseBaseForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFormCount }) => {
   const {
@@ -26,7 +25,6 @@ const ExpenseBaseForm: React.FC<CustomFormProps> = ({ submitted, formCount, setF
     formState: { isSubmitting },
   } = useForm<ExpensesBase[]>();
   const [details, setDetails] = useState<ExpensesBase[]>([]);
-  const setSnackbarState = useSetRecoilState(snackbarState);
   const { custId } = useParams();
   const [persons, setPersons] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -44,10 +42,8 @@ const ExpenseBaseForm: React.FC<CustomFormProps> = ({ submitted, formCount, setF
         return [...prev, ...newNames];
       });
     } else {
-      setSnackbarState({
-        open: true,
-        message: 'Kunde inte hitta kunders namn, vänligen kontrollera ifyllnad.',
-        severity: 'error',
+      enqueueSnackbar('Kunde inte hitta kunders namn, vänligen kontrollera ifyllnad.', {
+        variant: 'error',
       });
     }
   };

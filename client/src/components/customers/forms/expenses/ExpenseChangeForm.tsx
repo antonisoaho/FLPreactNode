@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom';
 import { updateCustomer } from '../../../../services/api/apiCustomerCalls';
 import { ExpensesChange } from '../../models/CustomerFormModels';
 import { CustomFormProps, FormTextFieldProps } from '../../models/FormProps';
-import { removeFormByIndex } from '../../../../utils/commonFunctions';
+import { removeFormByIndex } from '../../../../utils/formUtils';
 import {
   Table,
   TableBody,

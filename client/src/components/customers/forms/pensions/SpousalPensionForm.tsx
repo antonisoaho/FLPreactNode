@@ -13,17 +13,16 @@ import {
 import React, { Fragment, useEffect, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
-import { useSetRecoilState } from 'recoil';
 import {
   updateCustomer,
   getCustomerNames,
   getCustomerChildNames,
 } from '../../../../services/api/apiCustomerCalls';
 import ColoredTableRow from '../../../ui/coloredTableRow/ColoredTableRow';
-import { snackbarState } from '../../../../services/state/RecoilAtoms';
 import { SpousalPension } from '../../models/CustomerFormModels';
 import { CustomFormProps, FormTextFieldProps } from '../../models/FormProps';
-import { removeFormByIndex } from '../../../../utils/commonFunctions';
+import { removeFormByIndex } from '../../../../utils/formUtils';
+import { enqueueSnackbar } from 'notistack';
 
 const SpousalPensionForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFormCount }) => {
   const {
@@ -32,7 +31,6 @@ const SpousalPensionForm: React.FC<CustomFormProps> = ({ submitted, formCount, s
     formState: { isSubmitting },
   } = useForm<SpousalPension[]>();
   const [details, setDetails] = useState<SpousalPension[]>([]);
-  const setSnackbarState = useSetRecoilState(snackbarState);
   const { custId } = useParams();
   const [selectItems, setSelectItems] = useState<Array<{ value: string; label: string }>>([]);
   const colSpan: number = 6;
@@ -54,10 +52,8 @@ const SpousalPensionForm: React.FC<CustomFormProps> = ({ submitted, formCount, s
         return [...prev, ...newPersons, ...newChildren];
       });
     } else {
-      setSnackbarState({
-        open: true,
-        message: 'Kunde inte hitta kunders namn, vänligen kontrollera ifyllnad.',
-        severity: 'error',
+      enqueueSnackbar('Kunde inte hitta kunders namn, vänligen kontrollera ifyllnad.', {
+        variant: 'error',
       });
     }
   };
