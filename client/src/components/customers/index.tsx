@@ -92,7 +92,7 @@ const CustomerComponent = () => {
         variant: 'success',
       });
 
-      navigate(`/customers/${(data as CustomerModel).custId}`);
+      navigate(`/customers/${data.custId}`);
     },
   });
 

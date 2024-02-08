@@ -51,7 +51,10 @@ const Row: React.FC<RowProps> = ({ row, onUserPrefsOpen }) => {
             padding: 0,
             paddingLeft: '16px',
           }}>
-          <IconButton aria-label="expand row" size="small" onClick={() => handleOpen(row._id)}>
+          <IconButton
+            aria-label="expand row"
+            size="small"
+            onClick={() => (!open ? handleOpen(row._id) : setOpen(false))}>
             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
         </TableCell>
@@ -86,14 +89,10 @@ const Row: React.FC<RowProps> = ({ row, onUserPrefsOpen }) => {
                 {user ? (
                   <TableBody>
                     <TableRow>
-                      <TableCell>{(user as UserModel)?._id}</TableCell>
-                      <TableCell>{(user as UserModel)?.email}</TableCell>
-                      <TableCell>
-                        {new Date((user as UserModel)?.updatedAt!).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell>
-                        {new Date((user as UserModel)?.createdAt!).toLocaleDateString()}
-                      </TableCell>
+                      <TableCell>{user._id}</TableCell>
+                      <TableCell>{user.email}</TableCell>
+                      <TableCell>{new Date(user.updatedAt!).toLocaleDateString()}</TableCell>
+                      <TableCell>{new Date(user.createdAt!).toLocaleDateString()}</TableCell>
                       <TableCell />
                     </TableRow>
                   </TableBody>

@@ -5,14 +5,11 @@ import UserCredentialsComponent from './UserCredentialsComponent';
 import { userState } from '../../services/state/RecoilAtoms';
 import { useRecoilValue } from 'recoil';
 import { getUserList } from '../../services/api/apiUserCalls';
-import UserModel from './models/UserModel';
 import UserListTable from './table/UserListTable';
 import AddButton from '../ui/button/AddButton';
 import { useQuery } from 'react-query';
 
 const UserComponent: React.FC = () => {
-  // const [users, setUsers] = useState<Array<UserModel>>([]);
-  // const [loading, setLoading] = useState<boolean>(false);
   const [createOpen, setCreateOpen] = useState<boolean>(false);
   const [changeOpen, setChangeOpen] = useState<boolean>(false);
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
@@ -20,7 +17,7 @@ const UserComponent: React.FC = () => {
   const { isAdmin } = useRecoilValue(userState);
 
   const handleCreateUser = () => {
-    setCreateOpen(!open);
+    setCreateOpen(!createOpen);
   };
 
   const handleUserPrefsOpen = (selectedUser: string) => {
@@ -58,7 +55,7 @@ const UserComponent: React.FC = () => {
       )}
 
       <UserListTable
-        users={(users as UserModel[]) || []}
+        users={users || []}
         isLoading={isLoading}
         handleUserPrefsOpen={handleUserPrefsOpen}
       />

@@ -5,8 +5,6 @@ import { CustomerFormData } from '../../../components/customers/models/CustomerF
 //   status: number | undefined;
 // };
 
-export type ApiResponse<T> = T | unknown;
-
 export type QueryResponse<T> = {
   success: boolean;
   status: number | undefined;

@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSetRecoilState } from 'recoil';
 import { loginAPI } from '../../services/api/apiUserCalls';
 import { userState } from '../../services/state/RecoilAtoms';
-import { LoginResponse, LoginFormData } from './models';
+import { LoginFormData } from './models';
 
 const LoginForm = () => {
   const setUser = useSetRecoilState(userState);
@@ -21,7 +21,7 @@ const LoginForm = () => {
   const { mutateAsync: onSubmit } = useMutation({
     mutationFn: (data: LoginFormData) => loginAPI(data.email, data.password),
     onSuccess: (data) => {
-      const { userId, name, isAdmin, token } = data as LoginResponse;
+      const { userId, name, isAdmin, token } = data;
 
       enqueueSnackbar(`Välkommen, ${name || 'inloggning lyckades'}.`, {
         variant: 'success',

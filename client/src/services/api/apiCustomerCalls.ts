@@ -2,65 +2,62 @@ import axiosInstance from './AxiosInstance';
 import { CustomerOverview } from '../../components/customers/models/ViewCustomerModel';
 import CustomerModel from '../../components/customers/models/CustomerModel';
 import {
-  ApiResponse,
   CustomerDataHandler,
   CustomerFormResponse,
   CustomerGetDataHandler,
   SubDocRemoval,
 } from './models';
 
-export const getCustomerList = async (): Promise<ApiResponse<CustomerModel[]>> => {
+export const getCustomerList = async (): Promise<CustomerModel[]> => {
   try {
     const response = await axiosInstance.get('/customers');
     return response.data;
   } catch (error) {
-    return error;
+    return Promise.reject(error);
   }
 };
 
-export const getSingleCustomerById = async (
-  custId: string
-): Promise<ApiResponse<CustomerOverview>> => {
+export const getSingleCustomerById = async (custId: string): Promise<CustomerOverview> => {
   try {
     const response = await axiosInstance.get(`/customers/${custId}`);
     return response.data;
   } catch (error) {
-    return error;
+    return Promise.reject(error);
   }
 };
 
-export const getCustomerNames = async (id: string): Promise<ApiResponse<[]>> => {
+export const getCustomerNames = async (id: string): Promise<[]> => {
   try {
     const response = await axiosInstance.get(`/customers/${id}/customerDetails`);
     const customerNames = response.data.map((cust: { name: string }) => cust.name);
     return customerNames;
   } catch (error) {
-    return error;
+    return Promise.reject(error);
   }
 };
 
-export const getCustomerChildNames = async (id: string): Promise<ApiResponse<[]>> => {
+export const getCustomerChildNames = async (id: string): Promise<[]> => {
   try {
     const response = await axiosInstance.get(`/customers/${id}/customerChildren`);
     const customerNames = response.data.map((cust: { name: string }) => cust.name);
     return customerNames;
   } catch (error) {
-    return error;
+    return Promise.reject(error);
   }
 };
 
-export const createNewCustomer = async (): Promise<ApiResponse<CustomerModel>> => {
+export const createNewCustomer = async (): Promise<CustomerModel> => {
   try {
     const response = await axiosInstance.post('/customers/create');
     return response.data;
   } catch (error) {
-    return error;
+    return Promise.reject(error);
   }
 };
 
 export const getCustomerFormData = async (
   details: CustomerGetDataHandler
-): Promise<ApiResponse<CustomerFormResponse>> => {
+): Promise<CustomerFormResponse> => {
   if (details.subField == undefined) {
     details.subField = '';
   }
@@ -70,13 +67,13 @@ export const getCustomerFormData = async (
     );
     return response.data;
   } catch (error) {
-    return error;
+    return Promise.reject(error);
   }
 };
 
 export const updateCustomer = async (
   details: CustomerDataHandler
-): Promise<ApiResponse<CustomerFormResponse>> => {
+): Promise<CustomerFormResponse> => {
   if (details.subField == undefined) {
     details.subField = '';
   }
@@ -87,22 +84,20 @@ export const updateCustomer = async (
     );
     return response.data;
   } catch (error) {
-    return error;
+    return Promise.reject(error);
   }
 };
 
-export const deleteCustomerById = async (custId: string): Promise<ApiResponse<string>> => {
+export const deleteCustomerById = async (custId: string): Promise<string> => {
   try {
     const response = await axiosInstance.delete(`/customers/${custId}`);
     return response.data;
   } catch (error) {
-    return error;
+    return Promise.reject(error);
   }
 };
 
-export const deleteCustSubDocument = async (
-  d: SubDocRemoval
-): Promise<ApiResponse<CustomerFormResponse>> => {
+export const deleteCustSubDocument = async (d: SubDocRemoval): Promise<CustomerFormResponse> => {
   if (d.subField == undefined) {
     d.subField = '';
   }
@@ -112,6 +107,6 @@ export const deleteCustSubDocument = async (
     );
     return response.data;
   } catch (error) {
-    return error;
+    return Promise.reject(error);
   }
 };

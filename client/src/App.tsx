@@ -28,20 +28,19 @@ const App = () => {
   const setUser = useSetRecoilState(userState);
 
   const { isLoading } = useQuery({
-    queryFn: () => userInfoGetMe(),
+    queryFn: userInfoGetMe,
     queryKey: ['loggedInUser'],
 
     onSuccess: (data) => {
-      if (data.success) {
-        setUser({
-          loggedIn: true,
-          isAdmin: data.data!.isAdmin,
-          userId: data.data!.userId,
-        });
-      } else {
-        Logout();
-        localStorage.removeItem('TOKEN');
-      }
+      setUser({
+        loggedIn: true,
+        isAdmin: data.isAdmin,
+        userId: data.userId,
+      });
+    },
+    onError: () => {
+      Logout();
+      localStorage.removeItem('TOKEN');
     },
   });
 

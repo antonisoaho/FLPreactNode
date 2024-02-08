@@ -99,6 +99,7 @@ const CreateUserForm: React.FC<CreateUserProps> = ({ onClose }) => {
         fullWidth
         id="password"
         label="Lösenord"
+        autoComplete="current-password"
         type={showPassword ? 'text' : 'password'}
         {...register('password', { required: 'Lösenord saknas.' })}
         InputProps={{
