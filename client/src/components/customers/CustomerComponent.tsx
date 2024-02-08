@@ -67,6 +67,7 @@ const CustomerComponent = () => {
     if (!customer.customerNames) {
       return true;
     }
+
     if (searchTerm) {
       return customer.customerNames.some((name) =>
         name.toLowerCase().includes(searchTerm.toLowerCase())

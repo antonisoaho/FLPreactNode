@@ -8,18 +8,24 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import dayjs from 'dayjs';
 import 'dayjs/locale/sv';
+import { QueryClient, QueryClientProvider } from 'react-query';
+import { ReactQueryDevtools } from 'react-query/devtools';
 
 dayjs.locale('sv');
+const queryClient = new QueryClient();
 
 const Providers: FC<ProviderProps> = ({ children }) => {
   return (
     <BrowserRouter>
       <RecoilRoot>
-        <ThemeProvider>
-          <SnackbarProvider maxSnack={3}>
-            <LocalizationProvider dateAdapter={AdapterDayjs}>{children}</LocalizationProvider>
-          </SnackbarProvider>
-        </ThemeProvider>
+        <QueryClientProvider client={queryClient}>
+          <ThemeProvider>
+            <SnackbarProvider maxSnack={3}>
+              <LocalizationProvider dateAdapter={AdapterDayjs}>{children}</LocalizationProvider>
+            </SnackbarProvider>
+          </ThemeProvider>
+          <ReactQueryDevtools />
+        </QueryClientProvider>
       </RecoilRoot>
     </BrowserRouter>
   );

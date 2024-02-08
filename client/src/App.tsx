@@ -71,6 +71,7 @@ const App = () => {
               <Route element={<ProtectedRoute />}>
                 {/* Logout, users and myaccount */}
                 {UserRoutes}
+
                 {/* Customer related pages */}
                 {CustomerRoutes}
               </Route>

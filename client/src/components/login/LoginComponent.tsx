@@ -34,6 +34,7 @@ const LoginComponent: React.FC = () => {
 
   const onSubmit: SubmitHandler<LoginForm> = async (data) => {
     const response = await loginAPI(data.email, data.password);
+
     if (response.success && response.status === 200) {
       enqueueSnackbar(`Välkommen, ${response.data?.name || 'inloggning lyckades'}.`, {
         variant: 'success',
