@@ -1,33 +1,31 @@
 import CustomerDashboard from './dashboard/CustomerDashboard';
 import CustomerSidebar from './sidebar/CustomerSidebar';
 import CustomerTable from './table/CustomerTable';
-import { Box, CircularProgress, Divider } from '@mui/material';
+import { Box, Divider } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import { getSingleCustomerById } from '../../services/api/apiCustomerCalls';
 import { CustomerOverview } from './models/ViewCustomerModel';
-import { useEffect, useState } from 'react';
 import { enqueueSnackbar } from 'notistack';
+import { useQuery } from 'react-query';
+import PageLoader from '../ui/pageLoader';
 
 const CustomerView = () => {
-  const [customer, setCustomer] = useState<CustomerOverview>();
   const { custId } = useParams();
-  const [loading, setLoading] = useState<boolean>(true);
 
-  const getCustomer = async () => {
-    const response = await getSingleCustomerById(custId!);
-    if (response.success && response.status === 200) {
-      setCustomer(response.data as CustomerOverview);
-      setLoading(false);
-    } else {
-      enqueueSnackbar(response.error!, {
+  const { data: customer, isLoading } = useQuery({
+    queryKey: ['customer', custId],
+    queryFn: () => getSingleCustomerById(custId!),
+
+    onError: (error) => {
+      enqueueSnackbar(error as string, {
         variant: 'error',
       });
-    }
-  };
+    },
+  });
 
-  useEffect(() => {
-    getCustomer();
-  }, [custId]);
+  if (isLoading) {
+    return <PageLoader />;
+  }
 
   return (
     <>
@@ -44,15 +42,9 @@ const CustomerView = () => {
           gap: 2,
           alignSelf: 'center',
         }}>
-        {loading ? (
-          <CircularProgress sx={{ alignSelf: 'center' }} />
-        ) : (
-          <>
-            <CustomerDashboard customer={customer!} />
-            <Divider />
-            <CustomerTable customer={customer!} />
-          </>
-        )}
+        <CustomerDashboard customer={customer as CustomerOverview} />
+        <Divider />
+        <CustomerTable customer={customer as CustomerOverview} />
       </Box>
     </>
   );

@@ -18,37 +18,27 @@ import EditIcon from '@mui/icons-material/Edit';
 import UserModel from '../models/UserModel';
 import { getSingleUserById } from '../../../services/api/apiUserCalls';
 import { enqueueSnackbar } from 'notistack';
+import { useMutation } from 'react-query';
+import TableLoader from '../../ui/tableLoader/TableLoader';
 
 interface RowProps {
   row: UserModel;
-  setUsers: React.Dispatch<React.SetStateAction<UserModel[]>>;
   onUserPrefsOpen: (selectedUser: string) => void;
 }
-const Row: React.FC<RowProps> = ({ row, onUserPrefsOpen, setUsers }) => {
+const Row: React.FC<RowProps> = ({ row, onUserPrefsOpen }) => {
   const [open, setOpen] = useState(false);
 
-  const handleOpen = async () => {
-    if (!open && !row.email) {
-      const response = await getSingleUserById(row._id);
-
-      if (response.success && response.status === 200) {
-        const user = response.data;
-        setUsers((prevUsers) => {
-          const updatedUsers = [...prevUsers];
-          const objIndex = updatedUsers.findIndex((obj) => obj._id === row._id);
-          updatedUsers[objIndex].email = user!.email;
-          updatedUsers[objIndex].updatedAt = user!.updatedAt;
-          updatedUsers[objIndex].createdAt = user!.createdAt;
-          return updatedUsers;
-        });
-      } else {
-        enqueueSnackbar(response.error!, {
-          variant: 'error',
-        });
-      }
-    }
-    setOpen(!open);
-  };
+  const { data: user, mutateAsync: handleOpen } = useMutation({
+    mutationFn: (id: string) => getSingleUserById(id),
+    onSuccess: () => {
+      setOpen(!open);
+    },
+    onError: (error) => {
+      enqueueSnackbar(error as string, {
+        variant: 'error',
+      });
+    },
+  });
 
   return (
     <>
@@ -61,7 +51,7 @@ const Row: React.FC<RowProps> = ({ row, onUserPrefsOpen, setUsers }) => {
             padding: 0,
             paddingLeft: '16px',
           }}>
-          <IconButton aria-label="expand row" size="small" onClick={handleOpen}>
+          <IconButton aria-label="expand row" size="small" onClick={() => handleOpen(row._id)}>
             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
         </TableCell>
@@ -74,7 +64,7 @@ const Row: React.FC<RowProps> = ({ row, onUserPrefsOpen, setUsers }) => {
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={5}>
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Box sx={{ margin: 1 }}>
-              <Table size="small" aria-label="more-info">
+              <Table size="small">
                 <TableHead>
                   <TableRow>
                     <TableCell>ID</TableCell>
@@ -93,15 +83,23 @@ const Row: React.FC<RowProps> = ({ row, onUserPrefsOpen, setUsers }) => {
                     </TableCell>
                   </TableRow>
                 </TableHead>
-                <TableBody>
-                  <TableRow>
-                    <TableCell>{row._id}</TableCell>
-                    <TableCell>{row.email}</TableCell>
-                    <TableCell>{new Date(row.updatedAt!).toLocaleDateString()}</TableCell>
-                    <TableCell>{new Date(row.createdAt!).toLocaleDateString()}</TableCell>
-                    <TableCell />
-                  </TableRow>
-                </TableBody>
+                {user ? (
+                  <TableBody>
+                    <TableRow>
+                      <TableCell>{(user as UserModel)?._id}</TableCell>
+                      <TableCell>{(user as UserModel)?.email}</TableCell>
+                      <TableCell>
+                        {new Date((user as UserModel)?.updatedAt!).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell>
+                        {new Date((user as UserModel)?.createdAt!).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell />
+                    </TableRow>
+                  </TableBody>
+                ) : (
+                  <TableLoader colSpan={5} />
+                )}
               </Table>
             </Box>
           </Collapse>

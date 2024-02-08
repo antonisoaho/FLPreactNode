@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import './assets/App.css';
 import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
@@ -19,43 +18,36 @@ import UserRoutes from './routes/UserRoutes';
 import BasicRoutes from './routes/BasicRoutes';
 import PageNotFound from './routes/PageNotFound';
 import { userInfoGetMe } from './services/api/apiUserCalls';
+import { useQuery } from 'react-query';
 
 dayjs.locale('sv');
 
 const App = () => {
   const navigate = useNavigate();
   globalRouter.navigate = navigate;
-  const [loading, setLoading] = useState<boolean>(true);
   const setUser = useSetRecoilState(userState);
 
-  useEffect(() => {
-    const checkUserLogin = async () => {
-      if (localStorage.getItem('TOKEN')) {
-        try {
-          const userRoleData = await userInfoGetMe();
+  const { isLoading } = useQuery({
+    queryFn: () => userInfoGetMe(),
+    queryKey: ['loggedInUser'],
 
-          if (userRoleData.success) {
-            setUser({
-              loggedIn: true,
-              isAdmin: userRoleData.data!.isAdmin,
-              userId: userRoleData.data!.userId,
-            });
-          } else {
-            Logout();
-          }
-        } catch (error) {
-          Logout();
-        }
+    onSuccess: (data) => {
+      if (data.success) {
+        setUser({
+          loggedIn: true,
+          isAdmin: data.data!.isAdmin,
+          userId: data.data!.userId,
+        });
+      } else {
+        Logout();
+        localStorage.removeItem('TOKEN');
       }
-      setLoading(false);
-    };
-
-    checkUserLogin();
-  }, []);
+    },
+  });
 
   return (
     <div className="App" style={{ display: 'grid' }}>
-      {loading ? (
+      {isLoading ? (
         <>
           <CircularProgress />
         </>

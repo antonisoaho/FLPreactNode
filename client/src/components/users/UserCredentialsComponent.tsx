@@ -23,21 +23,23 @@ import {
 import UpdateUserModel from './models/UpdateUserModel';
 import UserModel from './models/UserModel';
 import { enqueueSnackbar } from 'notistack';
+import { useMutation, useQuery, useQueryClient } from 'react-query';
 
 export interface UserCredentialsProps {
-  onUserChanged: () => void;
+  // onUserChanged: () => void;
   onClose: () => void;
   _id: string;
 }
 
 const UserCredentialsComponent: React.FC<UserCredentialsProps> = ({
-  onUserChanged,
+  // onUserChanged,
   onClose,
   _id,
 }) => {
   const [userModel, setUserModel] = useState<UpdateUserModel>();
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [loading, isLoading] = useState<boolean>(true);
+  const queryClient = useQueryClient();
 
   const getSelectedUser = async () => {
     const response = await getSingleUserById(_id);
@@ -72,19 +74,63 @@ const UserCredentialsComponent: React.FC<UserCredentialsProps> = ({
     }));
   };
 
-  const handleClickShowPassword = () => setShowPassword((show) => !show);
+  const { mutateAsync: editUserMutation } = useMutation<unknown, unknown, string, UpdateUserModel>({
+    mutationFn: () => updateSingleUserById(_id, userModel!),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['users']);
+    },
+  });
 
-  const updateUser = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const { mutateAsync: deleteUserMutation } = useMutation<unknown, unknown, string>({
+    mutationFn: () => deleteUserById(_id),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['users']);
+    },
+  });
 
-    const response = await updateSingleUserById(_id, userModel!);
+  // const updateUser = async (event: React.FormEvent<HTMLFormElement>) => {
+  //   event.preventDefault();
+
+  //   const response = await updateSingleUserById(_id, userModel!);
+
+  //   if (response.success && response.status === 200) {
+  //     enqueueSnackbar(`${userModel!.name}'s konto ändrat.`, {
+  //       variant: 'info',
+  //     });
+
+  //     // onUserChanged();
+  //   } else {
+  //     enqueueSnackbar(response.error!, {
+  //       variant: 'error',
+  //     });
+  //   }
+  // };
+
+  // const removeUser = async (event: React.MouseEvent<HTMLButtonElement>) => {
+  //   event.preventDefault();
+
+  //   const response = await deleteUserById(_id);
+
+  //   if (response.success && response.status === 200) {
+  //     enqueueSnackbar(`${userModel!.name}'s konto borttaget.`, {
+  //       variant: 'info',
+  //     });
+  //   } else {
+  //     enqueueSnackbar(response.error!, {
+  //       variant: 'error',
+  //     });
+  //   }
+
+  //   // onUserChanged();
+  // };
+
+  const updateUser = async () => {
+    const response = await editUserMutation(_id, userModel!);
 
     if (response.success && response.status === 200) {
       enqueueSnackbar(`${userModel!.name}'s konto ändrat.`, {
         variant: 'info',
       });
-
-      onUserChanged();
     } else {
       enqueueSnackbar(response.error!, {
         variant: 'error',
@@ -92,10 +138,8 @@ const UserCredentialsComponent: React.FC<UserCredentialsProps> = ({
     }
   };
 
-  const removeUser = async (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
-
-    const response = await deleteUserById(_id);
+  const handleRemoveClick = async () => {
+    const response = await deleteUserMutation();
 
     if (response.success && response.status === 200) {
       enqueueSnackbar(`${userModel!.name}'s konto borttaget.`, {
@@ -106,8 +150,6 @@ const UserCredentialsComponent: React.FC<UserCredentialsProps> = ({
         variant: 'error',
       });
     }
-
-    onUserChanged();
   };
 
   const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -207,7 +249,7 @@ const UserCredentialsComponent: React.FC<UserCredentialsProps> = ({
               <Button variant="contained" color="primary" type="submit">
                 Uppdatera användare
               </Button>
-              <Button variant="contained" color="error" onClick={removeUser}>
+              <Button variant="contained" color="error" onClick={handleRemoveClick}>
                 Ta bort användare
               </Button>
             </CardActions>

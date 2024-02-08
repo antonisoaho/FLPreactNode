@@ -28,6 +28,7 @@ import GroupRemoveIcon from '@mui/icons-material/GroupRemove';
 import { deleteCustomerById } from '../../../services/api/apiCustomerCalls';
 import PromptDialog from '../../ui/promtDialog/PromptDialog';
 import { enqueueSnackbar } from 'notistack';
+import { useMutation, useQueryClient } from 'react-query';
 
 const drawerWidth = 100;
 const closeWidth = 15;
@@ -39,6 +40,7 @@ const CustomerSidebar = () => {
   const { custId } = useParams();
   const basePath = `/customers/${custId}/edit/`;
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const items = [
     { text: 'Personer', to: basePath + 'details', icon: <AccessibilityIcon /> },
@@ -54,10 +56,6 @@ const CustomerSidebar = () => {
     { text: 'Pensioner', to: basePath + 'pension', icon: <ElderlyIcon /> },
   ];
 
-  const handleToggleDrawer = () => {
-    setOpen(!open);
-  };
-
   const listItemButtonSx = {
     width: !open ? '40px' : 'auto',
     paddingX: open ? 3 : 1.5,
@@ -71,27 +69,30 @@ const CustomerSidebar = () => {
     overflow: 'hidden',
   };
 
+  const handleToggleDrawer = () => {
+    setOpen(!open);
+  };
+
   const handleDialogOpen = () => {
     setDialogOpen(!dialogOpen);
   };
 
-  const customerDeleteConfirm = async () => {
-    handleDialogOpen();
-
-    const response = await deleteCustomerById(custId!);
-
-    if (response.success) {
+  const { mutateAsync: customerDeleteConfirm } = useMutation({
+    mutationFn: () => deleteCustomerById(custId!),
+    onSuccess: () => {
+      handleDialogOpen();
       enqueueSnackbar('Kund raderad', {
         variant: 'success',
       });
-
       navigate('/customers');
-    } else {
-      enqueueSnackbar(response.error!, {
+      queryClient.invalidateQueries('customers');
+    },
+    onError: (error) => {
+      enqueueSnackbar(error as string, {
         variant: 'error',
       });
-    }
-  };
+    },
+  });
 
   const customerDeleteCanceled = () => {
     handleDialogOpen();

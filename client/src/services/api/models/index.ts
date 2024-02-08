@@ -1,6 +1,13 @@
 import { CustomerFormData } from '../../../components/customers/models/CustomerFormModels';
 
-export type ApiResponse<T> = {
+// export type ApiResponse<T> = {
+//   data: T | string | undefined;
+//   status: number | undefined;
+// };
+
+export type ApiResponse<T> = T | unknown;
+
+export type QueryResponse<T> = {
   success: boolean;
   status: number | undefined;
   data?: T;

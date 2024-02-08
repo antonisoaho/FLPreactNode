@@ -1,4 +1,4 @@
-import { DateFields } from '../../../services/api/models/ApiModel';
+import { DateFields } from '../../../services/api/models';
 import {
   Assets,
   BankFund,

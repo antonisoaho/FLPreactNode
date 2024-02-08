@@ -1,4 +1,4 @@
-import axiosInstance, { ExtendedError } from './AxiosInstance';
+import axiosInstance from './AxiosInstance';
 import { CustomerOverview } from '../../components/customers/models/ViewCustomerModel';
 import CustomerModel from '../../components/customers/models/CustomerModel';
 import {
@@ -6,29 +6,15 @@ import {
   CustomerDataHandler,
   CustomerFormResponse,
   CustomerGetDataHandler,
-  ErrorResponse,
   SubDocRemoval,
-} from './models/ApiModel';
+} from './models';
 
 export const getCustomerList = async (): Promise<ApiResponse<CustomerModel[]>> => {
   try {
     const response = await axiosInstance.get('/customers');
-    if (response.status === 200) {
-      return {
-        success: true,
-        status: response.status,
-        data: response.data,
-      };
-    } else throw new Error('Ett oväntat fel inträffade, försök igen senare.');
+    return response.data;
   } catch (error) {
-    const extendedError = error as ExtendedError;
-    const errorMessage: ErrorResponse = <ErrorResponse>extendedError.response?.data;
-
-    return {
-      success: false,
-      status: extendedError.status,
-      error: errorMessage.error || 'Ett oväntat fel inträffade.',
-    };
+    return error;
   }
 };
 
@@ -37,94 +23,38 @@ export const getSingleCustomerById = async (
 ): Promise<ApiResponse<CustomerOverview>> => {
   try {
     const response = await axiosInstance.get(`/customers/${custId}`);
-    return {
-      success: true,
-      status: response.status,
-      data: response.data,
-    };
+    return response.data;
   } catch (error) {
-    const extendedError = error as ExtendedError;
-    const errorMessage: ErrorResponse = <ErrorResponse>extendedError.response?.data;
-    if (extendedError.status === 403) {
-      return {
-        success: false,
-        status: extendedError.status,
-        error: errorMessage.error || 'Ett oväntat fel inträffade.',
-      };
-    } else {
-      return {
-        success: false,
-        status: extendedError.status,
-        error: errorMessage.error || 'Ett oväntat fel inträffade.',
-      };
-    }
+    return error;
   }
 };
 
 export const getCustomerNames = async (id: string): Promise<ApiResponse<[]>> => {
   try {
     const response = await axiosInstance.get(`/customers/${id}/customerDetails`);
-
     const customerNames = response.data.map((cust: { name: string }) => cust.name);
-
-    return {
-      success: true,
-      status: response.status,
-      data: customerNames,
-    };
+    return customerNames;
   } catch (error) {
-    const extendedError = error as ExtendedError;
-    const errorMessage: ErrorResponse = <ErrorResponse>extendedError.response?.data;
-
-    return {
-      success: false,
-      status: extendedError.status,
-      error: errorMessage.error || 'Ett oväntat fel inträffade.',
-    };
+    return error;
   }
 };
 
 export const getCustomerChildNames = async (id: string): Promise<ApiResponse<[]>> => {
   try {
     const response = await axiosInstance.get(`/customers/${id}/customerChildren`);
-
     const customerNames = response.data.map((cust: { name: string }) => cust.name);
-
-    return {
-      success: true,
-      status: response.status,
-      data: customerNames,
-    };
+    return customerNames;
   } catch (error) {
-    const extendedError = error as ExtendedError;
-    const errorMessage: ErrorResponse = <ErrorResponse>extendedError.response?.data;
-
-    return {
-      success: false,
-      status: extendedError.status,
-      error: errorMessage.error || 'Ett oväntat fel inträffade.',
-    };
+    return error;
   }
 };
 
 export const createNewCustomer = async (): Promise<ApiResponse<CustomerModel>> => {
   try {
     const response = await axiosInstance.post('/customers/create');
-
-    return {
-      success: true,
-      status: response.status,
-      data: response.data,
-    };
+    return response.data;
   } catch (error) {
-    const extendedError = error as ExtendedError;
-    const errorMessage: ErrorResponse = <ErrorResponse>extendedError.response?.data;
-
-    return {
-      success: false,
-      status: extendedError.status,
-      error: errorMessage.error || 'Ett oväntat fel inträffade.',
-    };
+    return error;
   }
 };
 
@@ -138,21 +68,9 @@ export const getCustomerFormData = async (
     const response = await axiosInstance.get(
       `/customers/${details._id}/${details.field}/${details.subField}`
     );
-
-    return {
-      success: true,
-      status: response.status,
-      data: response.data,
-    };
+    return response.data;
   } catch (error) {
-    const extendedError = error as ExtendedError;
-    const errorMessage: ErrorResponse = <ErrorResponse>extendedError.response?.data;
-
-    return {
-      success: false,
-      status: extendedError.status,
-      error: errorMessage.error || 'Ett oväntat fel inträffade.',
-    };
+    return error;
   }
 };
 
@@ -167,41 +85,18 @@ export const updateCustomer = async (
       `/customers/${details._id}/update/${details.field}/${details.subField}`,
       details.formData
     );
-
-    return {
-      success: true,
-      status: response.status,
-      data: response.data,
-    };
+    return response.data;
   } catch (error) {
-    const extendedError = error as ExtendedError;
-    const errorMessage: ErrorResponse = <ErrorResponse>extendedError.response?.data;
-
-    return {
-      success: false,
-      status: extendedError.status,
-      error: errorMessage.error || 'Ett oväntat fel inträffade.',
-    };
+    return error;
   }
 };
 
 export const deleteCustomerById = async (custId: string): Promise<ApiResponse<string>> => {
   try {
     const response = await axiosInstance.delete(`/customers/${custId}`);
-    return {
-      success: true,
-      status: response.status,
-      data: response.data,
-    };
+    return response.data;
   } catch (error) {
-    const extendedError = error as ExtendedError;
-    const errorMessage: ErrorResponse = <ErrorResponse>extendedError.response?.data;
-
-    return {
-      success: false,
-      status: extendedError.status,
-      error: errorMessage.error || 'Ett oväntat fel inträffade.',
-    };
+    return error;
   }
 };
 
@@ -215,19 +110,8 @@ export const deleteCustSubDocument = async (
     const response = await axiosInstance.patch(
       `/customers/${d.custId}/remove/${d.field}/${d.subDocId}/${d.subField}`
     );
-    return {
-      success: true,
-      status: response.status,
-      data: response.data,
-    };
+    return response.data;
   } catch (error) {
-    const extendedError = error as ExtendedError;
-    const errorMessage: ErrorResponse = <ErrorResponse>extendedError.response?.data;
-
-    return {
-      success: false,
-      status: extendedError.status,
-      error: errorMessage.error || 'Ett oväntat fel inträffade.',
-    };
+    return error;
   }
 };

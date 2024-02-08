@@ -15,17 +15,11 @@ import TableLoader from '../../ui/tableLoader/TableLoader';
 
 interface UserListTableProps {
   users: UserModel[];
-  loading: boolean;
-  setUsers: React.Dispatch<React.SetStateAction<UserModel[]>>;
+  isLoading: boolean;
   handleUserPrefsOpen: (selectedUser: string) => void;
 }
 
-const UserListTable: React.FC<UserListTableProps> = ({
-  users,
-  loading,
-  setUsers,
-  handleUserPrefsOpen,
-}) => {
+const UserListTable: React.FC<UserListTableProps> = ({ users, isLoading, handleUserPrefsOpen }) => {
   return (
     <TableContainer component={Paper}>
       <Table sx={{ minWidth: 450 }}>
@@ -45,16 +39,11 @@ const UserListTable: React.FC<UserListTableProps> = ({
           </TableRow>
         </TableHead>
         <TableBody>
-          {loading ? (
+          {isLoading ? (
             <TableLoader colSpan={5} />
           ) : (
             users.map((user) => (
-              <Row
-                key={user._id}
-                row={user}
-                setUsers={setUsers}
-                onUserPrefsOpen={handleUserPrefsOpen}
-              />
+              <Row key={user._id} row={user} onUserPrefsOpen={handleUserPrefsOpen} />
             ))
           )}
         </TableBody>

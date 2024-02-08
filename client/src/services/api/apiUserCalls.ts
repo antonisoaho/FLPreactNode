@@ -1,6 +1,6 @@
-import axiosInstance, { ExtendedError } from './AxiosInstance';
-import { ApiResponse, ErrorResponse } from './models/ApiModel';
-import LoginResponse from '../../components/login/models/LoginResponse';
+import axiosInstance from './AxiosInstance';
+import { ApiResponse } from './models';
+import { LoginResponse } from '../../components/login/models';
 import UserModel from '../../components/users/models/UserModel';
 import UpdateUserModel from '../../components/users/models/UpdateUserModel';
 import CreateUserModel from '../../components/users/models/CreateUserModel';
@@ -10,68 +10,31 @@ export const loginAPI = async (
   password: string
 ): Promise<ApiResponse<LoginResponse>> => {
   try {
-    const response = await axiosInstance.post<LoginResponse>('/login', {
+    const response = await axiosInstance.post('/login', {
       email: email,
       password: password,
     });
-    if (response.status === 200) {
-      return {
-        success: true,
-        status: response.status,
-        data: response.data,
-      };
-    } else throw new Error('Ett oväntat fel inträffade, försök igen senare.');
+    return response.data;
   } catch (error) {
-    const extendedError = error as ExtendedError;
-    const errorMessage: ErrorResponse = <ErrorResponse>extendedError.response?.data;
-
-    return {
-      success: false,
-      status: extendedError.status,
-      error: errorMessage.error || 'Ett oväntat fel inträffade, försök igen senare.',
-    };
+    return error;
   }
 };
 
 export const getUserList = async (): Promise<ApiResponse<UserModel[]>> => {
   try {
     const response = await axiosInstance.get('/users');
-    if (response.status === 200) {
-      return {
-        success: true,
-        status: response.status,
-        data: response.data,
-      };
-    } else throw new Error('Ett oväntat fel inträffade, försök igen senare.');
+    return response.data;
   } catch (error) {
-    const extendedError = error as ExtendedError;
-    const errorMessage: ErrorResponse = <ErrorResponse>extendedError.response?.data;
-
-    return {
-      success: false,
-      status: extendedError.status,
-      error: errorMessage.error || 'Ett oväntat fel inträffade.',
-    };
+    return error;
   }
 };
 
 export const getSingleUserById = async (id: string): Promise<ApiResponse<UserModel>> => {
   try {
     const response = await axiosInstance.get(`/users/singleuser/${id}`);
-    return {
-      success: true,
-      status: response.status,
-      data: response.data,
-    };
+    return response.data;
   } catch (error) {
-    const extendedError = error as ExtendedError;
-    const errorMessage: ErrorResponse = <ErrorResponse>extendedError.response?.data;
-
-    return {
-      success: false,
-      status: extendedError.status,
-      error: errorMessage.error || 'Ett oväntat fel inträffade.',
-    };
+    return error;
   }
 };
 
@@ -81,20 +44,9 @@ export const updateSingleUserById = async (id: string, newData: UpdateUserModel)
       newData,
     });
 
-    return {
-      success: true,
-      status: response.status,
-      data: response.data,
-    };
+    return response.data;
   } catch (error) {
-    const extendedError = error as ExtendedError;
-    const errorMessage: ErrorResponse = <ErrorResponse>extendedError.response?.data;
-
-    return {
-      success: false,
-      status: extendedError.status,
-      error: errorMessage.error || 'Ett oväntat fel inträffade.',
-    };
+    return error;
   }
 };
 
@@ -112,61 +64,26 @@ export const createNewUser = async ({
       isAdmin,
     });
 
-    return {
-      success: true,
-      status: response.status,
-      data: response.data,
-    };
+    return response.data;
   } catch (error) {
-    const extendedError = error as ExtendedError;
-    const errorMessage: ErrorResponse = <ErrorResponse>extendedError.response?.data;
-
-    return {
-      success: false,
-      status: extendedError.status,
-      error: errorMessage.error || 'Ett oväntat fel inträffade.',
-    };
+    return error;
   }
 };
 
 export const deleteUserById = async (id: string): Promise<ApiResponse<string>> => {
   try {
     const response = await axiosInstance.delete(`/users/singleuser/${id}`);
-
-    return {
-      success: true,
-      status: response.status,
-      data: response.data,
-    };
+    return response.data;
   } catch (error) {
-    const extendedError = error as ExtendedError;
-    const errorMessage: ErrorResponse = <ErrorResponse>extendedError.response?.data;
-
-    return {
-      success: false,
-      status: extendedError.status,
-      error: errorMessage.error || 'Ett oväntat fel inträffade vid radering av användare.',
-    };
+    return error;
   }
 };
 
 export const userInfoGetMe = async (): Promise<ApiResponse<LoginResponse>> => {
   try {
     const response = await axiosInstance.get(`/users/getme`);
-
-    return {
-      success: true,
-      status: response.status,
-      data: response.data,
-    };
+    return response.data;
   } catch (error) {
-    const extendedError = error as ExtendedError;
-    const errorMessage: ErrorResponse = <ErrorResponse>extendedError.response?.data;
-
-    return {
-      success: false,
-      status: extendedError.status,
-      error: errorMessage.error || 'Ett oväntat fel inträffade vid radering av användare.',
-    };
+    return error;
   }
 };

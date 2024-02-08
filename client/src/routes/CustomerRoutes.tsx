@@ -1,5 +1,5 @@
 import { Route } from 'react-router-dom';
-import CustomerComponent from '../components/customers/CustomerComponent';
+import CustomerComponent from '../components/customers';
 import CustomerPrintversion from '../components/customers/print/CustomerPrintversion';
 import CustomerView from '../components/customers/CustomerView';
 
