@@ -63,7 +63,7 @@ export const getCustomerFormData = async (
   }
   try {
     const response = await axiosInstance.get(
-      `/customers/${details._id}/${details.field}/${details.subField}`
+      `/customers/${details.custId}/${details.field}/${details.subField}`
     );
     return response.data;
   } catch (error) {
@@ -79,7 +79,7 @@ export const updateCustomer = async (
   }
   try {
     const response = await axiosInstance.patch(
-      `/customers/${details._id}/update/${details.field}/${details.subField}`,
+      `/customers/${details.custId}/update/${details.field}/${details.subField}`,
       details.formData
     );
     return response.data;

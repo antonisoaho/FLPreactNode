@@ -7,11 +7,10 @@ import {
   TableBody,
   ListItemButton,
 } from '@mui/material';
-import { useEffect, useState } from 'react';
-import { DateFields } from '../../../../services/api/models/ApiModel';
+import { useState } from 'react';
+import { DateFields } from '../../../../services/api/models';
 import { CustomerChildren } from '../../models/CustomerFormModels';
 import ColoredTableRow from '../../../ui/coloredTableRow/ColoredTableRow';
-import FormCountHandler from '../../forms/FormCountHandler';
 import CustomerChildForm from '../../forms/details/CustomerChildForm';
 import {
   deleteCustSubDocument,
@@ -19,43 +18,46 @@ import {
 } from '../../../../services/api/apiCustomerCalls';
 import { useParams } from 'react-router-dom';
 import TableLoader from '../../../ui/tableLoader/TableLoader';
+import { FormFields } from '../../models/FormProps';
+import { useMutation, useQuery, useQueryClient } from 'react-query';
+import { enqueueSnackbar } from 'notistack';
+import FormOpenHandler from '../../forms/FormOpenHandler';
 
 const CustomerChildrenRow = () => {
-  const [formCount, setFormCount] = useState<number>(0);
+  const [formOpen, setFormOpen] = useState<boolean>(false);
   const { custId } = useParams();
-  const [fields, setFields] = useState<[CustomerChildren & DateFields]>();
-  const [loading, setLoading] = useState<boolean>(true);
   const colSpan: number = 7;
-
-  const onSubmit = () => {
-    updateCustomerFields();
+  const queryClient = useQueryClient();
+  const formFields: FormFields = {
+    field: 'customerChildren',
+    custId: custId!,
   };
 
-  const updateCustomerFields = async () => {
-    const response = await getCustomerFormData({
-      field: 'customerChildren',
-      _id: custId as string,
-    });
+  const { data, isLoading } = useQuery({
+    queryKey: ['customer', formFields],
+    queryFn: () => getCustomerFormData(formFields),
 
-    if (response.success) {
-      setFields(response.data!);
-      setLoading(false);
-    }
-  };
+    onSuccess: (data) => {
+      return data as [CustomerChildren & DateFields];
+    },
 
-  useEffect(() => {
-    updateCustomerFields();
-  }, [custId]);
+    cacheTime: 0,
+    onError: (error) => {
+      enqueueSnackbar(error as string, {
+        variant: 'error',
+      });
+    },
+  });
 
-  const removeSubDoc = async (subDocId: string) => {
-    const response = await deleteCustSubDocument({
-      field: 'customerChildren',
-      custId: custId!,
-      subDocId: subDocId,
-    });
+  const { mutateAsync: removeSubDoc } = useMutation({
+    mutationFn: (subDocId: string) => deleteCustSubDocument({ ...formFields, subDocId }),
 
-    if (response.success) setFields(response.data);
-  };
+    onSuccess: () => {
+      queryClient.invalidateQueries(['customer']);
+    },
+  });
+
+  if (isLoading) return <TableLoader colSpan={colSpan} />;
 
   return (
     <TableRow>
@@ -74,10 +76,8 @@ const CustomerChildrenRow = () => {
               </ColoredTableRow>
             </TableHead>
             <TableBody>
-              {loading ? (
-                <TableLoader colSpan={colSpan} />
-              ) : fields!.length > 0 ? (
-                fields!.map((child) => (
+              {data!.length > 0 ? (
+                (data as [CustomerChildren & DateFields])?.map((child) => (
                   <TableRow key={child._id}>
                     <TableCell>{child.name}</TableCell>
                     <TableCell>{child.belongs || '-'}</TableCell>
@@ -101,21 +101,13 @@ const CustomerChildrenRow = () => {
                   </TableCell>
                 </TableRow>
               )}
-              <FormCountHandler
-                formCount={formCount}
-                setFormCount={(value) => setFormCount(value)}
-                colSpan={colSpan}
-              />
+              {!formOpen && (
+                <FormOpenHandler setFormOpen={(value) => setFormOpen(value)} colSpan={colSpan} />
+              )}
             </TableBody>
           </Table>
         </Box>
-        {formCount > 0 && (
-          <CustomerChildForm
-            submitted={onSubmit}
-            formCount={formCount}
-            setFormCount={(value) => setFormCount(value)}
-          />
-        )}
+        {formOpen && <CustomerChildForm setFormOpen={(value) => setFormOpen(value)} />}
       </TableCell>
     </TableRow>
   );

@@ -12,14 +12,14 @@ interface DashboardProps {
 
 const CustomerDashboard: React.FC<DashboardProps> = ({ customer }) => {
   const totalIncome: number =
-    customer?.income.base.reduce((sum, inc) => inc.values!.serviceIncome! + sum, 0) || 0;
+    customer!.income.base.reduce((sum, inc) => inc.values!.serviceIncome! + sum, 0) || 0;
 
   const totalExpense: number =
-    customer?.expenses.base.reduce((sum, inc) => inc.values!.mapped! + sum, 0) || 0;
+    customer!.expenses.base.reduce((sum, inc) => inc.values!.mapped! + sum, 0) || 0;
 
-  const numberOfChildren: number = customer?.customerChildren.length || 0;
+  const numberOfChildren: number = customer!.customerChildren.length || 0;
 
-  const numberOfInsurances: number = customer?.insurances
+  const numberOfInsurances: number = customer!.insurances
     ? Object.values(customer.insurances).reduce((totalLength, insuranceArray) => {
         return totalLength + insuranceArray.length;
       }, 0)
@@ -65,9 +65,7 @@ const CustomerDashboard: React.FC<DashboardProps> = ({ customer }) => {
         </Tooltip>
       </Stack>
 
-      {((customer?.income.base.length ?? 0) && (customer?.expenses.base.length ?? 0)) > 0 && (
-        <DashboardDiagrams customer={customer!} />
-      )}
+      {totalIncome && totalExpense > 0 ? <DashboardDiagrams customer={customer!} /> : null}
 
       <Grid container justifyContent="center" spacing={3} sx={{ marginTop: 1 }}>
         {cardItems.map((item, idx) => (

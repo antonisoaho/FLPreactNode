@@ -6,7 +6,7 @@ export const useCustomerDelete = (custId: string) => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
-  const { mutateAsync: customerDeleteConfirm } = useMutation({
+  const { mutateAsync: customerDelete } = useMutation({
     mutationFn: () => deleteCustomerById(custId!),
     onSuccess: () => {
       enqueueSnackbar('Kund raderad', {
@@ -22,5 +22,5 @@ export const useCustomerDelete = (custId: string) => {
     },
   });
 
-  return customerDeleteConfirm;
+  return customerDelete;
 };

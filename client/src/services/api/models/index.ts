@@ -19,14 +19,14 @@ export type ErrorResponse = {
 export type CustomerDataHandler = {
   field: string;
   subField?: string;
-  _id: string;
+  custId: string;
   formData: CustomerFormData[];
 };
 
 export type CustomerGetDataHandler = {
   field: string;
   subField?: string;
-  _id: string;
+  custId: string;
 };
 
 export type DateFields = {

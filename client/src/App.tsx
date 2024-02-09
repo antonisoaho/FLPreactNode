@@ -7,7 +7,6 @@ import { Route, Routes, useNavigate } from 'react-router-dom';
 import globalRouter from './services/providers/globalRouter';
 import ResponsiveAppBar from './components/navbar/NavbarComponent';
 import { Logout } from './services/api/AxiosInstance';
-import { CircularProgress } from '@mui/material';
 import { useSetRecoilState } from 'recoil';
 import { userState } from './services/state/RecoilAtoms';
 import dayjs from 'dayjs';
@@ -19,6 +18,7 @@ import BasicRoutes from './routes/BasicRoutes';
 import PageNotFound from './routes/PageNotFound';
 import { userInfoGetMe } from './services/api/apiUserCalls';
 import { useQuery } from 'react-query';
+import PageLoader from './components/ui/pageLoader';
 
 dayjs.locale('sv');
 
@@ -30,7 +30,7 @@ const App = () => {
   const { isLoading } = useQuery({
     queryFn: userInfoGetMe,
     queryKey: ['loggedInUser'],
-
+    retry: false,
     onSuccess: (data) => {
       setUser({
         loggedIn: true,
@@ -44,33 +44,26 @@ const App = () => {
     },
   });
 
+  if (isLoading) return <PageLoader />;
+
   return (
     <div className="App" style={{ display: 'grid' }}>
-      {isLoading ? (
-        <>
-          <CircularProgress />
-        </>
-      ) : (
-        <>
-          <ResponsiveAppBar />
-          <>
-            <Routes>
-              {/* Home and Login */}
-              {BasicRoutes}
+      <ResponsiveAppBar />
 
-              {/* Protected routes nested */}
-              <Route element={<ProtectedRoute />}>
-                {/* Logout, users and myaccount */}
-                {UserRoutes}
+      <Routes>
+        {/* Home and Login */}
+        {BasicRoutes}
 
-                {/* Customer related pages */}
-                {CustomerRoutes}
-              </Route>
-              <Route path="*" element={<PageNotFound />} />
-            </Routes>
-          </>
-        </>
-      )}
+        {/* Protected routes nested */}
+        <Route element={<ProtectedRoute />}>
+          {/* Logout, users and myaccount */}
+          {UserRoutes}
+
+          {/* Customer related pages */}
+          {CustomerRoutes}
+        </Route>
+        <Route path="*" element={<PageNotFound />} />
+      </Routes>
     </div>
   );
 };

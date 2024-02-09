@@ -1,9 +1,7 @@
 import { SelectProps, TextFieldProps } from '@mui/material';
 
 export interface CustomFormProps {
-  submitted?: () => void;
-  formCount: number;
-  setFormCount: React.Dispatch<React.SetStateAction<number>>;
+  setFormOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const FormTextFieldProps: TextFieldProps = {
@@ -14,4 +12,10 @@ export const FormTextFieldProps: TextFieldProps = {
 export const FormSelectProps: SelectProps = {
   variant: 'standard',
   size: 'small',
+};
+
+export type FormFields = {
+  field: string;
+  custId: string;
+  subField?: string;
 };

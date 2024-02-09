@@ -1,11 +1,11 @@
 // LogoutComponent.jsx
 import { useEffect } from 'react';
 import { Logout } from '../../services/api/AxiosInstance';
-import { Container } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useSetRecoilState } from 'recoil';
 import { userState } from '../../services/state/RecoilAtoms';
 import { enqueueSnackbar } from 'notistack';
+import PageLoader from '../ui/pageLoader';
 
 const LogoutComponent = () => {
   const navigate = useNavigate();
@@ -19,12 +19,13 @@ const LogoutComponent = () => {
     });
 
     Logout();
+
     setTimeout(() => {
       navigate('/');
-    }, 1200);
-  });
+    }, 1000);
+  }, []);
 
-  return <Container></Container>;
+  return <PageLoader />;
 };
 
 export default LogoutComponent;

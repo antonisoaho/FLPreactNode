@@ -4,7 +4,6 @@ import CustomerTable from './table/CustomerTable';
 import { Box, Divider } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import { getSingleCustomerById } from '../../services/api/apiCustomerCalls';
-import { CustomerOverview } from './models/ViewCustomerModel';
 import { enqueueSnackbar } from 'notistack';
 import { useQuery } from 'react-query';
 import PageLoader from '../ui/pageLoader';
@@ -15,7 +14,7 @@ const CustomerView = () => {
   const { data: customer, isLoading } = useQuery({
     queryKey: ['customer', custId],
     queryFn: () => getSingleCustomerById(custId!),
-
+    cacheTime: 0,
     onError: (error) => {
       enqueueSnackbar(error as string, {
         variant: 'error',
@@ -42,9 +41,9 @@ const CustomerView = () => {
           gap: 2,
           alignSelf: 'center',
         }}>
-        <CustomerDashboard customer={customer as CustomerOverview} />
+        <CustomerDashboard customer={customer!} />
         <Divider />
-        <CustomerTable customer={customer as CustomerOverview} />
+        <CustomerTable customer={customer!} />
       </Box>
     </>
   );

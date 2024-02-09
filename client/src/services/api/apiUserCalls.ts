@@ -80,6 +80,6 @@ export const userInfoGetMe = async (): Promise<LoginResponse> => {
     const response = await axiosInstance.get(`/users/getme`);
     return response.data;
   } catch (error) {
-    return Promise.reject(error);
+    return Promise.reject('Ej inloggad');
   }
 };

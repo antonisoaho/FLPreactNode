@@ -7,84 +7,77 @@ import {
   TableBody,
   ListItemButton,
 } from '@mui/material';
-import { Fragment, useEffect, useState } from 'react';
-import { DateFields } from '../../../../services/api/models/ApiModel';
+import { Fragment, useState } from 'react';
+import { DateFields } from '../../../../services/api/models';
 import { CustomerDetails, ExpensesBase } from '../../models/CustomerFormModels';
 import ColoredTableRow from '../../../ui/coloredTableRow/ColoredTableRow';
 import { useParams } from 'react-router-dom';
 import {
   getCustomerFormData,
   deleteCustSubDocument,
+  getCustomerNames,
 } from '../../../../services/api/apiCustomerCalls';
 import TableLoader from '../../../ui/tableLoader/TableLoader';
-import FormCountHandler from '../../forms/FormCountHandler';
+import FormCountHandler from '../../forms/FormOpenHandler';
 import ExpenseBaseForm from '../../forms/expenses/ExpenseBaseForm';
+import { enqueueSnackbar } from 'notistack';
+import { useQueryClient, useQuery, useMutation } from 'react-query';
+import { FormFields } from '../../models/FormProps';
 
 const BaseExpenseRow = () => {
-  const [formCount, setFormCount] = useState<number>(0);
+  const [formOpen, setFormOpen] = useState<boolean>(false);
   const { custId } = useParams();
-  const [fields, setFields] = useState<[ExpensesBase & DateFields]>();
-  const [loading, setLoading] = useState<boolean>(true);
   const [persons, setPersons] = useState<string[]>([]);
   const colSpan: number = 5;
-
-  const onSubmit = () => {
-    updateCustomerFields();
+  const queryClient = useQueryClient();
+  const formFields: FormFields = {
+    field: 'expenses',
+    custId: custId!,
+    subField: 'base',
   };
 
-  const updateCustomerFields = async () => {
-    const formResponse = await getCustomerFormData({
-      field: 'expenses',
-      _id: custId as string,
-      subField: 'base',
-    });
+  const { data, isLoading } = useQuery({
+    queryKey: ['customer', formFields],
+    queryFn: () => getCustomerFormData(formFields),
 
-    if (formResponse.success) {
-      setFields(formResponse.data as [ExpensesBase & DateFields]);
-      setLoading(false);
-    }
-  };
+    onSuccess: (data) => {
+      return data as [ExpensesBase & DateFields];
+    },
 
-  const populatePersons = async () => {
-    const personResponse = await getCustomerFormData({
-      field: 'customerDetails',
-      _id: custId as string,
-    });
+    cacheTime: 0,
+    onError: (error) => {
+      enqueueSnackbar(error as string, {
+        variant: 'error',
+      });
+    },
+  });
 
-    if (personResponse.success) {
-      const names = (personResponse.data as CustomerDetails[]).map((cust) => cust.name as string);
+  useQuery({
+    queryKey: ['customerDetails', custId],
+    queryFn: () => getCustomerNames(formFields.custId),
 
-      setPersons(names);
-    }
-  };
+    onSuccess: (data) => {
+      setPersons(data);
+    },
+  });
 
-  useEffect(() => {
-    populatePersons();
-    updateCustomerFields();
-  }, [custId]);
+  const { mutateAsync: removeSubDoc } = useMutation({
+    mutationFn: (subDocId: string) => deleteCustSubDocument({ ...formFields, subDocId }),
 
-  const removeSubDoc = async (subDocId: string) => {
-    const response = await deleteCustSubDocument({
-      field: 'expenses',
-      custId: custId!,
-      subDocId: subDocId,
-      subField: 'base',
-    });
+    onSuccess: () => {
+      queryClient.invalidateQueries(['customer']);
+    },
+  });
 
-    if (response.success) setFields(response.data as [ExpensesBase & DateFields]);
-  };
+  if (isLoading) return <TableLoader colSpan={colSpan} />;
 
   return (
     <TableRow>
       <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={colSpan}>
         <Box sx={{ margin: 1 }}>
           <Table size="small" aria-label="more-info">
-            {loading ? (
-              <TableBody>
-                <TableLoader colSpan={colSpan} />
-              </TableBody>
-            ) : fields!.length > 0 ? (
-              fields?.map((exp) => (
+            {data!.length > 0 ? (
+              (data as [ExpensesBase & DateFields])?.map((exp) => (
                 <Fragment key={exp._id}>
                   <TableHead>
                     <ColoredTableRow>
@@ -102,7 +95,7 @@ const BaseExpenseRow = () => {
                       <TableCell />
                     </TableRow>
                   </TableBody>
-                  {persons.map((person, idx) => (
+                  {persons?.map((person, idx) => (
                     <Fragment key={person}>
                       <TableHead>
                         <ColoredTableRow key={person + 'header'}>
@@ -167,11 +160,7 @@ const BaseExpenseRow = () => {
           </Table>
         </Box>
         {formCount > 0 && (
-          <ExpenseBaseForm
-            formCount={formCount}
-            setFormCount={(value) => setFormCount(value)}
-            submitted={onSubmit}
-          />
+          <ExpenseBaseForm formCount={formCount} setFormCount={(value) => setFormCount(value)} />
         )}
       </TableCell>
     </TableRow>

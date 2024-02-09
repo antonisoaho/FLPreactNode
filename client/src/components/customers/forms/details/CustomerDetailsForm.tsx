@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { CustomerDetails } from '../../models/CustomerFormModels';
 import {
   Button,
@@ -12,54 +12,50 @@ import {
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { formatDateYearMonth } from '../../../../utils/formatting';
-import { useForm, SubmitHandler } from 'react-hook-form';
-import { updateCustomer } from '../../../../services/api/apiCustomerCalls';
+import { useForm, SubmitHandler, useFieldArray } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
-import { removeFormByIndex } from '../../../../utils/formUtils';
-import { CustomFormProps, FormTextFieldProps } from '../../models/FormProps';
+import { CustomFormProps, FormFields, FormTextFieldProps } from '../../models/FormProps';
+import { useSubmitCustomerForm } from '../../../../hooks/useSubmitCustomerForm';
 
-const CustomerDetailsForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFormCount }) => {
+const CustomerDetailsForm: React.FC<CustomFormProps> = ({ setFormOpen }) => {
+  const { custId } = useParams();
+  const colSpan: number = 4;
+
+  const formFields: FormFields = {
+    field: 'customerDetails',
+    custId: custId!,
+  };
+  const sendToServer = useSubmitCustomerForm(formFields);
+
+  const details: CustomerDetails = {
+    name: '',
+    status: '',
+    yearMonth: '',
+  };
+
   const {
     register,
     handleSubmit,
     setValue,
+    control,
     formState: { isSubmitting },
-  } = useForm<CustomerDetails[]>();
-  const [details, setDetails] = useState<CustomerDetails[]>([]);
-  const { custId } = useParams();
+  } = useForm({
+    defaultValues: {
+      item: [details],
+    },
+  });
 
-  const onSubmit: SubmitHandler<CustomerDetails[]> = async (data) => {
-    const response = await updateCustomer({
-      field: 'customerDetails',
-      _id: custId as string,
-      formData: data,
-    });
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'item',
+  });
 
-    if (response.success) {
-      if (submitted) {
-        submitted();
-        setFormCount(0);
-      }
-    }
-  };
-
-  useEffect(() => {
-    const newDetails = [];
-    for (let i = 0; i < formCount; i++) {
-      newDetails.push({
-        name: '',
-        status: '',
-        yearMonth: '',
-      });
-    }
-    setDetails(newDetails);
-  }, [formCount]);
-
-  const removeDetail = (index: number) => {
-    if (details.length > 0) {
-      setDetails(removeFormByIndex(details, index));
-      setFormCount(formCount - 1);
-    }
+  const onSubmit: SubmitHandler<{
+    item: CustomerDetails[];
+  }> = async (data) => {
+    await sendToServer(data.item);
+    setFormOpen(false);
+    remove();
   };
 
   const selectItems = [
@@ -83,20 +79,22 @@ const CustomerDetailsForm: React.FC<CustomFormProps> = ({ submitted, formCount, 
 
   const handleDateChange = (date: Date, index: number) => {
     const newDate = formatDateYearMonth(date);
-    setValue(`${index}.yearMonth`, newDate);
+    setValue(`item.${index}.yearMonth`, newDate);
   };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <Table>
         <TableBody>
-          {details.map((detail, index) => (
-            <TableRow key={index}>
+          {fields.map((detail, index) => (
+            <TableRow key={detail.id}>
               <TableCell sx={{ width: '20%' }}>
                 <TextField
                   required
                   label="Namn"
-                  {...register(`${index}.name`, { required: 'Vänligen ange ett namn.' })}
+                  {...register(`item.${index}.name`, {
+                    required: 'Vänligen ange ett namn.',
+                  })}
                   {...FormTextFieldProps}
                   className="form-input-field"
                 />
@@ -106,8 +104,8 @@ const CustomerDetailsForm: React.FC<CustomFormProps> = ({ submitted, formCount, 
                   select
                   className="form-input-select"
                   {...FormTextFieldProps}
-                  {...register(`${index}.status`)}
-                  defaultValue={detail.status}
+                  {...register(`item.${index}.status`)}
+                  defaultValue=""
                   label="Relationsstatus">
                   {selectItems.map((item) => (
                     <MenuItem value={item.value} key={item.value}>
@@ -121,25 +119,36 @@ const CustomerDetailsForm: React.FC<CustomFormProps> = ({ submitted, formCount, 
                   className="form-input-field"
                   label="Födelsedatum"
                   views={['month', 'year']}
-                  {...register(`${index}.yearMonth`, { required: 'Var vänlig välj ett datum.' })}
+                  {...register(`item.${index}.yearMonth`, {
+                    required: 'Var vänlig välj ett datum.',
+                  })}
                   onChange={(date) => handleDateChange(date as Date, index)}
                   slotProps={{ textField: { ...FormTextFieldProps } }}
                 />
               </TableCell>
               <TableCell align="right">
-                <ListItemButton onClick={() => removeDetail(index)}>Ta bort</ListItemButton>
+                <ListItemButton onClick={() => remove(index)}>Ta bort</ListItemButton>
               </TableCell>
             </TableRow>
           ))}
-          {formCount > 0 && (
-            <TableRow>
-              <TableCell colSpan={4} align="right">
-                <Button type="submit" disabled={isSubmitting}>
-                  {!isSubmitting ? 'Spara' : 'Sparar...'}
-                </Button>
-              </TableCell>
-            </TableRow>
-          )}
+
+          <TableRow>
+            <TableCell>
+              <Button disabled={isSubmitting} onClick={() => append(details)}>
+                Lägg till
+              </Button>
+            </TableCell>
+            <TableCell colSpan={colSpan - 2} align="right">
+              <Button type="submit" variant="contained" disabled={isSubmitting}>
+                {!isSubmitting ? 'Spara' : 'Sparar...'}
+              </Button>
+            </TableCell>
+            <TableCell>
+              <Button disabled={isSubmitting} onClick={() => setFormOpen(false)}>
+                Avbryt
+              </Button>
+            </TableCell>
+          </TableRow>
         </TableBody>
       </Table>
     </form>

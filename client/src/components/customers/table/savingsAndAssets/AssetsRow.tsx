@@ -7,8 +7,8 @@ import {
   TableBody,
   ListItemButton,
 } from '@mui/material';
-import React, { useEffect, useState } from 'react';
-import { DateFields } from '../../../../services/api/models/ApiModel';
+import React, { useState } from 'react';
+import { DateFields } from '../../../../services/api/models';
 import { Assets } from '../../models/CustomerFormModels';
 import ColoredTableRow from '../../../ui/coloredTableRow/ColoredTableRow';
 import { useParams } from 'react-router-dom';
@@ -17,65 +17,55 @@ import {
   getCustomerFormData,
 } from '../../../../services/api/apiCustomerCalls';
 import TableLoader from '../../../ui/tableLoader/TableLoader';
-import FormCountHandler from '../../forms/FormCountHandler';
+import FormCountHandler from '../../forms/FormOpenHandler';
 import AssetsForm from '../../forms/savingsAndAssets/AssetsForm';
+import { enqueueSnackbar } from 'notistack';
+import { useQueryClient, useQuery, useMutation } from 'react-query';
+import { FormFields } from '../../models/FormProps';
 
 const AssetsRow = () => {
-  const [formCount, setFormCount] = useState<number>(0);
+  const [formOpen, setFormOpen] = useState<boolean>(false);
   const { custId } = useParams();
-  const [fields, setFields] = useState<[Assets & DateFields]>();
-  const [loading, setLoading] = useState<boolean>(true);
   const colSpan: number = 5;
-
-  const onSubmit = () => {
-    updateCustomerFields();
+  const queryClient = useQueryClient();
+  const formFields: FormFields = {
+    field: 'assets',
+    custId: custId!,
   };
 
-  const removeSubDoc = async (subDocId: string) => {
-    const response = await deleteCustSubDocument({
-      field: 'assets',
-      custId: custId!,
-      subDocId: subDocId,
-    });
+  const { data, isLoading } = useQuery({
+    queryKey: ['customer', formFields],
+    queryFn: () => getCustomerFormData(formFields),
 
-    if (response.success) {
-      setFields(response.data as [Assets & DateFields]);
-    }
-  };
+    onSuccess: (data) => {
+      return data as [Assets & DateFields];
+    },
 
-  const updateCustomerFields = async () => {
-    const response = await getCustomerFormData({
-      field: 'assets',
-      _id: custId as string,
-    });
-    if (response.success) {
-      (response!.data as [Assets & DateFields]).sort((a, b) => {
-        if (a.belongs === 'Gemensamt') return -1;
-        if (b.belongs === 'Gemensamt') return 1;
-
-        return a.belongs! > b.belongs! ? 1 : -1;
+    cacheTime: 0,
+    onError: (error) => {
+      enqueueSnackbar(error as string, {
+        variant: 'error',
       });
+    },
+  });
 
-      setFields(response.data as [Assets & DateFields]);
-      setLoading(false);
-    }
-  };
+  const { mutateAsync: removeSubDoc } = useMutation({
+    mutationFn: (subDocId: string) => deleteCustSubDocument({ ...formFields, subDocId }),
 
-  useEffect(() => {
-    updateCustomerFields();
-  }, [custId]);
+    onSuccess: () => {
+      queryClient.invalidateQueries(['customer']);
+    },
+  });
+
+  if (isLoading) return <TableLoader colSpan={colSpan} />;
 
   return (
     <TableRow>
       <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={colSpan}>
         <Box sx={{ margin: 1 }}>
           <Table size="small" aria-label="more-info">
-            {loading ? (
-              <TableBody>
-                <TableLoader colSpan={colSpan} />
-              </TableBody>
-            ) : fields!.length > 0 ? (
-              fields!.map((f) => (
+            {data!.length > 0 ? (
+              (data as [Assets & DateFields])!.map((f) => (
                 <React.Fragment key={f._id}>
                   <TableHead>
                     <ColoredTableRow>
@@ -131,7 +121,9 @@ const AssetsRow = () => {
             ) : (
               <TableBody>
                 <TableRow>
-                  <TableCell colSpan={colSpan}>Inga tillgångar hittades registrerade.</TableCell>
+                  <TableCell align="center" colSpan={colSpan}>
+                    Inga tillgångar hittades registrerade.
+                  </TableCell>
                 </TableRow>
               </TableBody>
             )}
@@ -145,11 +137,7 @@ const AssetsRow = () => {
           </Table>
         </Box>
         {formCount > 0 && (
-          <AssetsForm
-            formCount={formCount}
-            setFormCount={(value) => setFormCount(value)}
-            submitted={onSubmit}
-          />
+          <AssetsForm formCount={formCount} setFormCount={(value) => setFormCount(value)} />
         )}
       </TableCell>
     </TableRow>

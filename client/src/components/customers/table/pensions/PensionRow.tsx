@@ -7,8 +7,8 @@ import {
   TableBody,
   ListItemButton,
 } from '@mui/material';
-import { Fragment, useEffect, useState } from 'react';
-import { DateFields } from '../../../../services/api/models/ApiModel';
+import { Fragment, useState } from 'react';
+import { DateFields } from '../../../../services/api/models';
 import { CustomerPension } from '../../models/CustomerFormModels';
 import ColoredTableRow from '../../../ui/coloredTableRow/ColoredTableRow';
 import { useParams } from 'react-router-dom';
@@ -17,58 +17,55 @@ import {
   getCustomerFormData,
 } from '../../../../services/api/apiCustomerCalls';
 import TableLoader from '../../../ui/tableLoader/TableLoader';
-import FormCountHandler from '../../forms/FormCountHandler';
+import FormCountHandler from '../../forms/FormOpenHandler';
 import PensionForm from '../../forms/pensions/PensionForm';
+import { enqueueSnackbar } from 'notistack';
+import { useQueryClient, useQuery, useMutation } from 'react-query';
+import { FormFields } from '../../models/FormProps';
 
 const PensionRow = () => {
-  const [formCount, setFormCount] = useState<number>(0);
+  const [formOpen, setFormOpen] = useState<boolean>(false);
   const { custId } = useParams();
-  const [fields, setFields] = useState<[CustomerPension & DateFields]>();
-  const [loading, setLoading] = useState<boolean>(true);
   const colSpan: number = 6;
-
-  const onSubmit = () => {
-    updateCustomerFields();
+  const queryClient = useQueryClient();
+  const formFields: FormFields = {
+    field: 'pension',
+    custId: custId!,
   };
 
-  const removeSubDoc = async (subDocId: string) => {
-    const response = await deleteCustSubDocument({
-      field: 'pension',
-      custId: custId!,
-      subDocId: subDocId,
-    });
+  const { data, isLoading } = useQuery({
+    queryKey: ['customer', formFields],
+    queryFn: () => getCustomerFormData(formFields),
 
-    if (response.success) {
-      setFields(response.data as [CustomerPension & DateFields]);
-    }
-  };
+    onSuccess: (data) => {
+      return data as [CustomerPension & DateFields];
+    },
 
-  const updateCustomerFields = async () => {
-    const response = await getCustomerFormData({
-      field: 'pension',
-      _id: custId as string,
-    });
-    if (response.success) {
-      setFields(response.data as [CustomerPension & DateFields]);
-      setLoading(false);
-    }
-  };
+    cacheTime: 0,
+    onError: (error) => {
+      enqueueSnackbar(error as string, {
+        variant: 'error',
+      });
+    },
+  });
 
-  useEffect(() => {
-    updateCustomerFields();
-  }, [custId]);
+  const { mutateAsync: removeSubDoc } = useMutation({
+    mutationFn: (subDocId: string) => deleteCustSubDocument({ ...formFields, subDocId }),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries(['customer']);
+    },
+  });
+
+  if (isLoading) return <TableLoader colSpan={colSpan} />;
 
   return (
     <TableRow>
       <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={colSpan}>
         <Box sx={{ margin: 1 }}>
           <Table size="small" aria-label="more-info">
-            {loading ? (
-              <TableBody>
-                <TableLoader colSpan={colSpan} />
-              </TableBody>
-            ) : fields!.length > 0 ? (
-              fields!.map((f) => (
+            {data!.length > 0 ? (
+              (data as [CustomerPension & DateFields])!.map((f) => (
                 <Fragment key={f._id}>
                   <TableHead>
                     <ColoredTableRow>
@@ -161,7 +158,9 @@ const PensionRow = () => {
             ) : (
               <TableBody>
                 <TableRow>
-                  <TableCell colSpan={colSpan}>Inga pensioner registrerade.</TableCell>
+                  <TableCell align="center" colSpan={colSpan}>
+                    Inga pensioner registrerade.
+                  </TableCell>
                 </TableRow>
               </TableBody>
             )}
@@ -175,11 +174,7 @@ const PensionRow = () => {
           </Table>
         </Box>
         {formCount > 0 && (
-          <PensionForm
-            formCount={formCount}
-            setFormCount={(value) => setFormCount(value)}
-            submitted={onSubmit}
-          />
+          <PensionForm formCount={formCount} setFormCount={(value) => setFormCount(value)} />
         )}
       </TableCell>
     </TableRow>

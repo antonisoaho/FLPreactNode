@@ -8,7 +8,7 @@ import {
   SelectChangeEvent,
   TextField,
 } from '@mui/material';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import CustomerModel from './models/CustomerModel';
 import { useRecoilValue } from 'recoil';
 import { userState } from '../../services/state/RecoilAtoms';
@@ -47,7 +47,7 @@ const CustomerComponent = () => {
     },
   });
 
-  const handleAdvisor = (event: SelectChangeEvent<string | number>) => {
+  const handleAdvisor = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     const selectedValue = event.target.value;
     setSelectedAdvisor(selectedValue);
   };
@@ -112,29 +112,26 @@ const CustomerComponent = () => {
         color={'primary'}
       />
       <Grid container direction="row" spacing={2} alignItems="end" justifyContent="center">
-        {isAdmin && (advisorList as UserModel[]) && (
+        {isAdmin && advisorList && (
           <Grid item alignItems="center">
-            <FormControl variant="outlined">
-              <InputLabel id="advisorIds-label">Rådgivare</InputLabel>
-              <Select
-                sx={{ minWidth: '180px', textAlign: 'left' }}
-                label="Rådgivare"
-                labelId="advisorIds"
-                id="selectedAdvisor"
-                value={selectedAdvisor}
-                onChange={(event) => {
-                  handleAdvisor(event);
-                }}>
-                <MenuItem value={-1} key={'allAdvisors'}>
-                  Alla
+            <TextField
+              sx={{ minWidth: '180px', textAlign: 'left' }}
+              label="Rådgivare"
+              select
+              id="selectedAdvisor"
+              value={selectedAdvisor}
+              onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) => {
+                return handleAdvisor(event);
+              }}>
+              <MenuItem value={-1} key={'allAdvisors'}>
+                Alla
+              </MenuItem>
+              {advisorList?.map((advisor, index) => (
+                <MenuItem value={index} key={advisor._id}>
+                  {advisor.name}
                 </MenuItem>
-                {(advisorList as UserModel[])?.map((advisor, index) => (
-                  <MenuItem value={index} key={advisor._id}>
-                    {advisor.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+              ))}
+            </TextField>
           </Grid>
         )}
         <Grid item sx={{ marginRight: 'auto' }}>

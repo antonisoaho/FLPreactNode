@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { CustomerChildren } from '../../models/CustomerFormModels';
 import {
   Button,
@@ -14,104 +14,103 @@ import {
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { formatDate } from '../../../../utils/formatting';
-import { removeFormByIndex } from '../../../../utils/formUtils';
 import { useParams } from 'react-router-dom';
-import { CustomFormProps, FormTextFieldProps } from '../../models/FormProps';
-import { getCustomerNames, updateCustomer } from '../../../../services/api/apiCustomerCalls';
-import { SubmitHandler, useForm } from 'react-hook-form';
+import { CustomFormProps, FormFields, FormTextFieldProps } from '../../models/FormProps';
+import { getCustomerNames } from '../../../../services/api/apiCustomerCalls';
+import { SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
 import { enqueueSnackbar } from 'notistack';
+import { useQuery } from 'react-query';
+import { useSubmitCustomerForm } from '../../../../hooks/useSubmitCustomerForm';
 
-const CustomerChildForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFormCount }) => {
-  const [details, setDetails] = useState<CustomerChildren[]>([]);
+const CustomerChildForm: React.FC<CustomFormProps> = ({ setFormOpen }) => {
   const { custId } = useParams();
+  const colSpan: number = 6;
   const [selectItems, setSelectItems] = useState<Array<{ value: string; label: string }>>([
     { value: 'Gemensamt', label: 'Gemensamt' },
   ]);
+
+  const formFields: FormFields = {
+    field: 'customerChildren',
+    custId: custId as string,
+  };
+  const sendToServer = useSubmitCustomerForm(formFields);
+
+  const details: CustomerChildren = {
+    name: '',
+    yearMonth: '',
+    belongs: '',
+    childSupportCounts: true,
+    livesAtHomeToAge: 20,
+  };
+
   const {
     register,
     handleSubmit,
     setValue,
+    control,
     formState: { isSubmitting },
-  } = useForm<CustomerChildren[]>();
+  } = useForm({
+    defaultValues: {
+      item: [details],
+    },
+  });
 
-  const populateSelectItems = async () => {
-    const response = await getCustomerNames(custId!);
-    if (response.success) {
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'item',
+  });
+
+  useQuery({
+    queryKey: ['customerDetails', custId],
+    queryFn: () => getCustomerNames(formFields.custId),
+
+    onSuccess: (data) => {
       setSelectItems((prev) => {
         const currentLabels = prev.map((item) => item.label);
-        const newItems = response
-          .data!.filter((name) => !currentLabels.includes(name))
+        const newItems = data
+          .filter((name) => !currentLabels.includes(name))
           .map((name) => ({ value: name, label: name }));
 
         return [...prev, ...newItems];
       });
-    } else {
+    },
+    onError: () => {
       enqueueSnackbar('Kunde inte hitta kunders namn, vänligen kontrollera ifyllnad.', {
         variant: 'error',
       });
-    }
-  };
+    },
+  });
 
-  const onSubmit: SubmitHandler<CustomerChildren[]> = async (data) => {
-    const response = await updateCustomer({
-      field: 'customerChildren',
-      _id: custId as string,
-      formData: data,
-    });
-
-    if (response.success) {
-      setFormCount(0);
-      if (submitted) submitted();
-    }
-  };
-
-  useEffect(() => {
-    populateSelectItems();
-  }, [custId]);
-
-  useEffect(() => {
-    const newDetails = [];
-    for (let i = 0; i < formCount; i++) {
-      newDetails.push({
-        name: '',
-        yearMonth: '',
-        belongs: '',
-        childSupportCounts: true,
-        livesAtHomeToAge: 20,
-      });
-    }
-    setDetails(newDetails);
-  }, [formCount]);
-
-  const removeDetail = (index: number) => {
-    if (details.length > 0) {
-      setDetails(removeFormByIndex(details, index));
-      setFormCount(formCount - 1);
-    }
+  const onSubmit: SubmitHandler<{
+    item: CustomerChildren[];
+  }> = async (data) => {
+    await sendToServer(data.item);
+    setFormOpen(false);
+    remove();
   };
 
   const handleDateChange = (date: Date, index: number) => {
     const newDate = formatDate(date);
-    setValue(`${index}.yearMonth`, newDate);
+    setValue(`item.${index}.yearMonth`, newDate);
   };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <Table>
         <TableBody>
-          {details.map((detail, index) => (
+          {fields.map((detail, index) => (
             <TableRow key={index}>
-              <TableCell>
+              <TableCell width="18%">
                 <TextField
                   required
                   label="Namn"
                   defaultValue={detail.name}
-                  {...register(`${index}.name`, { required: 'Vänligen ange ett namn.' })}
+                  {...register(`item.${index}.name`, { required: 'Vänligen ange ett namn.' })}
                   {...FormTextFieldProps}
                   className="form-input-field"
                 />
               </TableCell>
-              <TableCell>
+              <TableCell width="18%">
                 <TextField
                   required
                   {...FormTextFieldProps}
@@ -120,7 +119,7 @@ const CustomerChildForm: React.FC<CustomFormProps> = ({ submitted, formCount, se
                   select
                   fullWidth
                   label="Tillhör"
-                  {...register(`${index}.belongs`, {
+                  {...register(`item.${index}.belongs`, {
                     required: 'Vänligen välj ett alternativ.',
                   })}>
                   {selectItems.map((item) => (
@@ -130,49 +129,59 @@ const CustomerChildForm: React.FC<CustomFormProps> = ({ submitted, formCount, se
                   ))}
                 </TextField>
               </TableCell>
-              <TableCell>
+              <TableCell width="18%">
                 <InputLabel shrink className="form-checkbox-label">
                   Barnbidrag räknas
                 </InputLabel>
-                <Checkbox {...register(`${index}.childSupportCounts`)} />
+                <Checkbox {...register(`item.${index}.childSupportCounts`)} />
               </TableCell>
-              <TableCell>
+              <TableCell width="18%">
                 <DatePicker
                   required
                   className="form-input-field"
                   slotProps={{ textField: { ...FormTextFieldProps } }}
                   label="Född *"
                   views={['month', 'year']}
-                  {...register(`${index}.yearMonth`, { required: 'Var vänlig välj ett datum.' })}
+                  {...register(`item.${index}.yearMonth`, {
+                    required: 'Var vänlig välj ett datum.',
+                  })}
                   onChange={(date) => handleDateChange(date as Date, index)}
                 />
               </TableCell>
-              <TableCell>
+              <TableCell width="18%">
                 <TextField
                   required
                   className="form-input-field"
                   type="number"
                   defaultValue={detail.livesAtHomeToAge}
-                  {...register(`${index}.livesAtHomeToAge`)}
+                  {...register(`item.${index}.livesAtHomeToAge`)}
                   label="Bor hemma till"
                   {...FormTextFieldProps}
                   sx={{ maxWidth: '7rem' }}
                 />
               </TableCell>
-              <TableCell align="right">
-                <ListItemButton onClick={() => removeDetail(index)}>Ta bort</ListItemButton>
+              <TableCell width="10%" align="right">
+                <ListItemButton onClick={() => remove(index)}>Ta bort</ListItemButton>
               </TableCell>
             </TableRow>
           ))}
-          {formCount > 0 && (
-            <TableRow>
-              <TableCell colSpan={6} align="right">
-                <Button type="submit" disabled={isSubmitting}>
-                  {!isSubmitting ? 'Spara' : 'Sparar...'}
-                </Button>
-              </TableCell>
-            </TableRow>
-          )}
+          <TableRow>
+            <TableCell>
+              <Button disabled={isSubmitting} onClick={() => append(details)}>
+                Lägg till
+              </Button>
+            </TableCell>
+            <TableCell colSpan={colSpan - 2} align="right">
+              <Button type="submit" variant="contained" disabled={isSubmitting}>
+                {!isSubmitting ? 'Spara' : 'Sparar...'}
+              </Button>
+            </TableCell>
+            <TableCell>
+              <Button disabled={isSubmitting} onClick={() => setFormOpen(false)}>
+                Avbryt
+              </Button>
+            </TableCell>
+          </TableRow>
         </TableBody>
       </Table>
     </form>

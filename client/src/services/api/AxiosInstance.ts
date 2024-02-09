@@ -53,7 +53,7 @@ axiosInstance.interceptors.response.use(
   }
 );
 
-export const Logout = () => {
+export const Logout = async () => {
   localStorage.removeItem('TOKEN');
   localStorage.removeItem('USERNAME');
 

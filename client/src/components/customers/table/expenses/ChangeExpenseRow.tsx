@@ -7,8 +7,8 @@ import {
   TableBody,
   ListItemButton,
 } from '@mui/material';
-import { useEffect, useState } from 'react';
-import { DateFields } from '../../../../services/api/models/ApiModel';
+import { useState } from 'react';
+import { DateFields } from '../../../../services/api/models';
 import { ExpensesChange } from '../../models/CustomerFormModels';
 import ColoredTableRow from '../../../ui/coloredTableRow/ColoredTableRow';
 import { useParams } from 'react-router-dom';
@@ -17,47 +17,48 @@ import {
   deleteCustSubDocument,
 } from '../../../../services/api/apiCustomerCalls';
 import TableLoader from '../../../ui/tableLoader/TableLoader';
-import FormCountHandler from '../../forms/FormCountHandler';
+import FormCountHandler from '../../forms/FormOpenHandler';
 import ExpenseChangeForm from '../../forms/expenses/ExpenseChangeForm';
+import { enqueueSnackbar } from 'notistack';
+import { useQueryClient, useQuery, useMutation } from 'react-query';
+import { FormFields } from '../../models/FormProps';
 
 const ChangeIncomeRow = () => {
-  const [formCount, setFormCount] = useState<number>(0);
+  const [formOpen, setFormOpen] = useState<boolean>(false);
   const { custId } = useParams();
-  const [fields, setFields] = useState<[ExpensesChange & DateFields]>();
-  const [loading, setLoading] = useState<boolean>(true);
   const colSpan: number = 7;
-
-  const onSubmit = () => {
-    updateCustomerFields();
+  const queryClient = useQueryClient();
+  const formFields: FormFields = {
+    field: 'expenses',
+    custId: custId!,
+    subField: 'change',
   };
 
-  const updateCustomerFields = async () => {
-    const formResponse = await getCustomerFormData({
-      field: 'expenses',
-      _id: custId as string,
-      subField: 'change',
-    });
+  const { data, isLoading } = useQuery({
+    queryKey: ['customer', formFields],
+    queryFn: () => getCustomerFormData(formFields),
 
-    if (formResponse.success) {
-      setFields(formResponse.data as [ExpensesChange & DateFields]);
-      setLoading(false);
-    }
-  };
+    onSuccess: (data) => {
+      return data as [ExpensesChange & DateFields];
+    },
 
-  useEffect(() => {
-    updateCustomerFields();
-  }, [custId]);
+    cacheTime: 0,
+    onError: (error) => {
+      enqueueSnackbar(error as string, {
+        variant: 'error',
+      });
+    },
+  });
 
-  const removeSubDoc = async (subDocId: string) => {
-    const response = await deleteCustSubDocument({
-      field: 'expenses',
-      custId: custId!,
-      subDocId: subDocId,
-      subField: 'change',
-    });
+  const { mutateAsync: removeSubDoc } = useMutation({
+    mutationFn: (subDocId: string) => deleteCustSubDocument({ ...formFields, subDocId }),
 
-    if (response.success) setFields(response.data as [ExpensesChange & DateFields]);
-  };
+    onSuccess: () => {
+      queryClient.invalidateQueries(['customer']);
+    },
+  });
+
+  if (isLoading) return <TableLoader colSpan={colSpan} />;
 
   return (
     <TableRow>
@@ -76,10 +77,8 @@ const ChangeIncomeRow = () => {
               </ColoredTableRow>
             </TableHead>
             <TableBody>
-              {loading ? (
-                <TableLoader colSpan={colSpan} />
-              ) : fields!.length > 0 ? (
-                fields!.map((exp) => (
+              {data!.length > 0 ? (
+                (data as [ExpensesChange & DateFields])!.map((exp) => (
                   <TableRow key={exp._id}>
                     <TableCell>{exp.values!.changeType || '-'}</TableCell>
                     <TableCell>{exp.values!.when?.toLocaleString() || '-'}</TableCell>
@@ -94,7 +93,9 @@ const ChangeIncomeRow = () => {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={colSpan}>Inga ändringar hittades</TableCell>
+                  <TableCell align="center" colSpan={colSpan}>
+                    Inga planerade utgifter hittades.
+                  </TableCell>
                 </TableRow>
               )}
               <FormCountHandler
@@ -106,11 +107,7 @@ const ChangeIncomeRow = () => {
           </Table>
         </Box>
         {formCount > 0 && (
-          <ExpenseChangeForm
-            formCount={formCount}
-            setFormCount={(value) => setFormCount(value)}
-            submitted={onSubmit}
-          />
+          <ExpenseChangeForm formCount={formCount} setFormCount={(value) => setFormCount(value)} />
         )}
       </TableCell>
     </TableRow>

@@ -7,8 +7,8 @@ import {
   TableBody,
   ListItemButton,
 } from '@mui/material';
-import React, { useEffect, useState } from 'react';
-import { DateFields } from '../../../../services/api/models/ApiModel';
+import React, { useState } from 'react';
+import { DateFields } from '../../../../services/api/models';
 import { IncomeBase } from '../../models/CustomerFormModels';
 import ColoredTableRow from '../../../ui/coloredTableRow/ColoredTableRow';
 import { useParams } from 'react-router-dom';
@@ -16,60 +16,57 @@ import {
   getCustomerFormData,
   deleteCustSubDocument,
 } from '../../../../services/api/apiCustomerCalls';
-import FormCountHandler from '../../forms/FormCountHandler';
+import FormCountHandler from '../../forms/FormOpenHandler';
 import TableLoader from '../../../ui/tableLoader/TableLoader';
 import IncomeBaseForm from '../../forms/incomes/IncomeBaseForm';
+import { enqueueSnackbar } from 'notistack';
+import { useQueryClient, useQuery, useMutation } from 'react-query';
+import { FormFields } from '../../models/FormProps';
 
 const BaseIncomeRow = () => {
-  const [formCount, setFormCount] = useState<number>(0);
+  const [formOpen, setFormOpen] = useState<boolean>(false);
   const { custId } = useParams();
-  const [fields, setFields] = useState<[IncomeBase & DateFields]>();
-  const [loading, setLoading] = useState<boolean>(true);
   const colSpan: number = 6;
-
-  const onSubmit = () => {
-    updateCustomerFields();
+  const queryClient = useQueryClient();
+  const formFields: FormFields = {
+    field: 'income',
+    custId: custId!,
+    subField: 'base',
   };
 
-  const updateCustomerFields = async () => {
-    const response = await getCustomerFormData({
-      field: 'income',
-      _id: custId as string,
-      subField: 'base',
-    });
+  const { data, isLoading } = useQuery({
+    queryKey: ['customer', formFields],
+    queryFn: () => getCustomerFormData(formFields),
 
-    if (response.success) {
-      setFields(response.data as [IncomeBase & DateFields]);
-      setLoading(false);
-    }
-  };
+    onSuccess: (data) => {
+      return data as [IncomeBase & DateFields];
+    },
 
-  useEffect(() => {
-    updateCustomerFields();
-  }, [custId]);
+    cacheTime: 0,
+    onError: (error) => {
+      enqueueSnackbar(error as string, {
+        variant: 'error',
+      });
+    },
+  });
 
-  const removeSubDoc = async (subDocId: string) => {
-    const response = await deleteCustSubDocument({
-      field: 'income',
-      custId: custId!,
-      subDocId: subDocId,
-      subField: 'base',
-    });
+  const { mutateAsync: removeSubDoc } = useMutation({
+    mutationFn: (subDocId: string) => deleteCustSubDocument({ ...formFields, subDocId }),
 
-    if (response.success) setFields(response.data as [IncomeBase & DateFields]);
-  };
+    onSuccess: () => {
+      queryClient.invalidateQueries(['customer']);
+    },
+  });
+
+  if (isLoading) return <TableLoader colSpan={colSpan} />;
 
   return (
     <TableRow>
       <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={5}>
         <Box sx={{ margin: 1 }}>
           <Table size="small" aria-label="more-info">
-            {loading ? (
-              <TableBody>
-                <TableLoader colSpan={colSpan} />
-              </TableBody>
-            ) : fields!.length > 0 ? (
-              fields!.map((inc) => (
+            {data!.length > 0 ? (
+              (data as [IncomeBase & DateFields])!.map((inc) => (
                 <React.Fragment key={inc._id}>
                   <TableHead>
                     <ColoredTableRow>
@@ -183,11 +180,7 @@ const BaseIncomeRow = () => {
           </Table>
         </Box>
         {formCount > 0 && (
-          <IncomeBaseForm
-            formCount={formCount}
-            setFormCount={(value) => setFormCount(value)}
-            submitted={onSubmit}
-          />
+          <IncomeBaseForm formCount={formCount} setFormCount={(value) => setFormCount(value)} />
         )}
       </TableCell>
     </TableRow>

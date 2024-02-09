@@ -12,13 +12,7 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 import { ReactQueryDevtools } from 'react-query/devtools';
 
 dayjs.locale('sv');
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: Infinity,
-    },
-  },
-});
+const queryClient = new QueryClient({});
 
 const Providers: FC<ProviderProps> = ({ children }) => {
   return (

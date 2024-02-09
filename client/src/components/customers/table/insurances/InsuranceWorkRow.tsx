@@ -7,11 +7,11 @@ import {
   TableBody,
   ListItemButton,
 } from '@mui/material';
-import React, { useEffect, useState } from 'react';
-import { DateFields } from '../../../../services/api/models/ApiModel';
+import React, { useState } from 'react';
+import { DateFields } from '../../../../services/api/models';
 import { InsuranceWork } from '../../models/CustomerFormModels';
 import ColoredTableRow from '../../../ui/coloredTableRow/ColoredTableRow';
-import FormCountHandler from '../../forms/FormCountHandler';
+import FormCountHandler from '../../forms/FormOpenHandler';
 import WorkInsuranceForm from '../../forms/insurances/WorkInsuranceForm';
 import TableLoader from '../../../ui/tableLoader/TableLoader';
 import {
@@ -19,58 +19,54 @@ import {
   getCustomerFormData,
 } from '../../../../services/api/apiCustomerCalls';
 import { useParams } from 'react-router-dom';
+import { enqueueSnackbar } from 'notistack';
+import { useQueryClient, useQuery, useMutation } from 'react-query';
+import { FormFields } from '../../models/FormProps';
 
 const InsuranceWorkRow = () => {
-  const [formCount, setFormCount] = useState<number>(0);
+  const [formOpen, setFormOpen] = useState<boolean>(false);
   const { custId } = useParams();
-  const [fields, setFields] = useState<[InsuranceWork & DateFields]>();
-  const [loading, setLoading] = useState<boolean>(true);
   const colSpan: number = 6;
-
-  const onSubmit = () => {
-    updateCustomerFields();
+  const queryClient = useQueryClient();
+  const formFields: FormFields = {
+    field: 'insurances',
+    custId: custId!,
+    subField: 'work',
   };
 
-  const removeSubDoc = async (subDocId: string) => {
-    const response = await deleteCustSubDocument({
-      field: 'insurances',
-      custId: custId!,
-      subDocId: subDocId,
-      subField: 'work',
-    });
+  const { data, isLoading } = useQuery({
+    queryKey: ['customer', formFields],
+    queryFn: () => getCustomerFormData(formFields),
 
-    if (response.success) {
-      setFields(response.data as [InsuranceWork & DateFields]);
-    }
-  };
+    onSuccess: (data) => {
+      return data as [InsuranceWork & DateFields];
+    },
 
-  const updateCustomerFields = async () => {
-    const response = await getCustomerFormData({
-      field: 'insurances',
-      _id: custId as string,
-      subField: 'work',
-    });
-    if (response.success) {
-      setFields(response.data as [InsuranceWork & DateFields]);
-      setLoading(false);
-    }
-  };
+    cacheTime: 0,
+    onError: (error) => {
+      enqueueSnackbar(error as string, {
+        variant: 'error',
+      });
+    },
+  });
 
-  useEffect(() => {
-    updateCustomerFields();
-  }, [custId]);
+  const { mutateAsync: removeSubDoc } = useMutation({
+    mutationFn: (subDocId: string) => deleteCustSubDocument({ ...formFields, subDocId }),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries(['customer']);
+    },
+  });
+
+  if (isLoading) return <TableLoader colSpan={colSpan} />;
 
   return (
     <TableRow>
       <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={7}>
         <Box sx={{ margin: 1 }}>
           <Table size="small" aria-label="more-info">
-            {loading ? (
-              <TableBody>
-                <TableLoader colSpan={colSpan} />
-              </TableBody>
-            ) : fields!.length > 0 ? (
-              fields!.map((f) => (
+            {data!.length > 0 ? (
+              (data as [InsuranceWork & DateFields])!.map((f) => (
                 <React.Fragment key={f._id}>
                   <TableHead>
                     <ColoredTableRow>
@@ -111,11 +107,7 @@ const InsuranceWorkRow = () => {
           </Table>
         </Box>
         {formCount > 0 && (
-          <WorkInsuranceForm
-            formCount={formCount}
-            setFormCount={(value) => setFormCount(value)}
-            submitted={onSubmit}
-          />
+          <WorkInsuranceForm formCount={formCount} setFormCount={(value) => setFormCount(value)} />
         )}
       </TableCell>
     </TableRow>
