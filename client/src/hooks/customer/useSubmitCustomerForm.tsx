@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from 'react-query';
-import { updateCustomer } from '../services/api/apiCustomerCalls';
-import { FormFields } from '../components/customers/models/FormProps';
-import { CustomerFormData } from '../components/customers/models/CustomerFormModels';
+import { updateCustomer } from '../../services/api/apiCustomerCalls';
+import { FormFields } from '../../components/customers/models/FormProps';
+import { CustomerFormData } from '../../components/customers/models/CustomerFormModels';
 
 export const useSubmitCustomerForm = (formFields: FormFields) => {
   const queryClient = useQueryClient();
@@ -11,7 +11,6 @@ export const useSubmitCustomerForm = (formFields: FormFields) => {
 
     onSuccess: () => {
       queryClient.invalidateQueries(['customer']);
-      console.log('formFields', formFields);
     },
   });
 

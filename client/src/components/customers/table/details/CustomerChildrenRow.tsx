@@ -12,50 +12,23 @@ import { DateFields } from '../../../../services/api/models';
 import { CustomerChildren } from '../../models/CustomerFormModels';
 import ColoredTableRow from '../../../ui/coloredTableRow/ColoredTableRow';
 import CustomerChildForm from '../../forms/details/CustomerChildForm';
-import {
-  deleteCustSubDocument,
-  getCustomerFormData,
-} from '../../../../services/api/apiCustomerCalls';
 import { useParams } from 'react-router-dom';
 import TableLoader from '../../../ui/tableLoader/TableLoader';
 import { FormFields } from '../../models/FormProps';
-import { useMutation, useQuery, useQueryClient } from 'react-query';
-import { enqueueSnackbar } from 'notistack';
 import FormOpenHandler from '../../forms/FormOpenHandler';
+import { useGetCustomerRowData } from '../../../../hooks/customer/useGetCustomerRowData';
+import { useDeleteCustomerSubDoc } from '../../../../hooks/customer/useDeleteCustomerSubDoc';
 
 const CustomerChildrenRow = () => {
   const [formOpen, setFormOpen] = useState<boolean>(false);
   const { custId } = useParams();
   const colSpan: number = 7;
-  const queryClient = useQueryClient();
   const formFields: FormFields = {
     field: 'customerChildren',
     custId: custId!,
   };
-
-  const { data, isLoading } = useQuery({
-    queryKey: ['customer', formFields],
-    queryFn: () => getCustomerFormData(formFields),
-
-    onSuccess: (data) => {
-      return data as [CustomerChildren & DateFields];
-    },
-
-    cacheTime: 0,
-    onError: (error) => {
-      enqueueSnackbar(error as string, {
-        variant: 'error',
-      });
-    },
-  });
-
-  const { mutateAsync: removeSubDoc } = useMutation({
-    mutationFn: (subDocId: string) => deleteCustSubDocument({ ...formFields, subDocId }),
-
-    onSuccess: () => {
-      queryClient.invalidateQueries(['customer']);
-    },
-  });
+  const removeSubDoc = useDeleteCustomerSubDoc(formFields);
+  const { data, isLoading } = useGetCustomerRowData(formFields);
 
   if (isLoading) return <TableLoader colSpan={colSpan} />;
 
@@ -107,7 +80,9 @@ const CustomerChildrenRow = () => {
             </TableBody>
           </Table>
         </Box>
-        {formOpen && <CustomerChildForm setFormOpen={(value) => setFormOpen(value)} />}
+        {formOpen && (
+          <CustomerChildForm setFormOpen={(value) => setFormOpen(value)} formFields={formFields} />
+        )}
       </TableCell>
     </TableRow>
   );

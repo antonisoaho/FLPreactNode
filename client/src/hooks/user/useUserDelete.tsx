@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from 'react-query';
 import { enqueueSnackbar } from 'notistack';
-import { deleteUserById } from '../services/api/apiUserCalls';
+import { deleteUserById } from '../../services/api/apiUserCalls';
 
 export const useUserDelete = (id: string) => {
   const queryClient = useQueryClient();

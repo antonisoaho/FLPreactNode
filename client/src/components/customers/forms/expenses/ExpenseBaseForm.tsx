@@ -1,10 +1,7 @@
-import React, { Fragment, useEffect, useState } from 'react';
-import { useForm, SubmitHandler } from 'react-hook-form';
-import { useParams } from 'react-router-dom';
-import { getCustomerNames, updateCustomer } from '../../../../services/api/apiCustomerCalls';
+import React, { Fragment } from 'react';
+import { useForm, SubmitHandler, useFieldArray } from 'react-hook-form';
 import { ExpensesBase } from '../../models/CustomerFormModels';
 import { CustomFormProps, FormTextFieldProps } from '../../models/FormProps';
-import { removeFormByIndex } from '../../../../utils/formUtils';
 import {
   Table,
   TableBody,
@@ -16,78 +13,47 @@ import {
   ListItemButton,
 } from '@mui/material';
 import TableLoader from '../../../ui/tableLoader/TableLoader';
-import { enqueueSnackbar } from 'notistack';
+import { useGetCustomerNames } from '../../../../hooks/customer/useGetCustomerNames';
+import { useSubmitCustomerForm } from '../../../../hooks/customer/useSubmitCustomerForm';
 
-const ExpenseBaseForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFormCount }) => {
+const ExpenseBaseForm: React.FC<CustomFormProps> = ({ setFormOpen, formFields }) => {
+  const colSpan: number = 5;
+  const sendToServer = useSubmitCustomerForm(formFields);
+  const { persons, isLoading } = useGetCustomerNames(formFields.custId);
+
+  const details: ExpensesBase = {
+    values: {
+      expenseType: '',
+      mapped: 0,
+      pension: [],
+      activeEnd: [],
+      difPension: [],
+      difActiveEnd: [],
+      difDeath: [],
+    },
+  };
+
   const {
     register,
     handleSubmit,
+    control,
     formState: { isSubmitting },
-  } = useForm<ExpensesBase[]>();
-  const [details, setDetails] = useState<ExpensesBase[]>([]);
-  const { custId } = useParams();
-  const [persons, setPersons] = useState<string[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  } = useForm({
+    defaultValues: {
+      item: [details],
+    },
+  });
 
-  const populateSelectItems = async () => {
-    const response = await getCustomerNames(custId!);
-    if (response.success) {
-      setPersons((prev) => {
-        const currentNames = prev.map((item) => item);
-        const newNames = response
-          .data!.filter((name: any) => !currentNames.includes(name.split(' ')[0]))
-          .map((name: string) => name.split(' ')[0]);
-
-        setLoading(false);
-        return [...prev, ...newNames];
-      });
-    } else {
-      enqueueSnackbar('Kunde inte hitta kunders namn, vänligen kontrollera ifyllnad.', {
-        variant: 'error',
-      });
-    }
-  };
-
-  const onSubmit: SubmitHandler<ExpensesBase[]> = async (data) => {
-    const response = await updateCustomer({
-      field: 'expenses',
-      _id: custId as string,
-      formData: data,
-      subField: 'base',
-    });
-
-    if (response.success) {
-      if (submitted) {
-        submitted();
-        setFormCount(0);
-      }
-    }
-  };
-
-  useEffect(() => {
-    const newDetails: ExpensesBase[] = [];
-    for (let i = 0; i < formCount; i++) {
-      newDetails.push({
-        values: {
-          expenseType: '',
-          mapped: 0,
-          pension: [65, 65],
-          activeEnd: [85, 85],
-        },
-      });
-    }
-    setDetails(newDetails);
-  }, [formCount]);
-
-  useEffect(() => {
-    populateSelectItems();
-  }, [custId]);
-
-  const removeDetail = (index: number) => {
-    if (details.length > 0) {
-      setDetails(removeFormByIndex(details, index));
-      setFormCount(formCount - 1);
-    }
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'item',
+  });
+  const onSubmit: SubmitHandler<{
+    item: ExpensesBase[];
+  }> = async (data) => {
+    await sendToServer(data.item);
+    setFormOpen(false);
+    remove();
   };
 
   const expenseTypeSelect = [
@@ -103,15 +69,21 @@ const ExpenseBaseForm: React.FC<CustomFormProps> = ({ submitted, formCount, setF
     'Kartlaggd/Planerad utgift',
   ];
 
+  if (isLoading)
+    return (
+      <Table>
+        <TableBody>
+          <TableLoader colSpan={colSpan} />
+        </TableBody>
+      </Table>
+    );
+
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <Table>
         <TableBody>
-          {loading ? (
-            <TableLoader colSpan={5} />
-          ) : (
-            persons.length &&
-            details.map((detail, index) => (
+          {persons?.length &&
+            fields.map((detail, index) => (
               <Fragment key={index}>
                 <TableRow>
                   <TableCell width="20%">
@@ -122,7 +94,7 @@ const ExpenseBaseForm: React.FC<CustomFormProps> = ({ submitted, formCount, setF
                       required
                       defaultValue={detail.values!.expenseType}
                       label="Utgiftstyp"
-                      {...register(`${index}.values.expenseType`, {
+                      {...register(`item.${index}.values.expenseType`, {
                         required: 'Vänligen fyll i typ av utgift',
                       })}>
                       {expenseTypeSelect.map((item) => (
@@ -140,7 +112,7 @@ const ExpenseBaseForm: React.FC<CustomFormProps> = ({ submitted, formCount, setF
                       type="number"
                       label="Kartlaggt belopp"
                       placeholder="Ange belopp"
-                      {...register(`${index}.values.mapped`, {
+                      {...register(`item.${index}.values.mapped`, {
                         required: 'Vänligen fyll i kartlaggt belopp',
                       })}
                     />
@@ -148,7 +120,7 @@ const ExpenseBaseForm: React.FC<CustomFormProps> = ({ submitted, formCount, setF
                   <TableCell width="20%" />
                   <TableCell width="20%" />
                   <TableCell width="10%" align="right">
-                    <ListItemButton onClick={() => removeDetail(index)}>Ta bort</ListItemButton>
+                    <ListItemButton onClick={() => remove(index)}>Ta bort</ListItemButton>
                   </TableCell>
                 </TableRow>
                 {persons.map((person, idx) => (
@@ -160,9 +132,9 @@ const ExpenseBaseForm: React.FC<CustomFormProps> = ({ submitted, formCount, setF
                         required
                         type="number"
                         defaultValue={detail.values!.pension![idx]}
-                        label={`Pensionsålder ${person}`}
+                        label={`Pensionsålder ${person.split(' ')[0]}`}
                         placeholder="Ange belopp"
-                        {...register(`${index}.values.pension.${idx}`, {
+                        {...register(`item.${index}.values.pension.${idx}`, {
                           required: 'Vänligen fyll i pensionsålder',
                         })}
                       />
@@ -173,9 +145,9 @@ const ExpenseBaseForm: React.FC<CustomFormProps> = ({ submitted, formCount, setF
                         {...FormTextFieldProps}
                         type="number"
                         defaultValue={detail.values!.activeEnd![idx]}
-                        label={`Aktiv tid slut ${person}`}
+                        label={`Aktiv tid slut ${person.split(' ')[0]}`}
                         placeholder="Ange belopp"
-                        {...register(`${index}.values.activeEnd.${idx}`, {
+                        {...register(`item.${index}.values.activeEnd.${idx}`, {
                           required: 'Vänligen fyll i ålder för aktiv tid slut',
                         })}
                       />
@@ -185,9 +157,9 @@ const ExpenseBaseForm: React.FC<CustomFormProps> = ({ submitted, formCount, setF
                         className="form-input-field"
                         {...FormTextFieldProps}
                         type="number"
-                        label={`Dif ${person} pension`}
+                        label={`Dif ${person.split(' ')[0]} pension`}
                         placeholder="Ange belopp"
-                        {...register(`${index}.values.difPension.${idx}`)}
+                        {...register(`item.${index}.values.difPension.${idx}`)}
                       />
                     </TableCell>
                     <TableCell width="20%">
@@ -195,9 +167,9 @@ const ExpenseBaseForm: React.FC<CustomFormProps> = ({ submitted, formCount, setF
                         className="form-input-field"
                         {...FormTextFieldProps}
                         type="number"
-                        label={`Dif ${person} aktivt slut`}
+                        label={`Dif ${person.split(' ')[0]} aktivt slut`}
                         placeholder="Ange belopp"
-                        {...register(`${index}.values.difActiveEnd.${idx}`)}
+                        {...register(`item.${index}.values.difActiveEnd.${idx}`)}
                       />
                     </TableCell>
                     <TableCell width="20%">
@@ -205,26 +177,32 @@ const ExpenseBaseForm: React.FC<CustomFormProps> = ({ submitted, formCount, setF
                         className="form-input-field"
                         {...FormTextFieldProps}
                         type="number"
-                        label={`Dif ${person} död`}
+                        label={`Dif ${person.split(' ')[0]} död`}
                         placeholder="Ange belopp"
-                        {...register(`${index}.values.difDeath.${idx}`)}
+                        {...register(`item.${index}.values.difDeath.${idx}`)}
                       />
                     </TableCell>
                   </TableRow>
                 ))}
               </Fragment>
-            ))
-          )}
-
-          {formCount > 0 && (
-            <TableRow>
-              <TableCell colSpan={5} align="right">
-                <Button type="submit" disabled={isSubmitting}>
-                  {!isSubmitting ? 'Spara' : 'Sparar...'}
-                </Button>
-              </TableCell>
-            </TableRow>
-          )}
+            ))}
+          <TableRow>
+            <TableCell>
+              <Button disabled={isSubmitting} onClick={() => append(details)}>
+                Lägg till
+              </Button>
+            </TableCell>
+            <TableCell colSpan={colSpan - 2} align="right">
+              <Button type="submit" variant="contained" disabled={isSubmitting}>
+                {!isSubmitting ? 'Spara' : 'Sparar...'}
+              </Button>
+            </TableCell>
+            <TableCell>
+              <Button disabled={isSubmitting} onClick={() => setFormOpen(false)}>
+                Avbryt
+              </Button>
+            </TableCell>
+          </TableRow>
         </TableBody>
       </Table>
     </form>

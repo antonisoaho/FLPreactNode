@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { CustomerChildren } from '../../models/CustomerFormModels';
 import {
   Button,
@@ -14,25 +14,17 @@ import {
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { formatDate } from '../../../../utils/formatting';
-import { useParams } from 'react-router-dom';
-import { CustomFormProps, FormFields, FormTextFieldProps } from '../../models/FormProps';
-import { getCustomerNames } from '../../../../services/api/apiCustomerCalls';
+import { CustomFormProps, FormTextFieldProps } from '../../models/FormProps';
 import { SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
-import { enqueueSnackbar } from 'notistack';
-import { useQuery } from 'react-query';
-import { useSubmitCustomerForm } from '../../../../hooks/useSubmitCustomerForm';
+import { useSubmitCustomerForm } from '../../../../hooks/customer/useSubmitCustomerForm';
+import { useGetCustomerNameLabels } from '../../../../hooks/customer/useGetCustomerNameLabels';
 
-const CustomerChildForm: React.FC<CustomFormProps> = ({ setFormOpen }) => {
-  const { custId } = useParams();
+const CustomerChildForm: React.FC<CustomFormProps> = ({ setFormOpen, formFields }) => {
   const colSpan: number = 6;
-  const [selectItems, setSelectItems] = useState<Array<{ value: string; label: string }>>([
+  const selectItems = useGetCustomerNameLabels(formFields.custId, [
     { value: 'Gemensamt', label: 'Gemensamt' },
   ]);
 
-  const formFields: FormFields = {
-    field: 'customerChildren',
-    custId: custId as string,
-  };
   const sendToServer = useSubmitCustomerForm(formFields);
 
   const details: CustomerChildren = {
@@ -58,27 +50,6 @@ const CustomerChildForm: React.FC<CustomFormProps> = ({ setFormOpen }) => {
   const { fields, append, remove } = useFieldArray({
     control,
     name: 'item',
-  });
-
-  useQuery({
-    queryKey: ['customerDetails', custId],
-    queryFn: () => getCustomerNames(formFields.custId),
-
-    onSuccess: (data) => {
-      setSelectItems((prev) => {
-        const currentLabels = prev.map((item) => item.label);
-        const newItems = data
-          .filter((name) => !currentLabels.includes(name))
-          .map((name) => ({ value: name, label: name }));
-
-        return [...prev, ...newItems];
-      });
-    },
-    onError: () => {
-      enqueueSnackbar('Kunde inte hitta kunders namn, vänligen kontrollera ifyllnad.', {
-        variant: 'error',
-      });
-    },
   });
 
   const onSubmit: SubmitHandler<{

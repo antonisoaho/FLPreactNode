@@ -10,7 +10,7 @@ import {
   Toolbar,
   Tooltip,
 } from '@mui/material';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import AccessibilityIcon from '@mui/icons-material/Accessibility';
 import ChildCareIcon from '@mui/icons-material/ChildCare';
 import WorkIcon from '@mui/icons-material/Work';
@@ -25,10 +25,8 @@ import ElderlyIcon from '@mui/icons-material/Elderly';
 import MenuIcon from '@mui/icons-material/Menu';
 import MenuOpenIcon from '@mui/icons-material/MenuOpen';
 import GroupRemoveIcon from '@mui/icons-material/GroupRemove';
-import { deleteCustomerById } from '../../../services/api/apiCustomerCalls';
 import PromptDialog from '../../ui/promtDialog/PromptDialog';
-import { enqueueSnackbar } from 'notistack';
-import { useMutation, useQueryClient } from 'react-query';
+import { useCustomerDelete } from '../../../hooks/customer/useCustomerDelete';
 
 const drawerWidth = 100;
 const closeWidth = 15;
@@ -39,8 +37,7 @@ const CustomerSidebar = () => {
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
   const { custId } = useParams();
   const basePath = `/customers/${custId}/edit/`;
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
+  const customerDelete = useCustomerDelete(custId!);
 
   const items = [
     { text: 'Personer', to: basePath + 'details', icon: <AccessibilityIcon /> },
@@ -77,22 +74,9 @@ const CustomerSidebar = () => {
     setDialogOpen(!dialogOpen);
   };
 
-  const { mutateAsync: customerDeleteConfirm } = useMutation({
-    mutationFn: () => deleteCustomerById(custId!),
-    onSuccess: () => {
-      handleDialogOpen();
-      enqueueSnackbar('Kund raderad', {
-        variant: 'success',
-      });
-      navigate('/customers');
-      queryClient.invalidateQueries('customers');
-    },
-    onError: (error) => {
-      enqueueSnackbar(error as string, {
-        variant: 'error',
-      });
-    },
-  });
+  const customerDeleteConfirm = () => {
+    customerDelete();
+  };
 
   const customerDeleteCanceled = () => {
     handleDialogOpen();

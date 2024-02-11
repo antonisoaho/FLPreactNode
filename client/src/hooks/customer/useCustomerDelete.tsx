@@ -1,7 +1,8 @@
 import { useMutation, useQueryClient } from 'react-query';
-import { deleteCustomerById } from '../services/api/apiCustomerCalls';
+import { deleteCustomerById } from '../../services/api/apiCustomerCalls';
 import { enqueueSnackbar } from 'notistack';
 import { useNavigate } from 'react-router-dom';
+
 export const useCustomerDelete = (custId: string) => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();

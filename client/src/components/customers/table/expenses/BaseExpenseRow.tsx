@@ -9,65 +9,30 @@ import {
 } from '@mui/material';
 import { Fragment, useState } from 'react';
 import { DateFields } from '../../../../services/api/models';
-import { CustomerDetails, ExpensesBase } from '../../models/CustomerFormModels';
+import { ExpensesBase } from '../../models/CustomerFormModels';
 import ColoredTableRow from '../../../ui/coloredTableRow/ColoredTableRow';
 import { useParams } from 'react-router-dom';
-import {
-  getCustomerFormData,
-  deleteCustSubDocument,
-  getCustomerNames,
-} from '../../../../services/api/apiCustomerCalls';
 import TableLoader from '../../../ui/tableLoader/TableLoader';
-import FormCountHandler from '../../forms/FormOpenHandler';
 import ExpenseBaseForm from '../../forms/expenses/ExpenseBaseForm';
-import { enqueueSnackbar } from 'notistack';
-import { useQueryClient, useQuery, useMutation } from 'react-query';
 import { FormFields } from '../../models/FormProps';
+import { useGetCustomerNames } from '../../../../hooks/customer/useGetCustomerNames';
+import { useDeleteCustomerSubDoc } from '../../../../hooks/customer/useDeleteCustomerSubDoc';
+import { useGetCustomerRowData } from '../../../../hooks/customer/useGetCustomerRowData';
+import FormOpenHandler from '../../forms/FormOpenHandler';
 
 const BaseExpenseRow = () => {
   const [formOpen, setFormOpen] = useState<boolean>(false);
   const { custId } = useParams();
-  const [persons, setPersons] = useState<string[]>([]);
   const colSpan: number = 5;
-  const queryClient = useQueryClient();
   const formFields: FormFields = {
     field: 'expenses',
     custId: custId!,
     subField: 'base',
   };
 
-  const { data, isLoading } = useQuery({
-    queryKey: ['customer', formFields],
-    queryFn: () => getCustomerFormData(formFields),
-
-    onSuccess: (data) => {
-      return data as [ExpensesBase & DateFields];
-    },
-
-    cacheTime: 0,
-    onError: (error) => {
-      enqueueSnackbar(error as string, {
-        variant: 'error',
-      });
-    },
-  });
-
-  useQuery({
-    queryKey: ['customerDetails', custId],
-    queryFn: () => getCustomerNames(formFields.custId),
-
-    onSuccess: (data) => {
-      setPersons(data);
-    },
-  });
-
-  const { mutateAsync: removeSubDoc } = useMutation({
-    mutationFn: (subDocId: string) => deleteCustSubDocument({ ...formFields, subDocId }),
-
-    onSuccess: () => {
-      queryClient.invalidateQueries(['customer']);
-    },
-  });
+  const { persons } = useGetCustomerNames(custId as string);
+  const removeSubDoc = useDeleteCustomerSubDoc(formFields);
+  const { data, isLoading } = useGetCustomerRowData(formFields);
 
   if (isLoading) return <TableLoader colSpan={colSpan} />;
 
@@ -150,17 +115,15 @@ const BaseExpenseRow = () => {
                 </TableRow>
               </TableBody>
             )}
-            <TableBody>
-              <FormCountHandler
-                formCount={formCount}
-                setFormCount={(value) => setFormCount(value)}
-                colSpan={colSpan}
-              />
-            </TableBody>
+            {!formOpen && (
+              <TableBody>
+                <FormOpenHandler setFormOpen={(value) => setFormOpen(value)} colSpan={colSpan} />
+              </TableBody>
+            )}
           </Table>
         </Box>
-        {formCount > 0 && (
-          <ExpenseBaseForm formCount={formCount} setFormCount={(value) => setFormCount(value)} />
+        {formOpen && (
+          <ExpenseBaseForm setFormOpen={(value) => setFormOpen(value)} formFields={formFields} />
         )}
       </TableCell>
     </TableRow>

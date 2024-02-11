@@ -1,9 +1,5 @@
 import { SelectProps, TextFieldProps } from '@mui/material';
 
-export interface CustomFormProps {
-  setFormOpen: React.Dispatch<React.SetStateAction<boolean>>;
-}
-
 export const FormTextFieldProps: TextFieldProps = {
   size: 'small',
   variant: 'standard',
@@ -19,3 +15,8 @@ export type FormFields = {
   custId: string;
   subField?: string;
 };
+
+export interface CustomFormProps {
+  setFormOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  formFields: FormFields;
+}

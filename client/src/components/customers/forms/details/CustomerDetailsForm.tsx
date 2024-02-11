@@ -13,18 +13,11 @@ import {
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { formatDateYearMonth } from '../../../../utils/formatting';
 import { useForm, SubmitHandler, useFieldArray } from 'react-hook-form';
-import { useParams } from 'react-router-dom';
-import { CustomFormProps, FormFields, FormTextFieldProps } from '../../models/FormProps';
-import { useSubmitCustomerForm } from '../../../../hooks/useSubmitCustomerForm';
+import { CustomFormProps, FormTextFieldProps } from '../../models/FormProps';
+import { useSubmitCustomerForm } from '../../../../hooks/customer/useSubmitCustomerForm';
 
-const CustomerDetailsForm: React.FC<CustomFormProps> = ({ setFormOpen }) => {
-  const { custId } = useParams();
+const CustomerDetailsForm: React.FC<CustomFormProps> = ({ setFormOpen, formFields }) => {
   const colSpan: number = 4;
-
-  const formFields: FormFields = {
-    field: 'customerDetails',
-    custId: custId!,
-  };
   const sendToServer = useSubmitCustomerForm(formFields);
 
   const details: CustomerDetails = {
