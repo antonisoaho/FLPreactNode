@@ -11,52 +11,26 @@ import React, { useState } from 'react';
 import { DateFields } from '../../../../services/api/models';
 import { InsuranceWork } from '../../models/CustomerFormModels';
 import ColoredTableRow from '../../../ui/coloredTableRow/ColoredTableRow';
-import FormCountHandler from '../../forms/FormOpenHandler';
 import WorkInsuranceForm from '../../forms/insurances/WorkInsuranceForm';
 import TableLoader from '../../../ui/tableLoader/TableLoader';
-import {
-  deleteCustSubDocument,
-  getCustomerFormData,
-} from '../../../../services/api/apiCustomerCalls';
 import { useParams } from 'react-router-dom';
-import { enqueueSnackbar } from 'notistack';
-import { useQueryClient, useQuery, useMutation } from 'react-query';
 import { FormFields } from '../../models/FormProps';
+import FormOpenHandler from '../../forms/FormOpenHandler';
+import { useDeleteCustomerSubDoc } from '../../../../hooks/customer/useDeleteCustomerSubDoc';
+import { useGetCustomerRowData } from '../../../../hooks/customer/useGetCustomerRowData';
 
 const InsuranceWorkRow = () => {
   const [formOpen, setFormOpen] = useState<boolean>(false);
   const { custId } = useParams();
   const colSpan: number = 6;
-  const queryClient = useQueryClient();
   const formFields: FormFields = {
     field: 'insurances',
     custId: custId!,
     subField: 'work',
   };
 
-  const { data, isLoading } = useQuery({
-    queryKey: ['customer', formFields],
-    queryFn: () => getCustomerFormData(formFields),
-
-    onSuccess: (data) => {
-      return data as [InsuranceWork & DateFields];
-    },
-
-    cacheTime: 0,
-    onError: (error) => {
-      enqueueSnackbar(error as string, {
-        variant: 'error',
-      });
-    },
-  });
-
-  const { mutateAsync: removeSubDoc } = useMutation({
-    mutationFn: (subDocId: string) => deleteCustSubDocument({ ...formFields, subDocId }),
-
-    onSuccess: () => {
-      queryClient.invalidateQueries(['customer']);
-    },
-  });
+  const removeSubDoc = useDeleteCustomerSubDoc(formFields);
+  const { data, isLoading } = useGetCustomerRowData(formFields);
 
   if (isLoading) return <TableLoader colSpan={colSpan} />;
 
@@ -97,17 +71,15 @@ const InsuranceWorkRow = () => {
                 </TableRow>
               </TableBody>
             )}
-            <TableBody>
-              <FormCountHandler
-                formCount={formCount}
-                setFormCount={(value) => setFormCount(value)}
-                colSpan={colSpan}
-              />
-            </TableBody>
+            {!formOpen && (
+              <TableBody>
+                <FormOpenHandler setFormOpen={(value) => setFormOpen(value)} colSpan={colSpan} />
+              </TableBody>
+            )}
           </Table>
         </Box>
-        {formCount > 0 && (
-          <WorkInsuranceForm formCount={formCount} setFormCount={(value) => setFormCount(value)} />
+        {formOpen && (
+          <WorkInsuranceForm setFormOpen={(value) => setFormOpen(value)} formFields={formFields} />
         )}
       </TableCell>
     </TableRow>

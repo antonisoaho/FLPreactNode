@@ -10,106 +10,69 @@ import {
   Checkbox,
   InputLabel,
 } from '@mui/material';
-import React, { Fragment, useEffect, useState } from 'react';
-import { useForm, SubmitHandler } from 'react-hook-form';
-import { useParams } from 'react-router-dom';
-import { updateCustomer, getCustomerNames } from '../../../../services/api/apiCustomerCalls';
+import React, { Fragment } from 'react';
+import { useForm, SubmitHandler, useFieldArray } from 'react-hook-form';
 import ColoredTableRow from '../../../ui/coloredTableRow/ColoredTableRow';
 import { CustomerPension } from '../../models/CustomerFormModels';
-import { CustomFormProps, FormTextFieldProps } from '../../models/FormProps';
-import { removeFormByIndex } from '../../../../utils/formUtils';
+import {
+  CustomFormProps,
+  FormNumberFieldProps,
+  FormPercentageProps,
+  FormSelectProps,
+  FormTextFieldProps,
+} from '../../models/FormProps';
 import TableLoader from '../../../ui/tableLoader/TableLoader';
-import { enqueueSnackbar } from 'notistack';
+import { pensionCompensationPeriodSelect } from '../../../../utils/formVariables';
+import { useGetCustomerNameLabels } from '../../../../hooks/customer/useGetCustomerNameLabels';
+import { useSubmitCustomerForm } from '../../../../hooks/customer/useSubmitCustomerForm';
 
-const PensionForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFormCount }) => {
+const PensionForm: React.FC<CustomFormProps> = ({ setFormOpen, formFields }) => {
+  const colSpan: number = 4;
+  const sendToServer = useSubmitCustomerForm(formFields);
+  const { selectItems, isLoading } = useGetCustomerNameLabels(formFields.custId, []);
+
+  const details: CustomerPension = {
+    belongs: '',
+    company: '',
+    pensionType: '',
+    pensionName: '',
+    pensionValue: undefined,
+    pensionAge: undefined,
+    monthlyPension: undefined,
+    compensationPeriod: undefined,
+    shellFee: undefined,
+    riskClass: undefined,
+    fundFee: undefined,
+    estIncreasedValue: undefined,
+    annualSavings: undefined,
+    commitmentPowers: undefined,
+    spousalProtection: undefined,
+    timeAfterDeath: undefined,
+    beneficiary: '',
+  };
+
   const {
     register,
     handleSubmit,
+    control,
     formState: { isSubmitting },
-  } = useForm<CustomerPension[]>();
-  const [details, setDetails] = useState<CustomerPension[]>([]);
-  const { custId } = useParams();
-  const [selectItems, setSelectItems] = useState<Array<{ value: string; label: string }>>([]);
-  const [compensationPeriodSelect, setCompensationPeriodSelect] = useState<
-    Array<{ value: number; label: string }>
-  >([
-    {
-      value: 0,
-      label: 'Livslång',
+  } = useForm({
+    defaultValues: {
+      item: [details],
     },
-  ]);
-  const colSpan: number = 4;
+  });
 
-  const populateSelectItems = async () => {
-    const persons = await getCustomerNames(custId!);
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'item',
+  });
 
-    if (persons.success) {
-      setSelectItems((prev) => {
-        const currentLabels = prev.map((item) => item.label);
-        const newPersons = persons
-          .data!.filter((name: string) => !currentLabels.includes(name.split(' ')[0]))
-          .map((name: string) => ({ value: name, label: name.split(' ')[0] }));
-
-        return [...prev, ...newPersons];
-      });
-    } else {
-      enqueueSnackbar('Kunde inte hitta kunders namn, vänligen kontrollera ifyllnad.', {
-        variant: 'error',
-      });
-    }
-  };
-
-  const onSubmit: SubmitHandler<CustomerPension[]> = async (data) => {
-    const response = await updateCustomer({
-      field: 'pension',
-      _id: custId as string,
-      formData: data,
-    });
-
-    if (response.success) {
-      if (submitted) {
-        submitted();
-        setFormCount(0);
-      }
-    }
-  };
-
-  const makeCompensationPeriodSelect = () => {
-    if (compensationPeriodSelect.length == 1) {
-      setCompensationPeriodSelect((prev) => {
-        const newSelects = [];
-        for (let i = 1; i <= 40; i++) {
-          newSelects.push({ label: i.toString() + ' år', value: i });
-        }
-        return [...prev, ...newSelects];
-      });
-    }
-  };
-
-  useEffect(() => {
-    const newDetails = [];
-    for (let i = 0; i < formCount; i++) {
-      newDetails.push({
-        belongs: '',
-        pensionName: '',
-        pensionType: '',
-        beneficiary: '',
-        compensationPeriod: 0,
-      });
-    }
-    setDetails(newDetails);
-  }, [formCount]);
-
-  useEffect(() => {
-    populateSelectItems();
-    makeCompensationPeriodSelect();
-  }, [custId]);
-
-  const removeDetail = (index: number) => {
-    if (details.length > 0) {
-      setDetails(removeFormByIndex(details, index));
-      setFormCount(formCount - 1);
-    }
+  const onSubmit: SubmitHandler<{
+    item: CustomerPension[];
+  }> = async (data) => {
+    await sendToServer(data.item);
+    setFormOpen(false);
+    remove();
   };
 
   const pensionTypeSelect = [
@@ -161,229 +124,201 @@ const PensionForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFormC
     },
   ];
 
+  if (isLoading)
+    return (
+      <Table>
+        <TableBody>
+          <TableLoader colSpan={colSpan} />
+        </TableBody>
+      </Table>
+    );
+
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <Table>
         <TableBody>
-          {compensationPeriodSelect.length == 1 ? (
-            <TableLoader colSpan={colSpan} />
-          ) : (
-            details.map((detail, index) => (
-              <Fragment key={index}>
-                <ColoredTableRow>
-                  <TableCell colSpan={colSpan - 1}>
-                    <TextField
-                      className="form-input-select"
-                      select
-                      required
-                      fullWidth
-                      {...FormTextFieldProps}
-                      defaultValue={detail.belongs}
-                      label="Försäkrad"
-                      {...register(`${index}.belongs`, {
-                        required: 'Vänligen välj vem pensionen gäller.',
-                      })}>
-                      {selectItems.map((item) => (
-                        <MenuItem key={item.value} value={item.value}>
-                          {item.label}
-                        </MenuItem>
-                      ))}
-                    </TextField>
-                  </TableCell>
-                  <TableCell>
-                    <ListItemButton onClick={() => removeDetail(index)}>Ta bort</ListItemButton>
-                  </TableCell>
-                </ColoredTableRow>
-                <TableRow>
-                  <TableCell width="25%">
-                    <TextField
-                      className="form-input-select"
-                      label="Bolag"
-                      {...FormTextFieldProps}
-                      {...register(`${index}.company`)}
-                    />
-                  </TableCell>
-                  <TableCell width="25%">
-                    <TextField
-                      fullWidth
-                      required
-                      select
-                      defaultValue={detail.pensionType}
-                      label="Pensionstyp"
-                      className="form-input-select"
-                      {...FormTextFieldProps}
-                      {...register(`${index}.pensionType`)}>
-                      {pensionTypeSelect.map((item) => (
-                        <MenuItem key={item.value} value={item.value}>
-                          {item.label}
-                        </MenuItem>
-                      ))}
-                    </TextField>
-                  </TableCell>
-                  <TableCell width="25%">
-                    <TextField
-                      className="form-input-field"
-                      required
-                      select
-                      fullWidth
-                      defaultValue={detail.pensionName}
-                      label="Benämning"
-                      {...FormTextFieldProps}
-                      {...register(`${index}.pensionName`)}>
-                      {pensionNameSelect.map((item) => (
-                        <MenuItem key={item.value} value={item.value}>
-                          {item.label}
-                        </MenuItem>
-                      ))}
-                    </TextField>
-                  </TableCell>
-                  <TableCell width="25%">
-                    <TextField
-                      className="form-input-field"
-                      label="Värde"
-                      type="number"
-                      {...FormTextFieldProps}
-                      {...register(`${index}.pensionValue`, { min: 0 })}
-                    />
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell width="25%">
-                    <TextField
-                      className="form-input-field"
-                      label="Pensionsålder"
-                      type="number"
-                      {...FormTextFieldProps}
-                      {...register(`${index}.pensionAge`, { min: 0 })}
-                    />
-                  </TableCell>
-                  <TableCell width="25%">
-                    <TextField
-                      className="form-input-field"
-                      label="Gar.pens (kr/mån)"
-                      type="number"
-                      {...FormTextFieldProps}
-                      {...register(`${index}.monthlyPension`, { min: 0 })}
-                    />
-                  </TableCell>
-                  <TableCell width="25%">
-                    <TextField
-                      className="form-input-field"
-                      label="Utbet. Tid"
-                      select
-                      fullWidth
-                      defaultValue={detail.compensationPeriod}
-                      {...FormTextFieldProps}
-                      {...register(`${index}.compensationPeriod`)}>
-                      {compensationPeriodSelect.map((item) => (
-                        <MenuItem key={item.value} value={item.value}>
-                          {item.label}
-                        </MenuItem>
-                      ))}
-                    </TextField>
-                  </TableCell>
-                  <TableCell width="25%">
-                    <TextField
-                      className="form-input-field"
-                      label="Skalavgift"
-                      type="number"
-                      {...FormTextFieldProps}
-                      {...register(`${index}.shellFee`, { min: 0, max: 100 })}
-                    />
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell width="25%">
-                    <TextField
-                      className="form-input-field"
-                      label="Vägd risk"
-                      type="number"
-                      {...FormTextFieldProps}
-                      {...register(`${index}.riskClass`, { min: 0, max: 100 })}
-                    />
-                  </TableCell>
-                  <TableCell width="25%">
-                    <TextField
-                      className="form-input-field"
-                      label="Vägd fondavg."
-                      type="number"
-                      {...FormTextFieldProps}
-                      {...register(`${index}.fundFee`, { min: 0, max: 100 })}
-                    />
-                  </TableCell>
-                  <TableCell width="25%">
-                    <TextField
-                      className="form-input-field"
-                      label="Ber. Värdeökning"
-                      type="number"
-                      {...FormTextFieldProps}
-                      {...register(`${index}.estIncreasedValue`, { min: 0, max: 100 })}
-                    />
-                  </TableCell>
-                  <TableCell width="25%">
-                    <TextField
-                      className="form-input-field"
-                      label="Sparande (kr/år)"
-                      type="number"
-                      {...FormTextFieldProps}
-                      {...register(`${index}.annualSavings`)}
-                    />
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell width="25%">
-                    <InputLabel shrink className="form-checkbox-label">
-                      ÅB-skydd
-                    </InputLabel>
-                    <Checkbox {...register(`${index}.commitmentPowers`)} />
-                  </TableCell>
-                  <TableCell width="25%">
-                    <TextField
-                      className="form-input-field"
-                      label="Eft.skydd (kr/år)"
-                      type="number"
-                      {...FormTextFieldProps}
-                      {...register(`${index}.spousalProtection`)}
-                    />
-                  </TableCell>
-                  <TableCell width="25%">
-                    <TextField
-                      className="form-input-field"
-                      label="Uttid (död)"
-                      type="number"
-                      {...FormTextFieldProps}
-                      {...register(`${index}.timeAfterDeath`)}
-                    />
-                  </TableCell>
-                  <TableCell width="25%">
-                    <TextField
-                      className="form-input-field"
-                      label="Förmånstagare"
-                      select
-                      fullWidth
-                      defaultValue={detail.beneficiary}
-                      {...FormTextFieldProps}
-                      {...register(`${index}.beneficiary`)}>
-                      {beneficiarySelectItems.map((item) => (
-                        <MenuItem key={item.value} value={item.value}>
-                          {item.label}
-                        </MenuItem>
-                      ))}
-                    </TextField>
-                  </TableCell>
-                </TableRow>
-              </Fragment>
-            ))
-          )}
-          {formCount > 0 && selectItems.length > 0 && (
-            <TableRow>
-              <TableCell colSpan={colSpan} align="right">
-                <Button type="submit" disabled={isSubmitting}>
-                  {!isSubmitting ? 'Spara' : 'Sparar...'}
-                </Button>
-              </TableCell>
-            </TableRow>
-          )}
+          {fields.map((detail, index) => (
+            <Fragment key={detail.id}>
+              <ColoredTableRow>
+                <TableCell colSpan={colSpan - 1}>
+                  <TextField
+                    required
+                    {...FormSelectProps}
+                    label="Försäkrad"
+                    {...register(`item.${index}.belongs`, {
+                      required: 'Vänligen välj vem pensionen gäller.',
+                    })}>
+                    {selectItems.map((item) => (
+                      <MenuItem key={item.value} value={item.value}>
+                        {item.label}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                </TableCell>
+                <TableCell>
+                  <ListItemButton onClick={() => remove(index)}>Ta bort</ListItemButton>
+                </TableCell>
+              </ColoredTableRow>
+              <TableRow>
+                <TableCell width="25%">
+                  <TextField
+                    label="Bolag"
+                    {...FormTextFieldProps}
+                    {...register(`item.${index}.company`)}
+                  />
+                </TableCell>
+                <TableCell width="25%">
+                  <TextField
+                    required
+                    label="Pensionstyp"
+                    {...FormSelectProps}
+                    {...register(`item.${index}.pensionType`)}>
+                    {pensionTypeSelect.map((item) => (
+                      <MenuItem key={item.value} value={item.value}>
+                        {item.label}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                </TableCell>
+                <TableCell width="25%">
+                  <TextField
+                    required
+                    label="Benämning"
+                    {...FormSelectProps}
+                    {...register(`item.${index}.pensionName`)}>
+                    {pensionNameSelect.map((item) => (
+                      <MenuItem key={item.value} value={item.value}>
+                        {item.label}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                </TableCell>
+                <TableCell width="25%">
+                  <TextField
+                    label="Värde"
+                    {...FormNumberFieldProps}
+                    {...register(`item.${index}.pensionValue`, { min: 0 })}
+                  />
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell width="25%">
+                  <TextField
+                    label="Pensionsålder"
+                    {...FormNumberFieldProps}
+                    {...register(`item.${index}.pensionAge`, { min: 0 })}
+                  />
+                </TableCell>
+                <TableCell width="25%">
+                  <TextField
+                    label="Gar.pens (kr/mån)"
+                    {...FormNumberFieldProps}
+                    {...register(`item.${index}.monthlyPension`, { min: 0 })}
+                  />
+                </TableCell>
+                <TableCell width="25%">
+                  <TextField
+                    label="Utbet. Tid"
+                    {...FormSelectProps}
+                    {...register(`item.${index}.compensationPeriod`)}>
+                    {pensionCompensationPeriodSelect.map((item) => (
+                      <MenuItem key={item.value} value={item.value}>
+                        {item.label}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                </TableCell>
+                <TableCell width="25%">
+                  <TextField
+                    label="Skalavgift"
+                    {...FormPercentageProps}
+                    {...register(`item.${index}.shellFee`, { min: 0, max: 100 })}
+                  />
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell width="25%">
+                  <TextField
+                    label="Vägd risk"
+                    {...FormNumberFieldProps}
+                    {...register(`item.${index}.riskClass`, { min: 0, max: 100 })}
+                  />
+                </TableCell>
+                <TableCell width="25%">
+                  <TextField
+                    label="Vägd fondavg."
+                    {...FormPercentageProps}
+                    {...register(`item.${index}.fundFee`, { min: 0, max: 100 })}
+                  />
+                </TableCell>
+                <TableCell width="25%">
+                  <TextField
+                    label="Ber. Värdeökning"
+                    {...FormPercentageProps}
+                    {...register(`item.${index}.estIncreasedValue`, { min: 0, max: 100 })}
+                  />
+                </TableCell>
+                <TableCell width="25%">
+                  <TextField
+                    label="Sparande (kr/år)"
+                    {...FormNumberFieldProps}
+                    {...register(`item.${index}.annualSavings`)}
+                  />
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell width="25%">
+                  <InputLabel shrink className="form-checkbox-label">
+                    ÅB-skydd
+                  </InputLabel>
+                  <Checkbox {...register(`item.${index}.commitmentPowers`)} />
+                </TableCell>
+                <TableCell width="25%">
+                  <TextField
+                    label="Eft.skydd (kr/år)"
+                    {...FormNumberFieldProps}
+                    {...register(`item.${index}.spousalProtection`)}
+                  />
+                </TableCell>
+                <TableCell width="25%">
+                  <TextField
+                    label="Uttid (död)"
+                    {...FormNumberFieldProps}
+                    {...register(`item.${index}.timeAfterDeath`)}
+                  />
+                </TableCell>
+                <TableCell width="25%">
+                  <TextField
+                    label="Förmånstagare"
+                    {...FormSelectProps}
+                    {...register(`item.${index}.beneficiary`)}>
+                    {beneficiarySelectItems.map((item) => (
+                      <MenuItem key={item.value} value={item.value}>
+                        {item.label}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                </TableCell>
+              </TableRow>
+            </Fragment>
+          ))}
+          <TableRow>
+            <TableCell>
+              <Button disabled={isSubmitting} onClick={() => append(details)}>
+                Lägg till
+              </Button>
+            </TableCell>
+            <TableCell colSpan={colSpan - 2} align="right">
+              <Button type="submit" variant="contained" disabled={isSubmitting}>
+                {!isSubmitting ? 'Spara' : 'Sparar...'}
+              </Button>
+            </TableCell>
+            <TableCell>
+              <Button disabled={isSubmitting} onClick={() => setFormOpen(false)}>
+                Avbryt
+              </Button>
+            </TableCell>
+          </TableRow>
         </TableBody>
       </Table>
     </form>

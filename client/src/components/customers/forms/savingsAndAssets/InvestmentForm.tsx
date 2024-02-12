@@ -8,94 +8,69 @@ import {
   ListItemButton,
   Button,
 } from '@mui/material';
-import React, { Fragment, useEffect, useState } from 'react';
-import { useForm, SubmitHandler } from 'react-hook-form';
-import { useParams } from 'react-router-dom';
-import {
-  getCustomerChildNames,
-  getCustomerNames,
-  updateCustomer,
-} from '../../../../services/api/apiCustomerCalls';
+import React, { Fragment } from 'react';
+import { useForm, SubmitHandler, useFieldArray } from 'react-hook-form';
 import ColoredTableRow from '../../../ui/coloredTableRow/ColoredTableRow';
 import { Investment } from '../../models/CustomerFormModels';
-import { CustomFormProps, FormTextFieldProps } from '../../models/FormProps';
-import { removeFormByIndex } from '../../../../utils/formUtils';
+import {
+  CustomFormProps,
+  FormNumberFieldProps,
+  FormPercentageProps,
+  FormSelectProps,
+  FormTextFieldProps,
+} from '../../models/FormProps';
 import { timePerspectiveSelect } from '../../../../utils/formVariables';
-import { enqueueSnackbar } from 'notistack';
+import { useGetCustomerNameLabels } from '../../../../hooks/customer/useGetCustomerNameLabels';
+import { useSubmitCustomerForm } from '../../../../hooks/customer/useSubmitCustomerForm';
+import TableLoader from '../../../ui/tableLoader/TableLoader';
 
-const InvestmentForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFormCount }) => {
-  const {
-    register,
-    handleSubmit,
-    formState: { isSubmitting },
-  } = useForm<Investment[]>();
-  const [details, setDetails] = useState<Investment[]>([]);
-  const { custId } = useParams();
-  const [selectItems, setSelectItems] = useState<Array<{ value: string; label: string }>>([
+const InvestmentForm: React.FC<CustomFormProps> = ({ setFormOpen, formFields }) => {
+  const colSpan: number = 5;
+  const sendToServer = useSubmitCustomerForm(formFields);
+  const { selectItems, isLoading } = useGetCustomerNameLabels(formFields.custId, [
     { value: 'Gemensam', label: 'Gemensam' },
   ]);
 
-  const populateSelectItems = async () => {
-    const persons = await getCustomerNames(custId!);
-    const children = await getCustomerChildNames(custId!);
-
-    if (persons.success || children.success) {
-      setSelectItems((prev) => {
-        const currentLabels = prev.map((item) => item.label);
-        const newPersons = persons
-          .data!.filter((name: string) => !currentLabels.includes(name.split(' ')[0]))
-          .map((name: string) => ({ value: name, label: name.split(' ')[0] }));
-        const newChildren = children
-          .data!.filter((name) => !currentLabels.includes(name))
-          .map((name) => ({ value: name, label: name }));
-
-        return [...prev, ...newPersons, ...newChildren];
-      });
-    } else {
-      enqueueSnackbar('Kunde inte hitta kunders namn, vänligen kontrollera ifyllnad.', {
-        variant: 'error',
-      });
-    }
+  const details: Investment = {
+    investmentType: '',
+    institution: '',
+    name: '',
+    belongs: '',
+    depositedAmount: undefined,
+    value: undefined,
+    riskClass: undefined,
+    managementFee: undefined,
+    shellFee: undefined,
+    timePerspective: '',
+    monthlySavings: undefined,
+    saveForHowLong: undefined,
+    additionalInvestment: undefined,
+    when: undefined,
+    projectedGrowth: undefined,
   };
 
-  const onSubmit: SubmitHandler<Investment[]> = async (data) => {
-    const response = await updateCustomer({
-      field: 'investments',
-      _id: custId as string,
-      formData: data,
-    });
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { isSubmitting },
+  } = useForm({
+    defaultValues: {
+      item: [details],
+    },
+  });
 
-    if (response.success) {
-      if (submitted) {
-        submitted();
-        setFormCount(0);
-      }
-    }
-  };
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'item',
+  });
 
-  useEffect(() => {
-    const newDetails = [];
-    for (let i = 0; i < formCount; i++) {
-      newDetails.push({
-        belongs: '',
-        investmentType: '',
-        institution: '',
-        value: 0,
-        timePerspective: '',
-      });
-    }
-    setDetails(newDetails);
-  }, [formCount]);
-
-  useEffect(() => {
-    populateSelectItems();
-  }, [custId]);
-
-  const removeDetail = (index: number) => {
-    if (details.length > 0) {
-      setDetails(removeFormByIndex(details, index));
-      setFormCount(formCount - 1);
-    }
+  const onSubmit: SubmitHandler<{
+    item: Investment[];
+  }> = async (data) => {
+    await sendToServer(data.item);
+    setFormOpen(false);
+    remove();
   };
 
   const investmentTypeSelect = [
@@ -117,22 +92,28 @@ const InvestmentForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFo
     },
   ];
 
+  if (isLoading)
+    return (
+      <Table>
+        <TableBody>
+          <TableLoader colSpan={colSpan} />
+        </TableBody>
+      </Table>
+    );
+
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <Table>
         <TableBody>
-          {details.map((detail, index) => (
-            <Fragment key={index}>
+          {fields.map((detail, index) => (
+            <Fragment key={detail.id}>
               <ColoredTableRow>
-                <TableCell colSpan={4}>
+                <TableCell colSpan={colSpan - 1}>
                   <TextField
-                    className="form-input-select"
-                    select
                     required
-                    {...FormTextFieldProps}
-                    defaultValue={detail.belongs}
+                    {...FormSelectProps}
                     label="Tillhör"
-                    {...register(`${index}.belongs`, {
+                    {...register(`item.${index}.belongs`, {
                       required: 'Vänligen välj ägare av sparande.',
                     })}>
                     {selectItems.map((item) => (
@@ -143,19 +124,16 @@ const InvestmentForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFo
                   </TextField>
                 </TableCell>
                 <TableCell>
-                  <ListItemButton onClick={() => removeDetail(index)}>Ta bort</ListItemButton>
+                  <ListItemButton onClick={() => remove(index)}>Ta bort</ListItemButton>
                 </TableCell>
               </ColoredTableRow>
               <TableRow>
                 <TableCell width="20%">
                   <TextField
-                    className="form-input-select"
                     required
-                    select
                     label="Kontotyp"
-                    defaultValue=""
-                    {...FormTextFieldProps}
-                    {...register(`${index}.investmentType`, {
+                    {...FormSelectProps}
+                    {...register(`item.${index}.investmentType`, {
                       required: 'Vänligen ange vilken typ av investering.',
                     })}>
                     {investmentTypeSelect.map((item) => (
@@ -167,37 +145,31 @@ const InvestmentForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFo
                 </TableCell>
                 <TableCell width="20%">
                   <TextField
-                    className="form-input-field"
                     label="Institut"
                     {...FormTextFieldProps}
-                    {...register(`${index}.institution`)}
+                    {...register(`item.${index}.institution`)}
                   />
                 </TableCell>
                 <TableCell width="20%">
                   <TextField
-                    className="form-input-field"
                     label="Benämning"
                     {...FormTextFieldProps}
-                    {...register(`${index}.name`)}
+                    {...register(`item.${index}.name`)}
                   />
                 </TableCell>
                 <TableCell width="20%">
                   <TextField
-                    className="form-input-field"
                     label="Insatt"
-                    type="number"
-                    {...FormTextFieldProps}
-                    {...register(`${index}.depositedAmount`, { min: 0 })}
+                    {...FormNumberFieldProps}
+                    {...register(`item.${index}.depositedAmount`, { min: 0 })}
                   />
                 </TableCell>
                 <TableCell width="20%">
                   <TextField
-                    className="form-input-field"
                     label="Saldo"
-                    type="number"
                     required
-                    {...FormTextFieldProps}
-                    {...register(`${index}.value`, {
+                    {...FormNumberFieldProps}
+                    {...register(`item.${index}.value`, {
                       required: 'Vänligen ange värdet på bankmedel.',
                       min: 0,
                     })}
@@ -207,12 +179,9 @@ const InvestmentForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFo
               <TableRow>
                 <TableCell width="20%">
                   <TextField
-                    className="form-input-select"
-                    select
-                    defaultValue={detail.timePerspective}
                     label="Tidsperspektiv"
-                    {...FormTextFieldProps}
-                    {...register(`${index}.timePerspective`)}>
+                    {...FormSelectProps}
+                    {...register(`item.${index}.timePerspective`)}>
                     {timePerspectiveSelect.map((item) => (
                       <MenuItem key={item.value} value={item.value}>
                         {item.label}
@@ -222,94 +191,83 @@ const InvestmentForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFo
                 </TableCell>
                 <TableCell width="20%">
                   <TextField
-                    className="form-input-field"
                     label="Spartid (år)"
-                    type="number"
-                    {...FormTextFieldProps}
-                    {...register(`${index}.saveForHowLong`)}
+                    {...FormNumberFieldProps}
+                    {...register(`item.${index}.saveForHowLong`)}
                   />
                 </TableCell>
                 <TableCell width="20%">
                   <TextField
-                    className="form-input-field"
                     label="Riskklass"
-                    type="number"
-                    {...FormTextFieldProps}
-                    {...register(`${index}.riskClass`)}
+                    {...FormNumberFieldProps}
+                    {...register(`item.${index}.riskClass`)}
                   />
                 </TableCell>
                 <TableCell width="20%">
                   <TextField
-                    className="form-input-field"
-                    label="Förv. Avgift"
                     type="number"
-                    inputProps={{ step: 0.01 }}
-                    {...FormTextFieldProps}
-                    {...register(`${index}.managementFee`)}
+                    {...FormPercentageProps}
+                    {...register(`item.${index}.managementFee`)}
                   />
                 </TableCell>
                 <TableCell width="20%">
                   <TextField
-                    className="form-input-field"
-                    label="Skalavgift"
                     type="number"
-                    inputProps={{ step: 0.01 }}
-                    {...FormTextFieldProps}
-                    {...register(`${index}.shellFee`)}
+                    {...FormPercentageProps}
+                    {...register(`item.${index}.shellFee`)}
                   />
                 </TableCell>
               </TableRow>
               <TableRow>
                 <TableCell width="20%">
                   <TextField
-                    className="form-input-field"
                     label="Månadsspar"
-                    type="number"
-                    {...FormTextFieldProps}
-                    {...register(`${index}.monthlySavings`)}
+                    {...FormNumberFieldProps}
+                    {...register(`item.${index}.monthlySavings`)}
                   />
                 </TableCell>
                 <TableCell width="20%">
                   <TextField
-                    className="form-input-field"
                     label="Tilläggsinvestering"
-                    type="number"
-                    {...FormTextFieldProps}
-                    {...register(`${index}.additionalInvestment`)}
+                    {...FormNumberFieldProps}
+                    {...register(`item.${index}.additionalInvestment`)}
                   />
                 </TableCell>
                 <TableCell width="20%">
                   <TextField
-                    className="form-input-field"
-                    label="När tillägg"
-                    type="number"
-                    {...FormTextFieldProps}
-                    {...register(`${index}.when`)}
+                    label="Tilläggs när"
+                    {...FormNumberFieldProps}
+                    {...register(`item.${index}.when`)}
                   />
                 </TableCell>
                 <TableCell width="20%">
                   <TextField
-                    className="form-input-field"
                     label="Tänkt tillväxt"
-                    type="number"
-                    inputProps={{ step: 0.01 }}
-                    {...FormTextFieldProps}
-                    {...register(`${index}.projectedGrowth`)}
+                    {...FormPercentageProps}
+                    {...register(`item.${index}.projectedGrowth`)}
                   />
                 </TableCell>
                 <TableCell />
               </TableRow>
             </Fragment>
           ))}
-          {formCount > 0 && (
-            <TableRow>
-              <TableCell colSpan={5} align="right">
-                <Button type="submit" disabled={isSubmitting}>
-                  {!isSubmitting ? 'Spara' : 'Sparar...'}
-                </Button>
-              </TableCell>
-            </TableRow>
-          )}
+          <TableRow>
+            <TableCell>
+              <Button disabled={isSubmitting} onClick={() => append(details)}>
+                Lägg till
+              </Button>
+            </TableCell>
+            <TableCell colSpan={colSpan - 2} align="right">
+              <Button type="submit" variant="contained" disabled={isSubmitting}>
+                {!isSubmitting ? 'Spara' : 'Sparar...'}
+              </Button>
+            </TableCell>
+            <TableCell>
+              <Button disabled={isSubmitting} onClick={() => setFormOpen(false)}>
+                Avbryt
+              </Button>
+            </TableCell>
+          </TableRow>
         </TableBody>
       </Table>
     </form>

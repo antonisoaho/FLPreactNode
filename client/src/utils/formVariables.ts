@@ -89,3 +89,17 @@ export const timePerspectiveSelect = [
     label: 'Barnspar',
   },
 ];
+
+export const pensionCompensationPeriodSelect = [
+  {
+    value: 0,
+    label: 'Livslång',
+  },
+  ...(() => {
+    const newSelects = [];
+    for (let i = 1; i <= 40; i++) {
+      newSelects.push({ label: i.toString() + ' år', value: i });
+    }
+    return newSelects;
+  })(),
+];

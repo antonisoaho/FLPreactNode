@@ -1,10 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { useForm, SubmitHandler } from 'react-hook-form';
-import { useParams } from 'react-router-dom';
-import { getCustomerNames, updateCustomer } from '../../../../services/api/apiCustomerCalls';
+import React from 'react';
 import { IncomeChange } from '../../models/CustomerFormModels';
-import { CustomFormProps, FormTextFieldProps } from '../../models/FormProps';
-import { removeFormByIndex } from '../../../../utils/formUtils';
+import { CustomFormProps, FormNumberFieldProps, FormSelectProps } from '../../models/FormProps';
 import {
   Table,
   TableBody,
@@ -15,76 +11,23 @@ import {
   TextField,
   ListItemButton,
 } from '@mui/material';
-import { enqueueSnackbar } from 'notistack';
+import TableLoader from '../../../ui/tableLoader/TableLoader';
+import { useSubmitCustomerForm } from '../../../../hooks/customer/useSubmitCustomerForm';
+import { useGetCustomerNameLabels } from '../../../../hooks/customer/useGetCustomerNameLabels';
+import { SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
 
-const IncomeChangeForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFormCount }) => {
-  const {
-    register,
-    handleSubmit,
-    formState: { isSubmitting },
-  } = useForm<IncomeChange[]>();
-  const [details, setDetails] = useState<IncomeChange[]>([]);
-  const { custId } = useParams();
-  const [selectItems, setSelectItems] = useState<Array<{ value: string; label: string }>>([]);
+const IncomeChangeForm: React.FC<CustomFormProps> = ({ setFormOpen, formFields }) => {
+  const colSpan: number = 4;
+  const sendToServer = useSubmitCustomerForm(formFields);
+  const { selectItems, isLoading } = useGetCustomerNameLabels(formFields.custId, []);
 
-  const populateSelectItems = async () => {
-    const response = await getCustomerNames(custId!);
-    if (response.success) {
-      setSelectItems((prev) => {
-        const currentLabels = prev.map((item) => item.label);
-        const newItems = response
-          .data!.filter((name) => !currentLabels.includes(name))
-          .map((name) => ({ value: name, label: name }));
-
-        return [...prev, ...newItems];
-      });
-    } else {
-      enqueueSnackbar('Kunde inte hitta kunders namn, vänligen kontrollera ifyllnad.', {
-        variant: 'error',
-      });
-    }
-  };
-
-  const onSubmit: SubmitHandler<IncomeChange[]> = async (data) => {
-    const response = await updateCustomer({
-      field: 'income',
-      _id: custId as string,
-      formData: data,
-      subField: 'change',
-    });
-
-    if (response.success) {
-      if (submitted) {
-        submitted();
-        setFormCount(0);
-      }
-    }
-  };
-
-  useEffect(() => {
-    const newDetails = [];
-    for (let i = 0; i < formCount; i++) {
-      newDetails.push({
-        belongs: '',
-        values: {
-          changeType: '',
-          when: 0,
-          newAmount: 0,
-        },
-      });
-    }
-    setDetails(newDetails);
-  }, [formCount]);
-
-  useEffect(() => {
-    populateSelectItems();
-  }, [custId]);
-
-  const removeDetail = (index: number) => {
-    if (details.length > 0) {
-      setDetails(removeFormByIndex(details, index));
-      setFormCount(formCount - 1);
-    }
+  const details: IncomeChange = {
+    belongs: '',
+    values: {
+      changeType: '',
+      when: undefined,
+      newAmount: undefined,
+    },
   };
 
   const changeValueSelect = [
@@ -106,21 +49,51 @@ const IncomeChangeForm: React.FC<CustomFormProps> = ({ submitted, formCount, set
     },
   ];
 
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { isSubmitting },
+  } = useForm({
+    defaultValues: {
+      item: [details],
+    },
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'item',
+  });
+
+  const onSubmit: SubmitHandler<{
+    item: IncomeChange[];
+  }> = async (data) => {
+    await sendToServer(data.item);
+    setFormOpen(false);
+    remove();
+  };
+
+  if (isLoading)
+    return (
+      <Table>
+        <TableBody>
+          <TableLoader colSpan={colSpan} />
+        </TableBody>
+      </Table>
+    );
+
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <Table>
         <TableBody>
-          {details.map((detail, index) => (
-            <TableRow key={index}>
+          {fields.map((detail, index) => (
+            <TableRow key={detail.id}>
               <TableCell width="20%">
                 <TextField
-                  className="form-input-select"
-                  {...FormTextFieldProps}
-                  select
+                  {...FormSelectProps}
                   required
-                  defaultValue={detail.belongs}
                   label="Tillhör"
-                  {...register(`${index}.belongs`, {
+                  {...register(`item.${index}.belongs`, {
                     required: 'Vänligen välj vem inkomsten tillhör',
                   })}>
                   {selectItems.map((item) => (
@@ -132,13 +105,10 @@ const IncomeChangeForm: React.FC<CustomFormProps> = ({ submitted, formCount, set
               </TableCell>
               <TableCell width="20%">
                 <TextField
-                  className="form-input-select"
-                  {...FormTextFieldProps}
-                  select
+                  {...FormSelectProps}
                   required
-                  defaultValue={detail.values!.changeType}
                   label="Typ av ändring"
-                  {...register(`${index}.values.changeType`, {
+                  {...register(`item.${index}.values.changeType`, {
                     required: 'Vänligen välj typ av ändring.',
                   })}>
                   {changeValueSelect.map((item) => (
@@ -150,40 +120,42 @@ const IncomeChangeForm: React.FC<CustomFormProps> = ({ submitted, formCount, set
               </TableCell>
               <TableCell width="20%">
                 <TextField
-                  className="form-input-field"
                   required
-                  type="number"
-                  {...FormTextFieldProps}
-                  defaultValue={detail.values!.when}
+                  {...FormNumberFieldProps}
                   label="Om hur många år"
-                  {...register(`${index}.values.when`, { min: 0 })}
+                  {...register(`item.${index}.values.when`, { min: 0 })}
                 />
               </TableCell>
               <TableCell width="20%">
                 <TextField
-                  className="form-input-field"
                   required
-                  type="number"
-                  {...FormTextFieldProps}
-                  defaultValue={detail.values!.newAmount}
+                  {...FormNumberFieldProps}
                   label="Nytt belopp"
-                  {...register(`${index}.values.newAmount`)}
+                  {...register(`item.${index}.values.newAmount`)}
                 />
               </TableCell>
               <TableCell width="10%" align="right">
-                <ListItemButton onClick={() => removeDetail(index)}>Ta bort</ListItemButton>
+                <ListItemButton onClick={() => remove(index)}>Ta bort</ListItemButton>
               </TableCell>
             </TableRow>
           ))}
-          {formCount > 0 && (
-            <TableRow>
-              <TableCell colSpan={5} align="right">
-                <Button type="submit" disabled={isSubmitting}>
-                  {!isSubmitting ? 'Spara' : 'Sparar...'}
-                </Button>
-              </TableCell>
-            </TableRow>
-          )}
+          <TableRow>
+            <TableCell>
+              <Button disabled={isSubmitting} onClick={() => append(details)}>
+                Lägg till
+              </Button>
+            </TableCell>
+            <TableCell colSpan={colSpan - 2} align="right">
+              <Button type="submit" variant="contained" disabled={isSubmitting}>
+                {!isSubmitting ? 'Spara' : 'Sparar...'}
+              </Button>
+            </TableCell>
+            <TableCell>
+              <Button disabled={isSubmitting} onClick={() => setFormOpen(false)}>
+                Avbryt
+              </Button>
+            </TableCell>
+          </TableRow>
         </TableBody>
       </Table>
     </form>

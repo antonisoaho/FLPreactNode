@@ -13,15 +13,21 @@ import {
   TextField,
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { formatDate } from '../../../../utils/formatting';
-import { CustomFormProps, FormTextFieldProps } from '../../models/FormProps';
+import { formatDateYearMonth } from '../../../../utils/formatting';
+import {
+  CustomFormProps,
+  FormDateProps,
+  FormNumberFieldProps,
+  FormSelectProps,
+  FormTextFieldProps,
+} from '../../models/FormProps';
 import { SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
 import { useSubmitCustomerForm } from '../../../../hooks/customer/useSubmitCustomerForm';
 import { useGetCustomerNameLabels } from '../../../../hooks/customer/useGetCustomerNameLabels';
 
 const CustomerChildForm: React.FC<CustomFormProps> = ({ setFormOpen, formFields }) => {
   const colSpan: number = 6;
-  const selectItems = useGetCustomerNameLabels(formFields.custId, [
+  const { selectItems } = useGetCustomerNameLabels(formFields.custId, [
     { value: 'Gemensamt', label: 'Gemensamt' },
   ]);
 
@@ -61,7 +67,7 @@ const CustomerChildForm: React.FC<CustomFormProps> = ({ setFormOpen, formFields 
   };
 
   const handleDateChange = (date: Date, index: number) => {
-    const newDate = formatDate(date);
+    const newDate = formatDateYearMonth(date);
     setValue(`item.${index}.yearMonth`, newDate);
   };
 
@@ -70,25 +76,19 @@ const CustomerChildForm: React.FC<CustomFormProps> = ({ setFormOpen, formFields 
       <Table>
         <TableBody>
           {fields.map((detail, index) => (
-            <TableRow key={index}>
+            <TableRow key={detail.id}>
               <TableCell width="18%">
                 <TextField
                   required
                   label="Namn"
-                  defaultValue={detail.name}
                   {...register(`item.${index}.name`, { required: 'Vänligen ange ett namn.' })}
                   {...FormTextFieldProps}
-                  className="form-input-field"
                 />
               </TableCell>
               <TableCell width="18%">
                 <TextField
                   required
-                  {...FormTextFieldProps}
-                  className="form-input-select"
-                  defaultValue={detail.belongs}
-                  select
-                  fullWidth
+                  {...FormSelectProps}
                   label="Tillhör"
                   {...register(`item.${index}.belongs`, {
                     required: 'Vänligen välj ett alternativ.',
@@ -109,8 +109,7 @@ const CustomerChildForm: React.FC<CustomFormProps> = ({ setFormOpen, formFields 
               <TableCell width="18%">
                 <DatePicker
                   required
-                  className="form-input-field"
-                  slotProps={{ textField: { ...FormTextFieldProps } }}
+                  {...FormDateProps}
                   label="Född *"
                   views={['month', 'year']}
                   {...register(`item.${index}.yearMonth`, {
@@ -122,13 +121,9 @@ const CustomerChildForm: React.FC<CustomFormProps> = ({ setFormOpen, formFields 
               <TableCell width="18%">
                 <TextField
                   required
-                  className="form-input-field"
-                  type="number"
-                  defaultValue={detail.livesAtHomeToAge}
                   {...register(`item.${index}.livesAtHomeToAge`)}
                   label="Bor hemma till"
-                  {...FormTextFieldProps}
-                  sx={{ maxWidth: '7rem' }}
+                  {...FormNumberFieldProps}
                 />
               </TableCell>
               <TableCell width="10%" align="right">

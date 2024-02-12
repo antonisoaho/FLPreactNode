@@ -10,97 +10,61 @@ import {
   InputLabel,
   Checkbox,
 } from '@mui/material';
-import React, { Fragment, useEffect, useState } from 'react';
-import { useForm, SubmitHandler } from 'react-hook-form';
-import { useParams } from 'react-router-dom';
-import {
-  updateCustomer,
-  getCustomerNames,
-  getCustomerChildNames,
-} from '../../../../services/api/apiCustomerCalls';
+import React, { Fragment } from 'react';
+import { useForm, SubmitHandler, useFieldArray } from 'react-hook-form';
 import ColoredTableRow from '../../../ui/coloredTableRow/ColoredTableRow';
 import { InsuranceSickness } from '../../models/CustomerFormModels';
 import { CustomFormProps, FormTextFieldProps } from '../../models/FormProps';
-import { removeFormByIndex } from '../../../../utils/formUtils';
 import { DatePicker } from '@mui/x-date-pickers';
 import {
   compensationPeriodSickness,
   qualifyingPeriodSickness,
 } from '../../../../utils/formVariables';
-import { enqueueSnackbar } from 'notistack';
+import { useGetCustomerNameLabels } from '../../../../hooks/customer/useGetCustomerNameLabels';
+import { useSubmitCustomerForm } from '../../../../hooks/customer/useSubmitCustomerForm';
+import TableLoader from '../../../ui/tableLoader/TableLoader';
 
-const SickInsuranceForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFormCount }) => {
+const SickInsuranceForm: React.FC<CustomFormProps> = ({ setFormOpen, formFields }) => {
+  const colSpan: number = 5;
+  const sendToServer = useSubmitCustomerForm(formFields);
+  const { selectItems, isLoading } = useGetCustomerNameLabels(formFields.custId, []);
+
+  const details: InsuranceSickness = {
+    belongs: '',
+    company: '',
+    insuranceType: '',
+    taxFree: false,
+    qualifyingPeriod: undefined,
+    compensationAmount: undefined,
+    compensationPeriod: undefined,
+    premiumCost: undefined,
+    expiryDate: undefined,
+    lastUpdated: undefined,
+  };
+
   const {
     register,
     handleSubmit,
+    control,
     setValue,
     formState: { isSubmitting },
-  } = useForm<InsuranceSickness[]>();
-  const [details, setDetails] = useState<InsuranceSickness[]>([]);
-  const { custId } = useParams();
-  const [selectItems, setSelectItems] = useState<Array<{ value: string; label: string }>>([]);
-  const colSpan: number = 5;
+  } = useForm({
+    defaultValues: {
+      item: [details],
+    },
+  });
 
-  const populateSelectItems = async () => {
-    const persons = await getCustomerNames(custId!);
-    const children = await getCustomerChildNames(custId!);
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'item',
+  });
 
-    if (persons.success || children.success) {
-      setSelectItems((prev) => {
-        const currentLabels = prev.map((item) => item.label);
-        const newPersons = persons
-          .data!.filter((name: string) => !currentLabels.includes(name.split(' ')[0]))
-          .map((name: string) => ({ value: name, label: name.split(' ')[0] }));
-        const newChildren = children
-          .data!.filter((name) => !currentLabels.includes(name))
-          .map((name) => ({ value: name, label: name }));
-
-        return [...prev, ...newPersons, ...newChildren];
-      });
-    } else {
-      enqueueSnackbar('Kunde inte hitta kunders namn, vänligen kontrollera ifyllnad.', {
-        variant: 'error',
-      });
-    }
-  };
-
-  const onSubmit: SubmitHandler<InsuranceSickness[]> = async (data) => {
-    const response = await updateCustomer({
-      field: 'insurances',
-      _id: custId as string,
-      formData: data,
-      subField: 'sickness',
-    });
-
-    if (response.success) {
-      if (submitted) {
-        submitted();
-        setFormCount(0);
-      }
-    }
-  };
-
-  useEffect(() => {
-    const newDetails = [];
-    for (let i = 0; i < formCount; i++) {
-      newDetails.push({
-        belongs: '',
-        company: '',
-        insuranceType: '',
-      });
-    }
-    setDetails(newDetails);
-  }, [formCount]);
-
-  useEffect(() => {
-    populateSelectItems();
-  }, [custId]);
-
-  const removeDetail = (index: number) => {
-    if (details.length > 0) {
-      setDetails(removeFormByIndex(details, index));
-      setFormCount(formCount - 1);
-    }
+  const onSubmit: SubmitHandler<{
+    item: InsuranceSickness[];
+  }> = async (data) => {
+    await sendToServer(data.item);
+    setFormOpen(false);
+    remove();
   };
 
   const insuranceTypeSelect = [
@@ -126,12 +90,21 @@ const SickInsuranceForm: React.FC<CustomFormProps> = ({ submitted, formCount, se
     },
   ];
 
+  if (isLoading)
+    return (
+      <Table>
+        <TableBody>
+          <TableLoader colSpan={colSpan} />
+        </TableBody>
+      </Table>
+    );
+
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <Table>
         <TableBody>
-          {details.map((detail, index) => (
-            <Fragment key={index}>
+          {fields.map((detail, index) => (
+            <Fragment key={detail.id}>
               <ColoredTableRow>
                 <TableCell colSpan={colSpan - 1}>
                   <TextField
@@ -139,9 +112,9 @@ const SickInsuranceForm: React.FC<CustomFormProps> = ({ submitted, formCount, se
                     select
                     required
                     {...FormTextFieldProps}
-                    defaultValue={detail.belongs}
+                    defaultValue=""
                     label="Försäkrad"
-                    {...register(`${index}.belongs`, {
+                    {...register(`item.${index}.belongs`, {
                       required: 'Vänligen välj vem försäkringen gäller.',
                     })}
                     fullWidth>
@@ -153,7 +126,7 @@ const SickInsuranceForm: React.FC<CustomFormProps> = ({ submitted, formCount, se
                   </TextField>
                 </TableCell>
                 <TableCell>
-                  <ListItemButton onClick={() => removeDetail(index)}>Ta bort</ListItemButton>
+                  <ListItemButton onClick={() => remove(index)}>Ta bort</ListItemButton>
                 </TableCell>
               </ColoredTableRow>
               <TableRow>
@@ -162,7 +135,7 @@ const SickInsuranceForm: React.FC<CustomFormProps> = ({ submitted, formCount, se
                     className="form-input-select"
                     label="Bolag"
                     {...FormTextFieldProps}
-                    {...register(`${index}.company`)}></TextField>
+                    {...register(`item.${index}.company`)}></TextField>
                 </TableCell>
                 <TableCell width="20%">
                   <TextField
@@ -170,9 +143,9 @@ const SickInsuranceForm: React.FC<CustomFormProps> = ({ submitted, formCount, se
                     label="Benämning"
                     fullWidth
                     select
-                    defaultValue={detail.insuranceType}
+                    defaultValue=""
                     {...FormTextFieldProps}
-                    {...register(`${index}.insuranceType`)}>
+                    {...register(`item.${index}.insuranceType`)}>
                     {insuranceTypeSelect.map((item) => (
                       <MenuItem key={item.value} value={item.value}>
                         {item.label}
@@ -184,7 +157,7 @@ const SickInsuranceForm: React.FC<CustomFormProps> = ({ submitted, formCount, se
                   <InputLabel shrink className="form-input-label">
                     Skattefri
                   </InputLabel>
-                  <Checkbox {...register(`${index}.taxFree`)} />
+                  <Checkbox {...register(`item.${index}.taxFree`)} />
                 </TableCell>
                 <TableCell width="20%">
                   <TextField
@@ -194,7 +167,7 @@ const SickInsuranceForm: React.FC<CustomFormProps> = ({ submitted, formCount, se
                     select
                     fullWidth
                     {...FormTextFieldProps}
-                    {...register(`${index}.qualifyingPeriod`)}>
+                    {...register(`item.${index}.qualifyingPeriod`)}>
                     {qualifyingPeriodSickness.map((item) => (
                       <MenuItem key={item.value} value={item.value}>
                         {item.label}
@@ -209,7 +182,7 @@ const SickInsuranceForm: React.FC<CustomFormProps> = ({ submitted, formCount, se
                     type="number"
                     required
                     {...FormTextFieldProps}
-                    {...register(`${index}.compensationAmount`, { min: 0 })}
+                    {...register(`item.${index}.compensationAmount`, { min: 0 })}
                   />
                 </TableCell>
               </TableRow>
@@ -220,7 +193,7 @@ const SickInsuranceForm: React.FC<CustomFormProps> = ({ submitted, formCount, se
                     label="Premie (kr/år)"
                     type="number"
                     {...FormTextFieldProps}
-                    {...register(`${index}.premiumCost`, { min: 0 })}
+                    {...register(`item.${index}.premiumCost`, { min: 0 })}
                   />
                 </TableCell>
                 <TableCell width="20%">
@@ -229,10 +202,10 @@ const SickInsuranceForm: React.FC<CustomFormProps> = ({ submitted, formCount, se
                     slotProps={{ textField: { ...FormTextFieldProps } }}
                     label="Förfallodatum"
                     views={['day', 'month', 'year']}
-                    {...register(`${index}.expiryDate`)}
+                    {...register(`item.${index}.expiryDate`)}
                     onChange={(date) => {
                       const newDate = date as Date;
-                      setValue(`${index}.expiryDate`, newDate);
+                      setValue(`item.${index}.expiryDate`, newDate);
                     }}
                   />
                 </TableCell>
@@ -244,7 +217,7 @@ const SickInsuranceForm: React.FC<CustomFormProps> = ({ submitted, formCount, se
                     {...FormTextFieldProps}
                     defaultValue=""
                     label="Ersättningstid"
-                    {...register(`${index}.compensationPeriod`)}>
+                    {...register(`item.${index}.compensationPeriod`)}>
                     {compensationPeriodSickness.map((item) => (
                       <MenuItem key={item.value} value={item.value}>
                         {item.label}
@@ -258,29 +231,34 @@ const SickInsuranceForm: React.FC<CustomFormProps> = ({ submitted, formCount, se
                     slotProps={{ textField: { ...FormTextFieldProps } }}
                     label="Senaste uppdatering"
                     views={['day', 'month', 'year']}
-                    {...register(`${index}.lastUpdated`)}
+                    {...register(`item.${index}.lastUpdated`)}
                     onChange={(date) => {
                       const newDate = date as Date;
-                      setValue(`${index}.lastUpdated`, newDate);
+                      setValue(`item.${index}.lastUpdated`, newDate);
                     }}
                   />
                 </TableCell>
-
-                <TableCell>
-                  <ListItemButton onClick={() => removeDetail(index)}>Ta bort</ListItemButton>
-                </TableCell>
+                <TableCell />
               </TableRow>
             </Fragment>
           ))}
-          {formCount > 0 && selectItems.length > 0 && (
-            <TableRow>
-              <TableCell colSpan={colSpan} align="right">
-                <Button type="submit" disabled={isSubmitting}>
-                  {!isSubmitting ? 'Spara' : 'Sparar...'}
-                </Button>
-              </TableCell>
-            </TableRow>
-          )}
+          <TableRow>
+            <TableCell>
+              <Button disabled={isSubmitting} onClick={() => append(details)}>
+                Lägg till
+              </Button>
+            </TableCell>
+            <TableCell colSpan={colSpan - 2} align="right">
+              <Button type="submit" variant="contained" disabled={isSubmitting}>
+                {!isSubmitting ? 'Spara' : 'Sparar...'}
+              </Button>
+            </TableCell>
+            <TableCell>
+              <Button disabled={isSubmitting} onClick={() => setFormOpen(false)}>
+                Avbryt
+              </Button>
+            </TableCell>
+          </TableRow>
         </TableBody>
       </Table>
     </form>

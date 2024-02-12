@@ -8,102 +8,66 @@ import {
   TableRow,
   Button,
 } from '@mui/material';
-import { useState, useEffect, Fragment } from 'react';
-import { useForm, SubmitHandler } from 'react-hook-form';
-import { useParams } from 'react-router-dom';
-import {
-  getCustomerNames,
-  updateCustomer,
-  getCustomerFormData,
-} from '../../../../services/api/apiCustomerCalls';
+import { Fragment } from 'react';
+import { useForm, SubmitHandler, useFieldArray } from 'react-hook-form';
 import ColoredTableRow from '../../../ui/coloredTableRow/ColoredTableRow';
-import { LiabilityBase, LiabilityPlanned } from '../../models/CustomerFormModels';
-import { CustomFormProps, FormTextFieldProps } from '../../models/FormProps';
-import { removeFormByIndex } from '../../../../utils/formUtils';
-import { DateFields } from '../../../../services/api/models/ApiModel';
-import { enqueueSnackbar } from 'notistack';
+import {
+  CustomFormProps,
+  FormNumberFieldProps,
+  FormPercentageProps,
+  FormSelectProps,
+  FormTextFieldProps,
+} from '../../models/FormProps';
+import { useGetCustomerBaseLiabilityLabels } from '../../../../hooks/customer/useGetCustomerBaseLiabilityLabels';
+import TableLoader from '../../../ui/tableLoader/TableLoader';
+import { useSubmitCustomerForm } from '../../../../hooks/customer/useSubmitCustomerForm';
+import { LiabilityPlanned } from '../../models/CustomerFormModels';
 
-const LiabilityPlannedForm: React.FC<CustomFormProps> = ({
-  submitted,
-  formCount,
-  setFormCount,
-}) => {
+const LiabilityPlannedForm: React.FC<CustomFormProps> = ({ setFormOpen, formFields }) => {
+  const colSpan: number = 3;
+  const sendToServer = useSubmitCustomerForm(formFields);
+  const { selectItems, isLoading } = useGetCustomerBaseLiabilityLabels(formFields.custId, []);
+
+  const details: LiabilityPlanned = {
+    loanType: '',
+    event: '',
+    when: '',
+    amount: undefined,
+    interest: undefined,
+  };
+
   const {
     register,
     handleSubmit,
+    control,
     formState: { isSubmitting },
-  } = useForm<LiabilityPlanned[]>();
-  const [details, setDetails] = useState<LiabilityPlanned[]>([]);
-  const { custId } = useParams();
-  const [selectItems, setSelectItems] = useState<Array<{ value: string; label: string }>>([]);
+  } = useForm({
+    defaultValues: {
+      item: [details],
+    },
+  });
 
-  const populateSelectItems = async () => {
-    const loans = await getCustomerFormData({
-      field: 'liabilities',
-      subField: 'base',
-      _id: custId as string,
-    });
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'item',
+  });
 
-    if (loans) {
-      setSelectItems((prev) => {
-        const currentValues = prev.map((item) => item.value);
-        const newLoans = loans
-          .data!.filter((loan) => !currentValues.includes(loan._id))
-          .map((loan: LiabilityBase & DateFields) => ({
-            value: loan._id,
-            label: `${loan.name} - ${loan.debt!.toLocaleString()} kr: ${loan._id}`,
-          }));
-
-        return [...prev, ...newLoans];
-      });
-    } else {
-      enqueueSnackbar(
-        'Kunde inte hitta några befintliga lån att planera kring, vänligen lägg till ett nytt lån.',
-        {
-          variant: 'error',
-        }
-      );
-    }
+  const onSubmit: SubmitHandler<{
+    item: LiabilityPlanned[];
+  }> = async (data) => {
+    await sendToServer(data.item);
+    setFormOpen(false);
+    remove();
   };
 
-  const onSubmit: SubmitHandler<LiabilityPlanned[]> = async (data) => {
-    const response = await updateCustomer({
-      field: 'liabilities',
-      _id: custId as string,
-      formData: data,
-      subField: 'planned',
-    });
-
-    if (response.success) {
-      if (submitted) {
-        submitted();
-        setFormCount(0);
-      }
-    }
-  };
-
-  useEffect(() => {
-    const newDetails = [];
-    for (let i = 0; i < formCount; i++) {
-      newDetails.push({
-        loanType: '',
-        event: '',
-      });
-    }
-    getCustomerNames(custId!);
-    setDetails(newDetails);
-  }, [formCount]);
-
-  useEffect(() => {
-    populateSelectItems();
-  }, [custId]);
-
-  const removeDetail = (index: number) => {
-    if (details.length > 0) {
-      setDetails(removeFormByIndex(details, index));
-      setFormCount(formCount - 1);
-    }
-  };
+  if (isLoading)
+    return (
+      <Table>
+        <TableBody>
+          <TableLoader colSpan={colSpan} />
+        </TableBody>
+      </Table>
+    );
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -111,27 +75,26 @@ const LiabilityPlannedForm: React.FC<CustomFormProps> = ({
         <TableBody>
           {!(selectItems.length > 0) ? (
             <TableRow>
-              <TableCell colSpan={3}>
+              <TableCell colSpan={colSpan - 1}>
                 Kan inte hitta några befintliga lån att planera kring, vänligen lägg till ett nytt
                 lån.
               </TableCell>
               <TableCell>
-                <ListItemButton onClick={() => setFormCount(formCount - 1)}>Ok</ListItemButton>
+                <Button disabled={isSubmitting} onClick={() => setFormOpen(false)}>
+                  Avbryt
+                </Button>
               </TableCell>
             </TableRow>
           ) : (
-            details.map((detail, index) => (
-              <Fragment key={index}>
+            fields.map((detail, index) => (
+              <Fragment key={detail.id}>
                 <ColoredTableRow>
-                  <TableCell colSpan={3}>
+                  <TableCell colSpan={colSpan - 1}>
                     <TextField
-                      className="form-input-select"
-                      select
+                      {...FormSelectProps}
                       required
-                      {...FormTextFieldProps}
-                      defaultValue={detail.loanType}
                       label="Tillhör"
-                      {...register(`${index}.loanType`, {
+                      {...register(`item.${index}.loanType`, {
                         required: 'Vänligen välj vilket lån det gäller.',
                       })}>
                       {selectItems.map((item) => (
@@ -142,55 +105,57 @@ const LiabilityPlannedForm: React.FC<CustomFormProps> = ({
                     </TextField>
                   </TableCell>
                   <TableCell>
-                    <ListItemButton onClick={() => removeDetail(index)}>Ta bort</ListItemButton>
+                    <ListItemButton onClick={() => remove(index)}>Ta bort</ListItemButton>
                   </TableCell>
                 </ColoredTableRow>
                 <TableRow>
-                  <TableCell width="20%">
+                  <TableCell width="25%">
                     <TextField
-                      className="form-input-select"
-                      required
                       label="Händelse"
                       {...FormTextFieldProps}
-                      {...register(`${index}.event`, {
-                        required: 'Vänligen ange vilken lånetyp som gäller.',
-                      })}></TextField>
-                  </TableCell>
-                  <TableCell width="20%">
-                    <TextField
-                      className="form-input-field"
-                      label="När (ant. år)"
-                      type="number"
-                      {...FormTextFieldProps}
-                      {...register(`${index}.when`, { min: 0 })}
+                      {...register(`item.${index}.event`)}
                     />
                   </TableCell>
-                  <TableCell width="20%">
+                  <TableCell width="25%">
                     <TextField
-                      className="form-input-field"
+                      label="När (ant. år)"
+                      {...FormNumberFieldProps}
+                      {...register(`item.${index}.when`, { min: 0 })}
+                    />
+                  </TableCell>
+                  <TableCell width="25%">
+                    <TextField
                       label="Belopp"
                       {...FormTextFieldProps}
-                      {...register(`${index}.amount`, { min: 0 })}
+                      {...register(`item.${index}.amount`, { min: 0 })}
                     />
                   </TableCell>
-                  <TableCell width="20%">
+                  <TableCell width="25%">
                     <TextField
-                      className="form-input-field"
                       label="Ränta"
-                      type="number"
-                      {...FormTextFieldProps}
-                      {...register(`${index}.interest`, { min: 0, max: 100 })}
+                      {...FormPercentageProps}
+                      {...register(`item.${index}.interest`, { min: 0, max: 100 })}
                     />
                   </TableCell>
                 </TableRow>
               </Fragment>
             ))
           )}
-          {formCount > 0 && selectItems.length > 0 && (
+          {selectItems.length > 0 && (
             <TableRow>
-              <TableCell colSpan={4} align="right">
-                <Button type="submit" disabled={isSubmitting}>
+              <TableCell>
+                <Button disabled={isSubmitting} onClick={() => append(details)}>
+                  Lägg till
+                </Button>
+              </TableCell>
+              <TableCell colSpan={colSpan - 2} align="right">
+                <Button type="submit" variant="contained" disabled={isSubmitting}>
                   {!isSubmitting ? 'Spara' : 'Sparar...'}
+                </Button>
+              </TableCell>
+              <TableCell>
+                <Button disabled={isSubmitting} onClick={() => setFormOpen(false)}>
+                  Avbryt
                 </Button>
               </TableCell>
             </TableRow>

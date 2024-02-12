@@ -10,91 +10,57 @@ import {
   Checkbox,
   InputLabel,
 } from '@mui/material';
-import React, { Fragment, useEffect, useState } from 'react';
-import { useForm, SubmitHandler } from 'react-hook-form';
-import { useParams } from 'react-router-dom';
-import {
-  updateCustomer,
-  getCustomerNames,
-  getCustomerChildNames,
-} from '../../../../services/api/apiCustomerCalls';
+import React, { Fragment } from 'react';
+import { useForm, SubmitHandler, useFieldArray } from 'react-hook-form';
 import ColoredTableRow from '../../../ui/coloredTableRow/ColoredTableRow';
 import { SpousalPension } from '../../models/CustomerFormModels';
-import { CustomFormProps, FormTextFieldProps } from '../../models/FormProps';
-import { removeFormByIndex } from '../../../../utils/formUtils';
-import { enqueueSnackbar } from 'notistack';
+import {
+  CustomFormProps,
+  FormNumberFieldProps,
+  FormSelectProps,
+  FormTextFieldProps,
+} from '../../models/FormProps';
+import TableLoader from '../../../ui/tableLoader/TableLoader';
+import { useGetCustomerNameLabels } from '../../../../hooks/customer/useGetCustomerNameLabels';
+import { useSubmitCustomerForm } from '../../../../hooks/customer/useSubmitCustomerForm';
 
-const SpousalPensionForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFormCount }) => {
+const SpousalPensionForm: React.FC<CustomFormProps> = ({ setFormOpen, formFields }) => {
+  const colSpan: number = 6;
+  const sendToServer = useSubmitCustomerForm(formFields);
+  const { selectItems, isLoading } = useGetCustomerNameLabels(formFields.custId, []);
+
+  const details: SpousalPension = {
+    belongs: '',
+    company: '',
+    taxFree: undefined,
+    compensation: undefined,
+    compensationPeriod: '',
+    premiumCost: undefined,
+    beneficiary: '',
+  };
+
   const {
     register,
     handleSubmit,
+    control,
     formState: { isSubmitting },
-  } = useForm<SpousalPension[]>();
-  const [details, setDetails] = useState<SpousalPension[]>([]);
-  const { custId } = useParams();
-  const [selectItems, setSelectItems] = useState<Array<{ value: string; label: string }>>([]);
-  const colSpan: number = 6;
+  } = useForm({
+    defaultValues: {
+      item: [details],
+    },
+  });
 
-  const populateSelectItems = async () => {
-    const persons = await getCustomerNames(custId!);
-    const children = await getCustomerChildNames(custId!);
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'item',
+  });
 
-    if (persons.success || children.success) {
-      setSelectItems((prev) => {
-        const currentLabels = prev.map((item) => item.label);
-        const newPersons = persons
-          .data!.filter((name: string) => !currentLabels.includes(name.split(' ')[0]))
-          .map((name: string) => ({ value: name, label: name.split(' ')[0] }));
-        const newChildren = children
-          .data!.filter((name) => !currentLabels.includes(name))
-          .map((name) => ({ value: name, label: name }));
-
-        return [...prev, ...newPersons, ...newChildren];
-      });
-    } else {
-      enqueueSnackbar('Kunde inte hitta kunders namn, vänligen kontrollera ifyllnad.', {
-        variant: 'error',
-      });
-    }
-  };
-
-  const onSubmit: SubmitHandler<SpousalPension[]> = async (data) => {
-    const response = await updateCustomer({
-      field: 'spousalPension',
-      _id: custId as string,
-      formData: data,
-    });
-
-    if (response.success) {
-      if (submitted) {
-        submitted();
-        setFormCount(0);
-      }
-    }
-  };
-
-  useEffect(() => {
-    const newDetails = [];
-    for (let i = 0; i < formCount; i++) {
-      newDetails.push({
-        belongs: '',
-        company: '',
-        compensationPeriod: '',
-        beneficiary: '',
-      });
-    }
-    setDetails(newDetails);
-  }, [formCount]);
-
-  useEffect(() => {
-    populateSelectItems();
-  }, [custId]);
-
-  const removeDetail = (index: number) => {
-    if (details.length > 0) {
-      setDetails(removeFormByIndex(details, index));
-      setFormCount(formCount - 1);
-    }
+  const onSubmit: SubmitHandler<{
+    item: SpousalPension[];
+  }> = async (data) => {
+    await sendToServer(data.item);
+    setFormOpen(false);
+    remove();
   };
 
   const beneficiarySelectItems = [
@@ -112,11 +78,20 @@ const SpousalPensionForm: React.FC<CustomFormProps> = ({ submitted, formCount, s
     },
   ];
 
+  if (isLoading)
+    return (
+      <Table>
+        <TableBody>
+          <TableLoader colSpan={colSpan} />
+        </TableBody>
+      </Table>
+    );
+
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <Table>
         <TableBody>
-          {details.map((detail, index) => (
+          {fields.map((detail, index) => (
             <Fragment key={index}>
               <ColoredTableRow>
                 <TableCell colSpan={colSpan - 1}>
@@ -127,7 +102,7 @@ const SpousalPensionForm: React.FC<CustomFormProps> = ({ submitted, formCount, s
                     {...FormTextFieldProps}
                     defaultValue={detail.belongs}
                     label="Försäkrad"
-                    {...register(`${index}.belongs`, {
+                    {...register(`item.${index}.belongs`, {
                       required: 'Vänligen välj vem pensionen gäller.',
                     })}>
                     {selectItems.map((item) => (
@@ -138,60 +113,49 @@ const SpousalPensionForm: React.FC<CustomFormProps> = ({ submitted, formCount, s
                   </TextField>
                 </TableCell>
                 <TableCell>
-                  <ListItemButton onClick={() => removeDetail(index)}>Ta bort</ListItemButton>
+                  <ListItemButton onClick={() => remove(index)}>Ta bort</ListItemButton>
                 </TableCell>
               </ColoredTableRow>
               <TableRow>
                 <TableCell width="20%">
                   <TextField
-                    className="form-input-select"
                     label="Bolag"
                     {...FormTextFieldProps}
-                    {...register(`${index}.company`)}></TextField>
+                    {...register(`item.${index}.company`)}></TextField>
                 </TableCell>
                 <TableCell width="10%">
                   <InputLabel shrink className="form-checkbox-label">
                     Skattefri
                   </InputLabel>
-                  <Checkbox {...register(`${index}.taxFree`)} />
+                  <Checkbox {...register(`item.${index}.taxFree`)} />
                 </TableCell>
                 <TableCell width="15%">
                   <TextField
-                    className="form-input-field"
-                    type="number"
                     required
                     label="Ersättning"
-                    {...FormTextFieldProps}
-                    {...register(`${index}.compensation`, { min: 0 })}
+                    {...FormNumberFieldProps}
+                    {...register(`item.${index}.compensation`, { min: 0 })}
                   />
                 </TableCell>
                 <TableCell width="15%">
                   <TextField
-                    className="form-input-field"
                     label="Utbetalningstid"
-                    type="number"
-                    {...FormTextFieldProps}
-                    {...register(`${index}.compensationPeriod`)}
+                    {...FormNumberFieldProps}
+                    {...register(`item.${index}.compensationPeriod`)}
                   />
                 </TableCell>
                 <TableCell width="20%">
                   <TextField
-                    className="form-input-field"
                     label="Premie"
-                    type="number"
-                    {...FormTextFieldProps}
-                    {...register(`${index}.premiumCost`, { min: 0 })}
+                    {...FormNumberFieldProps}
+                    {...register(`item.${index}.premiumCost`, { min: 0 })}
                   />
                 </TableCell>
                 <TableCell width="15%">
                   <TextField
-                    className="form-input-field"
                     label="Förmånstagare"
-                    fullWidth
-                    select
-                    defaultValue={detail.beneficiary}
-                    {...FormTextFieldProps}
-                    {...register(`${index}.beneficiary`)}>
+                    {...FormSelectProps}
+                    {...register(`item.${index}.beneficiary`)}>
                     {beneficiarySelectItems.map((item) => (
                       <MenuItem key={item.value} value={item.value}>
                         {item.label}
@@ -202,15 +166,23 @@ const SpousalPensionForm: React.FC<CustomFormProps> = ({ submitted, formCount, s
               </TableRow>
             </Fragment>
           ))}
-          {formCount > 0 && selectItems.length > 0 && (
-            <TableRow>
-              <TableCell colSpan={colSpan} align="right">
-                <Button type="submit" disabled={isSubmitting}>
-                  {!isSubmitting ? 'Spara' : 'Sparar...'}
-                </Button>
-              </TableCell>
-            </TableRow>
-          )}
+          <TableRow>
+            <TableCell>
+              <Button disabled={isSubmitting} onClick={() => append(details)}>
+                Lägg till
+              </Button>
+            </TableCell>
+            <TableCell colSpan={colSpan - 2} align="right">
+              <Button type="submit" variant="contained" disabled={isSubmitting}>
+                {!isSubmitting ? 'Spara' : 'Sparar...'}
+              </Button>
+            </TableCell>
+            <TableCell>
+              <Button disabled={isSubmitting} onClick={() => setFormOpen(false)}>
+                Avbryt
+              </Button>
+            </TableCell>
+          </TableRow>
         </TableBody>
       </Table>
     </form>

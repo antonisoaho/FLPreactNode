@@ -8,93 +8,61 @@ import {
   MenuItem,
   Button,
 } from '@mui/material';
-import React, { Fragment, useEffect, useState } from 'react';
-import { useForm, SubmitHandler } from 'react-hook-form';
-import { useParams } from 'react-router-dom';
-import {
-  updateCustomer,
-  getCustomerNames,
-  getCustomerChildNames,
-} from '../../../../services/api/apiCustomerCalls';
+import React, { Fragment } from 'react';
+import { useForm, SubmitHandler, useFieldArray } from 'react-hook-form';
 import ColoredTableRow from '../../../ui/coloredTableRow/ColoredTableRow';
 import { InsuranceLife } from '../../models/CustomerFormModels';
-import { CustomFormProps, FormTextFieldProps } from '../../models/FormProps';
-import { removeFormByIndex } from '../../../../utils/formUtils';
+import {
+  CustomFormProps,
+  FormDateProps,
+  FormNumberFieldProps,
+  FormSelectProps,
+  FormTextFieldProps,
+} from '../../models/FormProps';
 import { DatePicker } from '@mui/x-date-pickers';
-import { enqueueSnackbar } from 'notistack';
+import { useGetCustomerNameLabels } from '../../../../hooks/customer/useGetCustomerNameLabels';
+import { useSubmitCustomerForm } from '../../../../hooks/customer/useSubmitCustomerForm';
+import TableLoader from '../../../ui/tableLoader/TableLoader';
 
-const LifeInsuranceForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFormCount }) => {
+const LifeInsuranceForm: React.FC<CustomFormProps> = ({ setFormOpen, formFields }) => {
+  const colSpan: number = 4;
+  const sendToServer = useSubmitCustomerForm(formFields);
+  const { selectItems, isLoading } = useGetCustomerNameLabels(formFields.custId, []);
+
+  const details: InsuranceLife = {
+    belongs: '',
+    company: '',
+    insuranceType: '',
+    compensationAmount: undefined,
+    premiumCost: undefined,
+    expiryDate: undefined,
+    beneficiary: '',
+    lastControl: undefined,
+  };
+
   const {
     register,
     handleSubmit,
+    control,
     setValue,
     formState: { isSubmitting },
-  } = useForm<InsuranceLife[]>();
-  const [details, setDetails] = useState<InsuranceLife[]>([]);
-  const { custId } = useParams();
-  const [selectItems, setSelectItems] = useState<Array<{ value: string; label: string }>>([]);
-  const colSpan: number = 4;
+  } = useForm({
+    defaultValues: {
+      item: [details],
+    },
+  });
 
-  const populateSelectItems = async () => {
-    const persons = await getCustomerNames(custId!);
-    const children = await getCustomerChildNames(custId!);
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'item',
+  });
 
-    if (persons.success || children.success) {
-      setSelectItems((prev) => {
-        const currentLabels = prev.map((item) => item.label);
-        const newPersons = persons
-          .data!.filter((name: string) => !currentLabels.includes(name.split(' ')[0]))
-          .map((name: string) => ({ value: name, label: name.split(' ')[0] }));
-        const newChildren = children
-          .data!.filter((name) => !currentLabels.includes(name))
-          .map((name) => ({ value: name, label: name }));
-
-        return [...prev, ...newPersons, ...newChildren];
-      });
-    } else {
-      enqueueSnackbar('Kunde inte hitta kunders namn, vänligen kontrollera ifyllnad.', {
-        variant: 'error',
-      });
-    }
-  };
-
-  const onSubmit: SubmitHandler<InsuranceLife[]> = async (data) => {
-    const response = await updateCustomer({
-      field: 'insurances',
-      _id: custId as string,
-      formData: data,
-      subField: 'life',
-    });
-
-    if (response.success) {
-      if (submitted) {
-        submitted();
-        setFormCount(0);
-      }
-    }
-  };
-
-  useEffect(() => {
-    const newDetails = [];
-    for (let i = 0; i < formCount; i++) {
-      newDetails.push({
-        belongs: '',
-        company: '',
-        insuranceType: '',
-      });
-    }
-    setDetails(newDetails);
-  }, [formCount]);
-
-  useEffect(() => {
-    populateSelectItems();
-  }, [custId]);
-
-  const removeDetail = (index: number) => {
-    if (details.length > 0) {
-      setDetails(removeFormByIndex(details, index));
-      setFormCount(formCount - 1);
-    }
+  const onSubmit: SubmitHandler<{
+    item: InsuranceLife[];
+  }> = async (data) => {
+    await sendToServer(data.item);
+    setFormOpen(false);
+    remove();
   };
 
   const insuranceTypeSelect = [
@@ -122,25 +90,30 @@ const LifeInsuranceForm: React.FC<CustomFormProps> = ({ submitted, formCount, se
     },
   ];
 
+  if (isLoading)
+    return (
+      <Table>
+        <TableBody>
+          <TableLoader colSpan={colSpan} />
+        </TableBody>
+      </Table>
+    );
+
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <Table>
         <TableBody>
-          {details.map((detail, index) => (
-            <Fragment key={index}>
+          {fields.map((detail, index) => (
+            <Fragment key={detail.id}>
               <ColoredTableRow>
                 <TableCell colSpan={colSpan - 1}>
                   <TextField
-                    className="form-input-select"
-                    select
                     required
-                    {...FormTextFieldProps}
-                    defaultValue={detail.belongs}
                     label="Försäkrad"
-                    {...register(`${index}.belongs`, {
+                    {...FormSelectProps}
+                    {...register(`item.${index}.belongs`, {
                       required: 'Vänligen välj vem pensionen gäller.',
-                    })}
-                    fullWidth>
+                    })}>
                     {selectItems.map((item) => (
                       <MenuItem key={item.value} value={item.value}>
                         {item.label}
@@ -149,26 +122,21 @@ const LifeInsuranceForm: React.FC<CustomFormProps> = ({ submitted, formCount, se
                   </TextField>
                 </TableCell>
                 <TableCell>
-                  <ListItemButton onClick={() => removeDetail(index)}>Ta bort</ListItemButton>
+                  <ListItemButton onClick={() => remove(index)}>Ta bort</ListItemButton>
                 </TableCell>
               </ColoredTableRow>
               <TableRow>
                 <TableCell width="25%">
                   <TextField
-                    className="form-input-select"
                     label="Bolag"
                     {...FormTextFieldProps}
-                    {...register(`${index}.company`)}></TextField>
+                    {...register(`item.${index}.company`)}></TextField>
                 </TableCell>
                 <TableCell width="25%">
                   <TextField
-                    className="form-input-select"
                     label="Benämning"
-                    fullWidth
-                    select
-                    defaultValue={detail.insuranceType}
-                    {...FormTextFieldProps}
-                    {...register(`${index}.insuranceType`)}>
+                    {...FormSelectProps}
+                    {...register(`item.${index}.insuranceType`)}>
                     {insuranceTypeSelect.map((item) => (
                       <MenuItem key={item.value} value={item.value}>
                         {item.label}
@@ -178,48 +146,39 @@ const LifeInsuranceForm: React.FC<CustomFormProps> = ({ submitted, formCount, se
                 </TableCell>
                 <TableCell width="25%">
                   <TextField
-                    className="form-input-field"
-                    type="number"
                     required
                     label="Ersättning"
-                    {...FormTextFieldProps}
-                    {...register(`${index}.compensationAmount`, { min: 0 })}
+                    {...FormNumberFieldProps}
+                    {...register(`item.${index}.compensationAmount`, { min: 0 })}
                   />
                 </TableCell>
                 <TableCell width="25%">
                   <TextField
-                    className="form-input-field"
                     label="Premie (kr/år)"
-                    type="number"
-                    {...FormTextFieldProps}
-                    {...register(`${index}.premiumCost`, { min: 0 })}
+                    {...FormNumberFieldProps}
+                    {...register(`item.${index}.premiumCost`, { min: 0 })}
                   />
                 </TableCell>
               </TableRow>
               <TableRow>
                 <TableCell width="25%">
                   <DatePicker
-                    className="form-input-field"
-                    slotProps={{ textField: { ...FormTextFieldProps } }}
+                    {...FormDateProps}
                     label="Förfallodatum"
                     views={['day', 'month', 'year']}
-                    {...register(`${index}.expiryDate`)}
+                    {...register(`item.${index}.expiryDate`)}
                     onChange={(date) => {
                       const newDate = date as Date;
-                      setValue(`${index}.expiryDate`, newDate);
+                      setValue(`item.${index}.expiryDate`, newDate);
                     }}
                   />
                 </TableCell>
                 <TableCell width="25%">
                   <TextField
-                    className="form-input-select"
-                    select
                     required
-                    fullWidth
-                    {...FormTextFieldProps}
-                    defaultValue=""
+                    {...FormSelectProps}
                     label="Förmånstagare"
-                    {...register(`${index}.beneficiary`, {
+                    {...register(`item.${index}.beneficiary`, {
                       required: 'Vänligen välj vem pensionen gäller.',
                     })}>
                     {beneficiarySelectItems.map((item) => (
@@ -231,33 +190,37 @@ const LifeInsuranceForm: React.FC<CustomFormProps> = ({ submitted, formCount, se
                 </TableCell>
                 <TableCell width="25%">
                   <DatePicker
-                    className="form-input-field"
-                    slotProps={{ textField: { ...FormTextFieldProps } }}
+                    {...FormDateProps}
                     label="Senast kontroll"
                     views={['year', 'month', 'day']}
-                    {...register(`${index}.lastControl`)}
+                    {...register(`item.${index}.lastControl`)}
                     onChange={(date) => {
                       const newDate = date as Date;
-                      setValue(`${index}.lastControl`, newDate);
+                      setValue(`item.${index}.lastControl`, newDate);
                     }}
                   />
                 </TableCell>
-
-                <TableCell>
-                  <ListItemButton onClick={() => removeDetail(index)}>Ta bort</ListItemButton>
-                </TableCell>
+                <TableCell />
               </TableRow>
             </Fragment>
           ))}
-          {formCount > 0 && selectItems.length > 0 && (
-            <TableRow>
-              <TableCell colSpan={colSpan} align="right">
-                <Button type="submit" disabled={isSubmitting}>
-                  {!isSubmitting ? 'Spara' : 'Sparar...'}
-                </Button>
-              </TableCell>
-            </TableRow>
-          )}
+          <TableRow>
+            <TableCell>
+              <Button disabled={isSubmitting} onClick={() => append(details)}>
+                Lägg till
+              </Button>
+            </TableCell>
+            <TableCell colSpan={colSpan - 2} align="right">
+              <Button type="submit" variant="contained" disabled={isSubmitting}>
+                {!isSubmitting ? 'Spara' : 'Sparar...'}
+              </Button>
+            </TableCell>
+            <TableCell>
+              <Button disabled={isSubmitting} onClick={() => setFormOpen(false)}>
+                Avbryt
+              </Button>
+            </TableCell>
+          </TableRow>
         </TableBody>
       </Table>
     </form>

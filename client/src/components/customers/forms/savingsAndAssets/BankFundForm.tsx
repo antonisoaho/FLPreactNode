@@ -1,10 +1,13 @@
-import { useState, useEffect, Fragment } from 'react';
-import { useForm, SubmitHandler } from 'react-hook-form';
-import { useParams } from 'react-router-dom';
-import { getCustomerNames, updateCustomer } from '../../../../services/api/apiCustomerCalls';
+import { Fragment } from 'react';
+import { useForm, SubmitHandler, useFieldArray } from 'react-hook-form';
 import { BankFund } from '../../models/CustomerFormModels';
-import { removeFormByIndex } from '../../../../utils/formUtils';
-import { CustomFormProps, FormTextFieldProps } from '../../models/FormProps';
+import {
+  CustomFormProps,
+  FormNumberFieldProps,
+  FormPercentageProps,
+  FormSelectProps,
+  FormTextFieldProps,
+} from '../../models/FormProps';
 import {
   Button,
   ListItemButton,
@@ -17,78 +20,50 @@ import {
 } from '@mui/material';
 import ColoredTableRow from '../../../ui/coloredTableRow/ColoredTableRow';
 import { timePerspectiveSelect } from '../../../../utils/formVariables';
-import { enqueueSnackbar } from 'notistack';
+import { useGetCustomerNameLabels } from '../../../../hooks/customer/useGetCustomerNameLabels';
+import { useSubmitCustomerForm } from '../../../../hooks/customer/useSubmitCustomerForm';
+import TableLoader from '../../../ui/tableLoader/TableLoader';
 
-const BankFundForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFormCount }) => {
+const BankFundForm: React.FC<CustomFormProps> = ({ setFormOpen, formFields }) => {
+  const colSpan: number = 5;
+  const sendToServer = useSubmitCustomerForm(formFields);
+  const { selectItems, isLoading } = useGetCustomerNameLabels(formFields.custId, []);
+
+  const details: BankFund = {
+    belongs: '',
+    accountType: '',
+    institution: '',
+    name: '',
+    value: undefined,
+    timePerspective: '',
+    monthlySavings: undefined,
+    saveForHowLong: undefined,
+    interestRate: undefined,
+    projectedGrowth: undefined,
+  };
+
   const {
     register,
     handleSubmit,
+    control,
     formState: { isSubmitting },
-  } = useForm<BankFund[]>();
-  const [details, setDetails] = useState<BankFund[]>([]);
-  const { custId } = useParams();
-  const colSpan: number = 5;
-  const [selectItems, setSelectItems] = useState<Array<{ value: string; label: string }>>([
-    { value: 'Gemensam', label: 'Gemensam' },
-  ]);
+  } = useForm({
+    defaultValues: {
+      item: [details],
+    },
+  });
 
-  const populateSelectItems = async () => {
-    const response = await getCustomerNames(custId!);
-    if (response.success) {
-      setSelectItems((prev) => {
-        const currentLabels = prev.map((item) => item.label);
-        const newItems = response
-          .data!.filter((name: string) => !currentLabels.includes(name.split(' ')[0]))
-          .map((name: string) => ({ value: name, label: name.split(' ')[0] }));
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'item',
+  });
 
-        return [...prev, ...newItems];
-      });
-    } else {
-      enqueueSnackbar('Kunde inte hitta kunders namn, vänligen kontrollera ifyllnad.', {
-        variant: 'error',
-      });
-    }
-  };
-
-  const onSubmit: SubmitHandler<BankFund[]> = async (data) => {
-    const response = await updateCustomer({
-      field: 'bankFunds',
-      _id: custId as string,
-      formData: data,
-    });
-
-    if (response.success) {
-      if (submitted) {
-        submitted();
-        setFormCount(0);
-      }
-    }
-  };
-
-  useEffect(() => {
-    const newDetails = [];
-    for (let i = 0; i < formCount; i++) {
-      newDetails.push({
-        belongs: '',
-        accountType: '',
-        institution: '',
-        timePerspective: '',
-        name: '',
-      });
-    }
-    getCustomerNames(custId!);
-    setDetails(newDetails);
-  }, [formCount]);
-
-  useEffect(() => {
-    populateSelectItems();
-  }, [custId]);
-
-  const removeDetail = (index: number) => {
-    if (details.length > 0) {
-      setDetails(removeFormByIndex(details, index));
-      setFormCount(formCount - 1);
-    }
+  const onSubmit: SubmitHandler<{
+    item: BankFund[];
+  }> = async (data) => {
+    await sendToServer(data.item);
+    setFormOpen(false);
+    remove();
   };
 
   const accountTypeSelect = [
@@ -114,22 +89,28 @@ const BankFundForm: React.FC<CustomFormProps> = ({ submitted, formCount, setForm
     },
   ];
 
+  if (isLoading)
+    return (
+      <Table>
+        <TableBody>
+          <TableLoader colSpan={colSpan} />
+        </TableBody>
+      </Table>
+    );
+
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <Table>
         <TableBody>
-          {details.map((detail, index) => (
-            <Fragment key={index}>
+          {fields.map((detail, index) => (
+            <Fragment key={detail.id}>
               <ColoredTableRow>
                 <TableCell colSpan={colSpan - 1}>
                   <TextField
-                    className="form-input-select"
-                    select
                     required
-                    {...FormTextFieldProps}
-                    defaultValue={detail.belongs}
                     label="Tillhör"
-                    {...register(`${index}.belongs`, {
+                    {...FormSelectProps}
+                    {...register(`item.${index}.belongs`, {
                       required: 'Vänligen välj ägare av bankmedel.',
                     })}>
                     {selectItems.map((item) => (
@@ -140,19 +121,16 @@ const BankFundForm: React.FC<CustomFormProps> = ({ submitted, formCount, setForm
                   </TextField>
                 </TableCell>
                 <TableCell>
-                  <ListItemButton onClick={() => removeDetail(index)}>Ta bort</ListItemButton>
+                  <ListItemButton onClick={() => remove(index)}>Ta bort</ListItemButton>
                 </TableCell>
               </ColoredTableRow>
               <TableRow>
                 <TableCell width="20%">
                   <TextField
-                    className="form-input-select"
                     required
-                    select
-                    defaultValue={detail.accountType}
                     label="Kontotyp"
-                    {...FormTextFieldProps}
-                    {...register(`${index}.accountType`, {
+                    {...FormSelectProps}
+                    {...register(`item.${index}.accountType`, {
                       required: 'Vänligen ange vilken typ av konto du har.',
                     })}>
                     {accountTypeSelect.map((item) => (
@@ -164,30 +142,24 @@ const BankFundForm: React.FC<CustomFormProps> = ({ submitted, formCount, setForm
                 </TableCell>
                 <TableCell width="20%">
                   <TextField
-                    className="form-input-field"
                     label="Bank/Institut"
                     {...FormTextFieldProps}
-                    {...register(`${index}.institution`)}
+                    {...register(`item.${index}.institution`)}
                   />
                 </TableCell>
                 <TableCell width="20%">
                   <TextField
-                    className="form-input-field"
                     label="Benämning"
                     {...FormTextFieldProps}
-                    {...register(`${index}.name`)}
+                    {...register(`item.${index}.name`)}
                   />
                 </TableCell>
                 <TableCell width="20%">
                   <TextField
                     required
-                    select
-                    className="form-input-field"
                     label="Tidsperspektiv"
-                    defaultValue={detail.timePerspective}
-                    fullWidth
-                    {...FormTextFieldProps}
-                    {...register(`${index}.timePerspective`)}>
+                    {...FormSelectProps}
+                    {...register(`item.${index}.timePerspective`)}>
                     {timePerspectiveSelect.map((item) => (
                       <MenuItem key={item.value} value={item.value}>
                         {item.label}
@@ -197,12 +169,10 @@ const BankFundForm: React.FC<CustomFormProps> = ({ submitted, formCount, setForm
                 </TableCell>
                 <TableCell width="20%">
                   <TextField
-                    className="form-input-field"
-                    label="Saldo"
                     type="number"
                     required
-                    {...FormTextFieldProps}
-                    {...register(`${index}.value`, {
+                    {...FormNumberFieldProps}
+                    {...register(`item.${index}.value`, {
                       required: 'Vänligen ange värdet på bankmedel.',
                       min: 0,
                     })}
@@ -212,53 +182,53 @@ const BankFundForm: React.FC<CustomFormProps> = ({ submitted, formCount, setForm
               <TableRow>
                 <TableCell width="20%">
                   <TextField
-                    className="form-input-field"
                     label="Månadsspar"
-                    type="number"
-                    {...FormTextFieldProps}
-                    {...register(`${index}.monthlySavings`)}
+                    {...FormNumberFieldProps}
+                    {...register(`item.${index}.monthlySavings`)}
                   />
                 </TableCell>
                 <TableCell width="20%">
                   <TextField
-                    className="form-input-field"
                     label="Spartid (år)"
-                    type="number"
-                    {...FormTextFieldProps}
-                    {...register(`${index}.saveForHowLong`)}
+                    {...FormNumberFieldProps}
+                    {...register(`item.${index}.saveForHowLong`)}
                   />
                 </TableCell>
                 <TableCell width="20%">
                   <TextField
-                    className="form-input-field"
                     label="Ränta"
-                    type="number"
-                    {...FormTextFieldProps}
-                    {...register(`${index}.interestRate`)}
+                    {...FormPercentageProps}
+                    {...register(`item.${index}.interestRate`)}
                   />
                 </TableCell>
                 <TableCell width="20%">
                   <TextField
-                    className="form-input-field"
                     label="Tänkt tillväxt"
-                    type="number"
-                    {...FormTextFieldProps}
-                    {...register(`${index}.projectedGrowth`)}
+                    {...FormNumberFieldProps}
+                    {...register(`item.${index}.projectedGrowth`)}
                   />
                 </TableCell>
                 <TableCell />
               </TableRow>
             </Fragment>
           ))}
-          {formCount > 0 && (
-            <TableRow>
-              <TableCell colSpan={colSpan} align="right">
-                <Button type="submit" disabled={isSubmitting}>
-                  {!isSubmitting ? 'Spara' : 'Sparar...'}
-                </Button>
-              </TableCell>
-            </TableRow>
-          )}
+          <TableRow>
+            <TableCell>
+              <Button disabled={isSubmitting} onClick={() => append(details)}>
+                Lägg till
+              </Button>
+            </TableCell>
+            <TableCell colSpan={colSpan - 2} align="right">
+              <Button type="submit" variant="contained" disabled={isSubmitting}>
+                {!isSubmitting ? 'Spara' : 'Sparar...'}
+              </Button>
+            </TableCell>
+            <TableCell>
+              <Button disabled={isSubmitting} onClick={() => setFormOpen(false)}>
+                Avbryt
+              </Button>
+            </TableCell>
+          </TableRow>
         </TableBody>
       </Table>
     </form>

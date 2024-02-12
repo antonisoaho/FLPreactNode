@@ -1,8 +1,9 @@
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment, useState } from 'react';
 import { IncomeBase } from '../../models/CustomerFormModels';
 import {
   Button,
   Checkbox,
+  InputAdornment,
   InputLabel,
   ListItemButton,
   MenuItem,
@@ -12,112 +13,85 @@ import {
   TableRow,
   TextField,
 } from '@mui/material';
-import { useForm, SubmitHandler } from 'react-hook-form';
-import { getCustomerNames, updateCustomer } from '../../../../services/api/apiCustomerCalls';
-import { useParams } from 'react-router-dom';
-import { removeFormByIndex } from '../../../../utils/formUtils';
-import { CustomFormProps, FormTextFieldProps } from '../../models/FormProps';
-import { enqueueSnackbar } from 'notistack';
+import { useForm, SubmitHandler, useFieldArray } from 'react-hook-form';
+import { CustomFormProps, FormNumberFieldProps, FormSelectProps } from '../../models/FormProps';
+import { useGetCustomerNameLabels } from '../../../../hooks/customer/useGetCustomerNameLabels';
+import { useSubmitCustomerForm } from '../../../../hooks/customer/useSubmitCustomerForm';
+import TableLoader from '../../../ui/tableLoader/TableLoader';
 
-const IncomeBaseForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFormCount }) => {
+const IncomeBaseForm: React.FC<CustomFormProps> = ({ setFormOpen, formFields }) => {
+  const colSpan: number = 4;
+  const sendToServer = useSubmitCustomerForm(formFields);
+  const { selectItems, isLoading } = useGetCustomerNameLabels(formFields.custId, []);
+  const [k10Checked, setK10Checked] = useState<boolean>(false);
+  const [companyCarChecked, setCompanyCarChecked] = useState<boolean>(false);
+
+  const details: IncomeBase = {
+    belongs: '',
+    values: {
+      serviceIncome: undefined,
+      ofWhichOwnAB: undefined,
+      companyCarBenefit: {
+        amount: undefined,
+        gross: false,
+      },
+      soleTraderIncome: undefined,
+      taxFree: undefined,
+      k10: {
+        amount: undefined,
+        savedDistribution: undefined,
+        salaryBasis: undefined,
+        ownershipShare: undefined,
+      },
+    },
+  };
+
   const {
     register,
     handleSubmit,
+    control,
     formState: { isSubmitting },
-  } = useForm<IncomeBase[]>();
-  const [details, setDetails] = useState<IncomeBase[]>([]);
-  const { custId } = useParams();
-  const [selectItems, setSelectItems] = useState<Array<{ value: string; label: string }>>([]);
-  const [companyCarChecked, setCompanyCarChecked] = useState<boolean>(false);
-  const [k10Values, setK10Values] = useState<boolean>(false);
+  } = useForm({
+    defaultValues: {
+      item: [details],
+    },
+  });
 
-  const populateSelectItems = async () => {
-    const response = await getCustomerNames(custId!);
-    if (response.success) {
-      setSelectItems((prev) => {
-        const currentLabels = prev.map((item) => item.label);
-        const newItems = response
-          .data!.filter((name) => !currentLabels.includes(name))
-          .map((name) => ({ value: name, label: name }));
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'item',
+  });
 
-        return [...prev, ...newItems];
-      });
-    } else {
-      enqueueSnackbar('Kunde inte hitta kunders namn, vänligen kontrollera ifyllnad.', {
-        variant: 'error',
-      });
-    }
+  const onSubmit: SubmitHandler<{
+    item: IncomeBase[];
+  }> = async (data) => {
+    await sendToServer(data.item);
+    setFormOpen(false);
+    remove();
   };
 
-  const onSubmit: SubmitHandler<IncomeBase[]> = async (data) => {
-    const response = await updateCustomer({
-      field: 'income',
-      _id: custId as string,
-      formData: data,
-      subField: 'base',
-    });
-
-    if (response.success) {
-      if (submitted) {
-        submitted();
-        setFormCount(0);
-      }
-    }
-  };
-
-  useEffect(() => {
-    const newDetails = [];
-    for (let i = 0; i < formCount; i++) {
-      newDetails.push({
-        belongs: '',
-        values: {
-          serviceIncome: 0,
-          ofWhichOwnAB: 0,
-          companyCarBenefit: {
-            amount: 0,
-            gross: false,
-          },
-          soleTraderIncome: 0,
-          taxFree: 0,
-          k10: {
-            amount: 0,
-            savedDistribution: 0,
-            salaryBasis: 0,
-            ownershipShare: 0,
-          },
-        },
-      });
-    }
-    setDetails(newDetails);
-  }, [formCount]);
-
-  useEffect(() => {
-    populateSelectItems();
-  }, [custId]);
-
-  const removeDetail = (index: number) => {
-    if (details.length > 0) {
-      setDetails(removeFormByIndex(details, index));
-      setFormCount(formCount - 1);
-    }
-  };
+  if (isLoading)
+    return (
+      <Table>
+        <TableBody>
+          <TableLoader colSpan={colSpan} />
+        </TableBody>
+      </Table>
+    );
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <Table>
         <TableBody>
-          {details.map((detail, index) => (
-            <Fragment key={index}>
+          {fields.map((detail, index) => (
+            <Fragment key={detail.id}>
               <TableRow>
                 <TableCell>
                   <TextField
-                    className="form-input-select"
-                    {...FormTextFieldProps}
-                    select
+                    {...FormSelectProps}
                     required
-                    defaultValue={detail.belongs}
                     label="Tillhör"
-                    {...register(`${index}.belongs`, {
+                    {...register(`item.${index}.belongs`, {
                       required: 'Vänligen välj vem inkomsten tillhör',
                     })}>
                     {selectItems.map((item) => (
@@ -130,54 +104,46 @@ const IncomeBaseForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFo
                 <TableCell>
                   <TextField
                     required
-                    type="number"
                     label="Ink. av tjänst"
-                    {...register(`${index}.values.serviceIncome`, {
+                    {...register(`item.${index}.values.serviceIncome`, {
                       required: 'Vänligen mata in inkomst.',
                       min: 0,
                     })}
-                    {...FormTextFieldProps}
-                    className="form-input-field"
+                    {...FormNumberFieldProps}
                   />
                 </TableCell>
                 <TableCell>
                   <TextField
-                    type="number"
                     label="Varav eget AB"
-                    {...register(`${index}.values.ofWhichOwnAB`, { min: 0 })}
-                    {...FormTextFieldProps}
-                    className="form-input-field"
+                    {...register(`item.${index}.values.ofWhichOwnAB`, { min: 0 })}
+                    {...FormNumberFieldProps}
                   />
                 </TableCell>
                 <TableCell align="right">
-                  <ListItemButton onClick={() => removeDetail(index)}>Ta bort</ListItemButton>
+                  <ListItemButton onClick={() => remove(index)}>Ta bort</ListItemButton>
                 </TableCell>
               </TableRow>
 
               <TableRow>
                 <TableCell>
                   <TextField
-                    type="number"
                     label="NE Inkomst"
-                    {...register(`${index}.values.soleTraderIncome`, { min: 0 })}
-                    {...FormTextFieldProps}
-                    className="form-input-field"
+                    {...register(`item.${index}.values.soleTraderIncome`, { min: 0 })}
+                    {...FormNumberFieldProps}
                   />
                 </TableCell>
                 <TableCell>
                   <TextField
-                    type="number"
                     label="Skattefritt"
-                    {...register(`${index}.values.taxFree`, { min: 0 })}
-                    {...FormTextFieldProps}
-                    className="form-input-field"
+                    {...register(`item.${index}.values.taxFree`, { min: 0 })}
+                    {...FormNumberFieldProps}
                   />
                 </TableCell>
                 <TableCell>
                   <InputLabel shrink className="form-checkbox-label">
                     K10?
                   </InputLabel>
-                  <Checkbox onChange={(e) => setK10Values(e.target.checked)} />
+                  <Checkbox onChange={(e) => setK10Checked(e.target.checked)} />
                 </TableCell>
                 <TableCell>
                   <InputLabel shrink className="form-checkbox-label">
@@ -186,42 +152,37 @@ const IncomeBaseForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFo
                   <Checkbox onChange={(e) => setCompanyCarChecked(e.target.checked)} />
                 </TableCell>
               </TableRow>
-              {k10Values && (
+              {k10Checked && (
                 <TableRow>
                   <TableCell>
                     <TextField
-                      type="number"
                       label="Belopp K10"
-                      {...register(`${index}.values.k10.amount`, { min: 0 })}
-                      {...FormTextFieldProps}
-                      className="form-input-field"
+                      {...register(`item.${index}.values.k10.amount`, { min: 0 })}
+                      {...FormNumberFieldProps}
                     />
                   </TableCell>
                   <TableCell>
                     <TextField
-                      type="number"
                       label="Sparad utdelning"
-                      {...register(`${index}.values.k10.savedDistribution`, { min: 0 })}
-                      {...FormTextFieldProps}
-                      className="form-input-field"
+                      {...register(`item.${index}.values.k10.savedDistribution`, { min: 0 })}
+                      {...FormNumberFieldProps}
                     />
                   </TableCell>
                   <TableCell>
                     <TextField
-                      type="number"
                       label="Löneunderlag"
-                      {...register(`${index}.values.k10.salaryBasis`, { min: 0 })}
-                      {...FormTextFieldProps}
-                      className="form-input-field"
+                      {...register(`item.${index}.values.k10.salaryBasis`, { min: 0 })}
+                      {...FormNumberFieldProps}
                     />
                   </TableCell>
                   <TableCell>
                     <TextField
-                      type="number"
                       label="Ägarandel"
-                      {...register(`${index}.values.k10.ownershipShare`, { min: 0, max: 100 })}
-                      {...FormTextFieldProps}
-                      className="form-input-field"
+                      {...register(`item.${index}.values.k10.ownershipShare`, { min: 0, max: 100 })}
+                      {...FormNumberFieldProps}
+                      InputProps={{
+                        endAdornment: <InputAdornment position="end">%</InputAdornment>,
+                      }}
                     />
                   </TableCell>
                 </TableRow>
@@ -231,33 +192,39 @@ const IncomeBaseForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFo
                   <TableCell>Tjänstebilsförmåner</TableCell>
                   <TableCell>
                     <TextField
-                      type="number"
                       label="Förmånsvärde"
-                      {...register(`${index}.values.companyCarBenefit.amount`)}
-                      {...FormTextFieldProps}
-                      className="form-input-field"
+                      {...register(`item.${index}.values.companyCarBenefit.amount`)}
+                      {...FormNumberFieldProps}
                     />
                   </TableCell>
                   <TableCell>
                     <InputLabel shrink className="form-checkbox-label">
                       Bruttovärde
                     </InputLabel>
-                    <Checkbox {...register(`${index}.values.companyCarBenefit.gross`)} />
+                    <Checkbox {...register(`item.${index}.values.companyCarBenefit.gross`)} />
                   </TableCell>
                   <TableCell />
                 </TableRow>
               )}
             </Fragment>
           ))}
-          {formCount > 0 && (
-            <TableRow>
-              <TableCell colSpan={4} align="right">
-                <Button type="submit" disabled={isSubmitting}>
-                  {!isSubmitting ? 'Spara' : 'Sparar...'}
-                </Button>
-              </TableCell>
-            </TableRow>
-          )}
+          <TableRow>
+            <TableCell>
+              <Button disabled={isSubmitting} onClick={() => append(details)}>
+                Lägg till
+              </Button>
+            </TableCell>
+            <TableCell colSpan={colSpan - 2} align="right">
+              <Button type="submit" variant="contained" disabled={isSubmitting}>
+                {!isSubmitting ? 'Spara' : 'Sparar...'}
+              </Button>
+            </TableCell>
+            <TableCell>
+              <Button disabled={isSubmitting} onClick={() => setFormOpen(false)}>
+                Avbryt
+              </Button>
+            </TableCell>
+          </TableRow>
         </TableBody>
       </Table>
     </form>

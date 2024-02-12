@@ -8,63 +8,50 @@ import {
   MenuItem,
   Button,
 } from '@mui/material';
-import React, { Fragment, useEffect, useState } from 'react';
-import { useForm, SubmitHandler } from 'react-hook-form';
-import { useParams } from 'react-router-dom';
-import { updateCustomer } from '../../../../services/api/apiCustomerCalls';
+import React, { Fragment } from 'react';
+import { useForm, SubmitHandler, useFieldArray } from 'react-hook-form';
 import { InsuranceProperty } from '../../models/CustomerFormModels';
 import { CustomFormProps, FormTextFieldProps } from '../../models/FormProps';
-import { removeFormByIndex } from '../../../../utils/formUtils';
 import { DatePicker } from '@mui/x-date-pickers';
 import { paymentPeriodSelect } from '../../../../utils/formVariables';
+import { useSubmitCustomerForm } from '../../../../hooks/customer/useSubmitCustomerForm';
 
-const PropertyInsuranceForm: React.FC<CustomFormProps> = ({
-  submitted,
-  formCount,
-  setFormCount,
-}) => {
+const PropertyInsuranceForm: React.FC<CustomFormProps> = ({ setFormOpen, formFields }) => {
+  const colSpan: number = 6;
+  const sendToServer = useSubmitCustomerForm(formFields);
+
+  const details: InsuranceProperty = {
+    propertyType: '',
+    company: '',
+    expiryDate: undefined,
+    premiumCost: undefined,
+    paymentPeriod: '',
+    lastControl: undefined,
+  };
+
   const {
     register,
     handleSubmit,
+    control,
     setValue,
     formState: { isSubmitting },
-  } = useForm<InsuranceProperty[]>();
-  const [details, setDetails] = useState<InsuranceProperty[]>([]);
-  const { custId } = useParams();
-  const colSpan: number = 6;
+  } = useForm({
+    defaultValues: {
+      item: [details],
+    },
+  });
 
-  const onSubmit: SubmitHandler<InsuranceProperty[]> = async (data) => {
-    const response = await updateCustomer({
-      field: 'insurances',
-      _id: custId as string,
-      formData: data,
-      subField: 'property',
-    });
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'item',
+  });
 
-    if (response.success) {
-      if (submitted) {
-        submitted();
-        setFormCount(0);
-      }
-    }
-  };
-
-  useEffect(() => {
-    const newDetails = [];
-    for (let i = 0; i < formCount; i++) {
-      newDetails.push({
-        company: '',
-        propertyType: '',
-      });
-    }
-    setDetails(newDetails);
-  }, [formCount]);
-
-  const removeDetail = (index: number) => {
-    if (details.length > 0) {
-      setDetails(removeFormByIndex(details, index));
-      setFormCount(formCount - 1);
-    }
+  const onSubmit: SubmitHandler<{
+    item: InsuranceProperty[];
+  }> = async (data) => {
+    await sendToServer(data.item);
+    setFormOpen(false);
+    remove();
   };
 
   const insuranceTypeSelect = [
@@ -114,8 +101,8 @@ const PropertyInsuranceForm: React.FC<CustomFormProps> = ({
     <form onSubmit={handleSubmit(onSubmit)}>
       <Table>
         <TableBody>
-          {details.map((detail, index) => (
-            <Fragment key={index}>
+          {fields.map((detail, index) => (
+            <Fragment key={detail.id}>
               <TableRow>
                 <TableCell width="25%">
                   <TextField
@@ -123,9 +110,9 @@ const PropertyInsuranceForm: React.FC<CustomFormProps> = ({
                     select
                     required
                     {...FormTextFieldProps}
-                    defaultValue={detail.propertyType}
+                    defaultValue=""
                     label="Försäkringstyp"
-                    {...register(`${index}.propertyType`, {
+                    {...register(`item.${index}.propertyType`, {
                       required: 'Vänligen välj vilken typ av egendom det gäller.',
                     })}>
                     {insuranceTypeSelect.map((item) => (
@@ -140,7 +127,7 @@ const PropertyInsuranceForm: React.FC<CustomFormProps> = ({
                     className="form-input-select"
                     label="Bolag"
                     {...FormTextFieldProps}
-                    {...register(`${index}.company`)}
+                    {...register(`item.${index}.company`)}
                   />
                 </TableCell>
                 <TableCell width="25%">
@@ -149,10 +136,10 @@ const PropertyInsuranceForm: React.FC<CustomFormProps> = ({
                     className="form-input-field"
                     slotProps={{ textField: { ...FormTextFieldProps } }}
                     views={['year', 'month', 'day']}
-                    {...register(`${index}.expiryDate`)}
+                    {...register(`item.${index}.expiryDate`)}
                     onChange={(date) => {
                       const newDate = date as Date;
-                      setValue(`${index}.expiryDate`, newDate);
+                      setValue(`item.${index}.expiryDate`, newDate);
                     }}
                   />
                 </TableCell>
@@ -163,7 +150,7 @@ const PropertyInsuranceForm: React.FC<CustomFormProps> = ({
                     required
                     className="form-input-field"
                     {...FormTextFieldProps}
-                    {...register(`${index}.premiumCost`, { min: 0 })}
+                    {...register(`item.${index}.premiumCost`, { min: 0 })}
                   />
                 </TableCell>
               </TableRow>
@@ -175,7 +162,7 @@ const PropertyInsuranceForm: React.FC<CustomFormProps> = ({
                     select
                     fullWidth
                     {...FormTextFieldProps}
-                    {...register(`${index}.paymentPeriod`)}>
+                    {...register(`item.${index}.paymentPeriod`)}>
                     {paymentPeriodSelect.map((item) => (
                       <MenuItem key={item.value} value={item.value}>
                         {item.label}
@@ -189,29 +176,37 @@ const PropertyInsuranceForm: React.FC<CustomFormProps> = ({
                     className="form-input-field"
                     slotProps={{ textField: { ...FormTextFieldProps } }}
                     views={['day', 'month', 'year']}
-                    {...register(`${index}.lastControl`)}
+                    {...register(`item.${index}.lastControl`)}
                     onChange={(date) => {
                       const newDate = date as Date;
-                      setValue(`${index}.lastControl`, newDate);
+                      setValue(`item.${index}.lastControl`, newDate);
                     }}
                   />
                 </TableCell>
                 <TableCell />
                 <TableCell>
-                  <ListItemButton onClick={() => removeDetail(index)}>Ta bort</ListItemButton>
+                  <ListItemButton onClick={() => remove(index)}>Ta bort</ListItemButton>
                 </TableCell>
               </TableRow>
             </Fragment>
           ))}
-          {formCount > 0 && details.length > 0 && (
-            <TableRow>
-              <TableCell colSpan={colSpan} align="right">
-                <Button type="submit" disabled={isSubmitting}>
-                  {!isSubmitting ? 'Spara' : 'Sparar...'}
-                </Button>
-              </TableCell>
-            </TableRow>
-          )}
+          <TableRow>
+            <TableCell>
+              <Button disabled={isSubmitting} onClick={() => append(details)}>
+                Lägg till
+              </Button>
+            </TableCell>
+            <TableCell colSpan={colSpan - 2} align="right">
+              <Button type="submit" variant="contained" disabled={isSubmitting}>
+                {!isSubmitting ? 'Spara' : 'Sparar...'}
+              </Button>
+            </TableCell>
+            <TableCell>
+              <Button disabled={isSubmitting} onClick={() => setFormOpen(false)}>
+                Avbryt
+              </Button>
+            </TableCell>
+          </TableRow>
         </TableBody>
       </Table>
     </form>

@@ -1,7 +1,7 @@
 import React, { Fragment } from 'react';
 import { useForm, SubmitHandler, useFieldArray } from 'react-hook-form';
 import { ExpensesBase } from '../../models/CustomerFormModels';
-import { CustomFormProps, FormTextFieldProps } from '../../models/FormProps';
+import { CustomFormProps, FormNumberFieldProps, FormSelectProps } from '../../models/FormProps';
 import {
   Table,
   TableBody,
@@ -84,15 +84,12 @@ const ExpenseBaseForm: React.FC<CustomFormProps> = ({ setFormOpen, formFields })
         <TableBody>
           {persons?.length &&
             fields.map((detail, index) => (
-              <Fragment key={index}>
+              <Fragment key={detail.id}>
                 <TableRow>
                   <TableCell width="20%">
                     <TextField
-                      className="form-input-select"
-                      {...FormTextFieldProps}
-                      select
+                      {...FormSelectProps}
                       required
-                      defaultValue={detail.values!.expenseType}
                       label="Utgiftstyp"
                       {...register(`item.${index}.values.expenseType`, {
                         required: 'Vänligen fyll i typ av utgift',
@@ -106,12 +103,9 @@ const ExpenseBaseForm: React.FC<CustomFormProps> = ({ setFormOpen, formFields })
                   </TableCell>
                   <TableCell width="20%">
                     <TextField
-                      className="form-input-field"
-                      {...FormTextFieldProps}
+                      {...FormNumberFieldProps}
                       required
-                      type="number"
                       label="Kartlaggt belopp"
-                      placeholder="Ange belopp"
                       {...register(`item.${index}.values.mapped`, {
                         required: 'Vänligen fyll i kartlaggt belopp',
                       })}
@@ -127,13 +121,9 @@ const ExpenseBaseForm: React.FC<CustomFormProps> = ({ setFormOpen, formFields })
                   <TableRow key={person}>
                     <TableCell width="20%">
                       <TextField
-                        className="form-input-field"
-                        {...FormTextFieldProps}
+                        {...FormNumberFieldProps}
                         required
-                        type="number"
-                        defaultValue={detail.values!.pension![idx]}
                         label={`Pensionsålder ${person.split(' ')[0]}`}
-                        placeholder="Ange belopp"
                         {...register(`item.${index}.values.pension.${idx}`, {
                           required: 'Vänligen fyll i pensionsålder',
                         })}
@@ -141,12 +131,8 @@ const ExpenseBaseForm: React.FC<CustomFormProps> = ({ setFormOpen, formFields })
                     </TableCell>
                     <TableCell width="20%">
                       <TextField
-                        className="form-input-field"
-                        {...FormTextFieldProps}
-                        type="number"
-                        defaultValue={detail.values!.activeEnd![idx]}
+                        {...FormNumberFieldProps}
                         label={`Aktiv tid slut ${person.split(' ')[0]}`}
-                        placeholder="Ange belopp"
                         {...register(`item.${index}.values.activeEnd.${idx}`, {
                           required: 'Vänligen fyll i ålder för aktiv tid slut',
                         })}
@@ -154,31 +140,22 @@ const ExpenseBaseForm: React.FC<CustomFormProps> = ({ setFormOpen, formFields })
                     </TableCell>
                     <TableCell width="20%">
                       <TextField
-                        className="form-input-field"
-                        {...FormTextFieldProps}
-                        type="number"
+                        {...FormNumberFieldProps}
                         label={`Dif ${person.split(' ')[0]} pension`}
-                        placeholder="Ange belopp"
                         {...register(`item.${index}.values.difPension.${idx}`)}
                       />
                     </TableCell>
                     <TableCell width="20%">
                       <TextField
-                        className="form-input-field"
-                        {...FormTextFieldProps}
-                        type="number"
+                        {...FormNumberFieldProps}
                         label={`Dif ${person.split(' ')[0]} aktivt slut`}
-                        placeholder="Ange belopp"
                         {...register(`item.${index}.values.difActiveEnd.${idx}`)}
                       />
                     </TableCell>
                     <TableCell width="20%">
                       <TextField
-                        className="form-input-field"
-                        {...FormTextFieldProps}
-                        type="number"
+                        {...FormNumberFieldProps}
                         label={`Dif ${person.split(' ')[0]} död`}
-                        placeholder="Ange belopp"
                         {...register(`item.${index}.values.difDeath.${idx}`)}
                       />
                     </TableCell>

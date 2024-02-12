@@ -8,92 +8,66 @@ import {
   TableRow,
   Button,
 } from '@mui/material';
-import React, { Fragment, useEffect, useState } from 'react';
-import { useForm, SubmitHandler } from 'react-hook-form';
-import { useParams } from 'react-router-dom';
-import {
-  getCustomerNames,
-  getCustomerChildNames,
-  updateCustomer,
-} from '../../../../services/api/apiCustomerCalls';
+import React, { Fragment } from 'react';
+import { useForm, SubmitHandler, useFieldArray } from 'react-hook-form';
 import ColoredTableRow from '../../../ui/coloredTableRow/ColoredTableRow';
 import { Assets } from '../../models/CustomerFormModels';
-import { CustomFormProps, FormTextFieldProps } from '../../models/FormProps';
-import { removeFormByIndex } from '../../../../utils/formUtils';
+import {
+  CustomFormProps,
+  FormDateProps,
+  FormNumberFieldProps,
+  FormPercentageProps,
+  FormSelectProps,
+  FormTextFieldProps,
+} from '../../models/FormProps';
 import { DatePicker } from '@mui/x-date-pickers';
-import { enqueueSnackbar } from 'notistack';
+import { useGetCustomerNameLabels } from '../../../../hooks/customer/useGetCustomerNameLabels';
+import { useSubmitCustomerForm } from '../../../../hooks/customer/useSubmitCustomerForm';
+import TableLoader from '../../../ui/tableLoader/TableLoader';
 
-const AssetsForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFormCount }) => {
+const AssetsForm: React.FC<CustomFormProps> = ({ setFormOpen, formFields }) => {
+  const colSpan: number = 5;
+  const sendToServer = useSubmitCustomerForm(formFields);
+  const { selectItems, isLoading } = useGetCustomerNameLabels(formFields.custId, [
+    { value: 'Gemesam', label: 'Gemensam' },
+  ]);
+
+  const details: Assets = {
+    assetType: '',
+    name: '',
+    value: undefined,
+    stake: undefined,
+    mortgageDeed: undefined,
+    valueYear: undefined,
+    belongs: '',
+    tax: undefined,
+    assessedValue: undefined,
+    base: undefined,
+  };
+
   const {
     register,
     handleSubmit,
+    control,
     setValue,
     formState: { isSubmitting },
-  } = useForm<Assets[]>();
-  const [details, setDetails] = useState<Assets[]>([]);
-  const { custId } = useParams();
-  const [selectItems, setSelectItems] = useState<Array<{ value: string; label: string }>>([
-    { value: 'Gemensam', label: 'Gemensam' },
-  ]);
-  const colSpan: number = 5;
+  } = useForm({
+    defaultValues: {
+      item: [details],
+    },
+  });
 
-  const populateSelectItems = async () => {
-    const persons = await getCustomerNames(custId!);
-    const children = await getCustomerChildNames(custId!);
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'item',
+  });
 
-    if (persons.success || children.success) {
-      setSelectItems((prev) => {
-        const currentLabels = prev.map((item) => item.label);
-        const newPersons = persons
-          .data!.filter((name: string) => !currentLabels.includes(name.split(' ')[0]))
-          .map((name: string) => ({ value: name, label: name.split(' ')[0] }));
-        const newChildren = children
-          .data!.filter((name) => !currentLabels.includes(name))
-          .map((name) => ({ value: name, label: name }));
-
-        return [...prev, ...newPersons, ...newChildren];
-      });
-    } else {
-      enqueueSnackbar('Kunde inte hitta kunders namn, vänligen kontrollera ifyllnad.', {
-        variant: 'error',
-      });
-    }
-  };
-
-  const onSubmit: SubmitHandler<Assets[]> = async (data) => {
-    const response = await updateCustomer({
-      field: 'assets',
-      _id: custId as string,
-      formData: data,
-    });
-
-    if (response.success) {
-      if (submitted) {
-        submitted();
-        setFormCount(0);
-      }
-    }
-  };
-
-  useEffect(() => {
-    const newDetails = [];
-    for (let i = 0; i < formCount; i++) {
-      newDetails.push({
-        belongs: '',
-      });
-    }
-    setDetails(newDetails);
-  }, [formCount]);
-
-  useEffect(() => {
-    populateSelectItems();
-  }, [custId]);
-
-  const removeDetail = (index: number) => {
-    if (details.length > 0) {
-      setDetails(removeFormByIndex(details, index));
-      setFormCount(formCount - 1);
-    }
+  const onSubmit: SubmitHandler<{
+    item: Assets[];
+  }> = async (data) => {
+    await sendToServer(data.item);
+    setFormOpen(false);
+    remove();
   };
 
   const AssetsTypeSelect = [
@@ -127,22 +101,28 @@ const AssetsForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFormCo
     },
   ];
 
+  if (isLoading)
+    return (
+      <Table>
+        <TableBody>
+          <TableLoader colSpan={colSpan} />
+        </TableBody>
+      </Table>
+    );
+
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <Table>
         <TableBody>
-          {details.map((detail, index) => (
-            <Fragment key={index}>
+          {fields.map((detail, index) => (
+            <Fragment key={detail.id}>
               <ColoredTableRow>
                 <TableCell colSpan={colSpan - 1}>
                   <TextField
-                    className="form-input-select"
-                    select
+                    {...FormSelectProps}
                     required
-                    {...FormTextFieldProps}
-                    defaultValue={detail.belongs}
                     label="Tillhör"
-                    {...register(`${index}.belongs`, {
+                    {...register(`item.${index}.belongs`, {
                       required: 'Vänligen välj ägare av egendom.',
                     })}>
                     {selectItems.map((item) => (
@@ -153,18 +133,16 @@ const AssetsForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFormCo
                   </TextField>
                 </TableCell>
                 <TableCell>
-                  <ListItemButton onClick={() => removeDetail(index)}>Ta bort</ListItemButton>
+                  <ListItemButton onClick={() => remove(index)}>Ta bort</ListItemButton>
                 </TableCell>
               </ColoredTableRow>
               <TableRow>
                 <TableCell width="20%">
                   <TextField
-                    className="form-input-select"
+                    {...FormSelectProps}
                     required
-                    select
                     label="Tillgångstyp"
-                    {...FormTextFieldProps}
-                    {...register(`${index}.assetType`, {
+                    {...register(`item.${index}.assetType`, {
                       required: 'Vänligen ange vilken typ av investering.',
                     })}>
                     {AssetsTypeSelect.map((item) => (
@@ -176,97 +154,90 @@ const AssetsForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFormCo
                 </TableCell>
                 <TableCell width="20%">
                   <TextField
-                    className="form-input-field"
                     label="Benämning"
                     {...FormTextFieldProps}
-                    {...register(`${index}.name`)}
+                    {...register(`item.${index}.name`)}
                   />
                 </TableCell>
                 <TableCell width="20%">
                   <TextField
-                    className="form-input-field"
-                    type="Number"
                     label="Värde"
                     required
-                    {...FormTextFieldProps}
-                    {...register(`${index}.value`, { min: 0 })}
+                    {...FormNumberFieldProps}
+                    {...register(`item.${index}.value`, { min: 0 })}
                   />
                 </TableCell>
                 <TableCell width="20%">
                   <TextField
-                    className="form-input-field"
                     label="Insats"
-                    type="number"
-                    {...FormTextFieldProps}
-                    {...register(`${index}.stake`, { min: 0 })}
+                    {...FormNumberFieldProps}
+                    {...register(`item.${index}.stake`, { min: 0 })}
                   />
                 </TableCell>
                 <TableCell width="20%">
                   <TextField
-                    className="form-input-field"
                     label="Pantbrev"
-                    type="number"
-                    {...FormTextFieldProps}
-                    {...register(`${index}.mortgageDeed`, { min: 0 })}
+                    {...FormPercentageProps}
+                    {...register(`item.${index}.mortgageDeed`, { min: 0 })}
                   />
                 </TableCell>
               </TableRow>
               <TableRow>
                 <TableCell width="20%">
                   <DatePicker
-                    className="form-input-field"
-                    slotProps={{ textField: { ...FormTextFieldProps } }}
+                    {...FormDateProps}
                     label="Värderingsår"
                     views={['year']}
-                    {...register(`${index}.valueYear`, { max: new Date().getFullYear() })}
+                    {...register(`item.${index}.valueYear`, { max: new Date().getFullYear() })}
                     onChange={(date) => {
                       const newDate = date as Date;
                       const newDateValue = newDate.getFullYear();
-                      setValue(`${index}.valueYear`, newDateValue);
+                      setValue(`item.${index}.valueYear`, newDateValue);
                     }}
                   />
                 </TableCell>
                 <TableCell width="20%">
                   <TextField
-                    className="form-input-field"
+                    {...FormPercentageProps}
                     label="Skatt"
-                    type="number"
-                    inputProps={{ step: 0.01 }}
-                    {...FormTextFieldProps}
-                    {...register(`${index}.tax`, { min: 0, max: 100 })}
+                    {...register(`item.${index}.tax`, { min: 0, max: 100 })}
                   />
                 </TableCell>
                 <TableCell width="20%">
                   <TextField
-                    className="form-input-field"
                     label="Taxeringsvärde"
-                    type="number"
-                    {...FormTextFieldProps}
-                    {...register(`${index}.assessedValue`, { min: 0 })}
+                    {...FormPercentageProps}
+                    {...register(`item.${index}.assessedValue`, { min: 0 })}
                   />
                 </TableCell>
                 <TableCell width="20%">
                   <TextField
-                    className="form-input-field"
                     label="Rot"
-                    type="number"
-                    {...FormTextFieldProps}
-                    {...register(`${index}.base`)}
+                    {...FormNumberFieldProps}
+                    {...register(`item.${index}.base`)}
                   />
                 </TableCell>
                 <TableCell />
               </TableRow>
             </Fragment>
           ))}
-          {formCount > 0 && (
-            <TableRow>
-              <TableCell colSpan={colSpan} align="right">
-                <Button type="submit" disabled={isSubmitting}>
-                  {!isSubmitting ? 'Spara' : 'Sparar...'}
-                </Button>
-              </TableCell>
-            </TableRow>
-          )}
+          <TableRow>
+            <TableCell>
+              <Button disabled={isSubmitting} onClick={() => append(details)}>
+                Lägg till
+              </Button>
+            </TableCell>
+            <TableCell colSpan={colSpan - 2} align="right">
+              <Button type="submit" variant="contained" disabled={isSubmitting}>
+                {!isSubmitting ? 'Spara' : 'Sparar...'}
+              </Button>
+            </TableCell>
+            <TableCell>
+              <Button disabled={isSubmitting} onClick={() => setFormOpen(false)}>
+                Avbryt
+              </Button>
+            </TableCell>
+          </TableRow>
         </TableBody>
       </Table>
     </form>

@@ -13,7 +13,12 @@ import {
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { formatDateYearMonth } from '../../../../utils/formatting';
 import { useForm, SubmitHandler, useFieldArray } from 'react-hook-form';
-import { CustomFormProps, FormTextFieldProps } from '../../models/FormProps';
+import {
+  CustomFormProps,
+  FormDateProps,
+  FormSelectProps,
+  FormTextFieldProps,
+} from '../../models/FormProps';
 import { useSubmitCustomerForm } from '../../../../hooks/customer/useSubmitCustomerForm';
 
 const CustomerDetailsForm: React.FC<CustomFormProps> = ({ setFormOpen, formFields }) => {
@@ -89,16 +94,12 @@ const CustomerDetailsForm: React.FC<CustomFormProps> = ({ setFormOpen, formField
                     required: 'Vänligen ange ett namn.',
                   })}
                   {...FormTextFieldProps}
-                  className="form-input-field"
                 />
               </TableCell>
               <TableCell sx={{ width: '20%' }}>
                 <TextField
-                  select
-                  className="form-input-select"
-                  {...FormTextFieldProps}
+                  {...FormSelectProps}
                   {...register(`item.${index}.status`)}
-                  defaultValue=""
                   label="Relationsstatus">
                   {selectItems.map((item) => (
                     <MenuItem value={item.value} key={item.value}>
@@ -109,14 +110,13 @@ const CustomerDetailsForm: React.FC<CustomFormProps> = ({ setFormOpen, formField
               </TableCell>
               <TableCell>
                 <DatePicker
-                  className="form-input-field"
+                  {...FormDateProps}
                   label="Födelsedatum"
                   views={['month', 'year']}
                   {...register(`item.${index}.yearMonth`, {
                     required: 'Var vänlig välj ett datum.',
                   })}
                   onChange={(date) => handleDateChange(date as Date, index)}
-                  slotProps={{ textField: { ...FormTextFieldProps } }}
                 />
               </TableCell>
               <TableCell align="right">

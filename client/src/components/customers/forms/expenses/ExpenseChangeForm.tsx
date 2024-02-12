@@ -1,10 +1,12 @@
-import React, { Fragment, useEffect, useState } from 'react';
-import { useForm, SubmitHandler } from 'react-hook-form';
-import { useParams } from 'react-router-dom';
-import { updateCustomer } from '../../../../services/api/apiCustomerCalls';
+import React, { Fragment } from 'react';
+import { useForm, SubmitHandler, useFieldArray } from 'react-hook-form';
 import { ExpensesChange } from '../../models/CustomerFormModels';
-import { CustomFormProps, FormTextFieldProps } from '../../models/FormProps';
-import { removeFormByIndex } from '../../../../utils/formUtils';
+import {
+  CustomFormProps,
+  FormNumberFieldProps,
+  FormSelectProps,
+  FormTextFieldProps,
+} from '../../models/FormProps';
 import {
   Table,
   TableBody,
@@ -15,50 +17,43 @@ import {
   TextField,
   ListItemButton,
 } from '@mui/material';
+import { useSubmitCustomerForm } from '../../../../hooks/customer/useSubmitCustomerForm';
 
-const ExpenseChangeForm: React.FC<CustomFormProps> = ({ submitted, formCount, setFormCount }) => {
+const ExpenseChangeForm: React.FC<CustomFormProps> = ({ setFormOpen, formFields }) => {
+  const colSpan: number = 6;
+  const sendToServer = useSubmitCustomerForm(formFields);
+
+  const details: ExpensesChange = {
+    values: {
+      changeType: '',
+      when: undefined,
+      ongoing: undefined,
+      value: undefined,
+      comment: '',
+    },
+  };
+
   const {
     register,
     handleSubmit,
+    control,
     formState: { isSubmitting },
-  } = useForm<ExpensesChange[]>();
-  const [details, setDetails] = useState<ExpensesChange[]>([]);
-  const { custId } = useParams();
+  } = useForm({
+    defaultValues: {
+      item: [details],
+    },
+  });
 
-  const onSubmit: SubmitHandler<ExpensesChange[]> = async (data) => {
-    const response = await updateCustomer({
-      field: 'expenses',
-      _id: custId as string,
-      formData: data,
-      subField: 'change',
-    });
-
-    if (response.success) {
-      if (submitted) {
-        submitted();
-        setFormCount(0);
-      }
-    }
-  };
-
-  useEffect(() => {
-    const newDetails: ExpensesChange[] = [];
-    for (let i = 0; i < formCount; i++) {
-      newDetails.push({
-        values: {
-          changeType: '',
-          comment: '',
-        },
-      });
-    }
-    setDetails(newDetails);
-  }, [formCount]);
-
-  const removeDetail = (index: number) => {
-    if (details.length > 0) {
-      setDetails(removeFormByIndex(details, index));
-      setFormCount(formCount - 1);
-    }
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'item',
+  });
+  const onSubmit: SubmitHandler<{
+    item: ExpensesChange[];
+  }> = async (data) => {
+    await sendToServer(data.item);
+    setFormOpen(false);
+    remove();
   };
 
   const expenseTypeSelect = [
@@ -78,19 +73,16 @@ const ExpenseChangeForm: React.FC<CustomFormProps> = ({ submitted, formCount, se
     <form onSubmit={handleSubmit(onSubmit)}>
       <Table>
         <TableBody>
-          {details.length > 0 &&
-            details.map((detail, index) => (
-              <Fragment key={index}>
+          {fields.length > 0 &&
+            fields.map((detail, index) => (
+              <Fragment key={detail.id}>
                 <TableRow>
                   <TableCell width="15%">
                     <TextField
-                      className="form-input-select"
-                      {...FormTextFieldProps}
-                      select
+                      {...FormSelectProps}
                       required
-                      defaultValue={detail.values!.changeType}
                       label="Utgiftstyp"
-                      {...register(`${index}.values.changeType`, {
+                      {...register(`item.${index}.values.changeType`, {
                         required: 'Vänligen fyll i typ av utgift',
                       })}>
                       {expenseTypeSelect.map((item) => (
@@ -102,11 +94,9 @@ const ExpenseChangeForm: React.FC<CustomFormProps> = ({ submitted, formCount, se
                   </TableCell>
                   <TableCell width="15%">
                     <TextField
-                      type="number"
                       required
-                      className="form-input-field"
-                      {...FormTextFieldProps}
-                      {...register(`${index}.values.when`, {
+                      {...FormNumberFieldProps}
+                      {...register(`item.${index}.values.when`, {
                         min: 0,
                         max: 100,
                       })}
@@ -115,11 +105,9 @@ const ExpenseChangeForm: React.FC<CustomFormProps> = ({ submitted, formCount, se
                   </TableCell>
                   <TableCell width="15%">
                     <TextField
-                      type="number"
                       required
-                      className="form-input-field"
-                      {...FormTextFieldProps}
-                      {...register(`${index}.values.ongoing`, {
+                      {...FormNumberFieldProps}
+                      {...register(`item.${index}.values.ongoing`, {
                         min: 0,
                         max: 100,
                       })}
@@ -128,38 +116,43 @@ const ExpenseChangeForm: React.FC<CustomFormProps> = ({ submitted, formCount, se
                   </TableCell>
                   <TableCell width="15%">
                     <TextField
-                      type="number"
                       required
-                      className="form-input-field"
-                      {...FormTextFieldProps}
-                      {...register(`${index}.values.value`)}
+                      {...FormNumberFieldProps}
+                      {...register(`item.${index}.values.value`)}
                       label="Belopp"
                     />
                   </TableCell>
                   <TableCell width="15%">
                     <TextField
-                      className="form-input-field"
                       {...FormTextFieldProps}
-                      {...register(`${index}.values.comment`)}
+                      {...register(`item.${index}.values.comment`)}
                       label="Kommentar"
                     />
                   </TableCell>
                   <TableCell width="10%" align="right">
-                    <ListItemButton onClick={() => removeDetail(index)}>Ta bort</ListItemButton>
+                    <ListItemButton onClick={() => remove(index)}>Ta bort</ListItemButton>
                   </TableCell>
                 </TableRow>
               </Fragment>
             ))}
 
-          {formCount > 0 && (
-            <TableRow>
-              <TableCell colSpan={6} align="right">
-                <Button type="submit" disabled={isSubmitting}>
-                  {!isSubmitting ? 'Spara' : 'Sparar...'}
-                </Button>
-              </TableCell>
-            </TableRow>
-          )}
+          <TableRow>
+            <TableCell>
+              <Button disabled={isSubmitting} onClick={() => append(details)}>
+                Lägg till
+              </Button>
+            </TableCell>
+            <TableCell colSpan={colSpan - 2} align="right">
+              <Button type="submit" variant="contained" disabled={isSubmitting}>
+                {!isSubmitting ? 'Spara' : 'Sparar...'}
+              </Button>
+            </TableCell>
+            <TableCell>
+              <Button disabled={isSubmitting} onClick={() => setFormOpen(false)}>
+                Avbryt
+              </Button>
+            </TableCell>
+          </TableRow>
         </TableBody>
       </Table>
     </form>

@@ -12,51 +12,25 @@ import { DateFields } from '../../../../services/api/models';
 import { ExpensesChange } from '../../models/CustomerFormModels';
 import ColoredTableRow from '../../../ui/coloredTableRow/ColoredTableRow';
 import { useParams } from 'react-router-dom';
-import {
-  getCustomerFormData,
-  deleteCustSubDocument,
-} from '../../../../services/api/apiCustomerCalls';
 import TableLoader from '../../../ui/tableLoader/TableLoader';
-import FormCountHandler from '../../forms/FormOpenHandler';
 import ExpenseChangeForm from '../../forms/expenses/ExpenseChangeForm';
-import { enqueueSnackbar } from 'notistack';
-import { useQueryClient, useQuery, useMutation } from 'react-query';
 import { FormFields } from '../../models/FormProps';
+import { useGetCustomerRowData } from '../../../../hooks/customer/useGetCustomerRowData';
+import { useDeleteCustomerSubDoc } from '../../../../hooks/customer/useDeleteCustomerSubDoc';
+import FormOpenHandler from '../../forms/FormOpenHandler';
 
 const ChangeIncomeRow = () => {
   const [formOpen, setFormOpen] = useState<boolean>(false);
   const { custId } = useParams();
   const colSpan: number = 7;
-  const queryClient = useQueryClient();
   const formFields: FormFields = {
     field: 'expenses',
     custId: custId!,
     subField: 'change',
   };
 
-  const { data, isLoading } = useQuery({
-    queryKey: ['customer', formFields],
-    queryFn: () => getCustomerFormData(formFields),
-
-    onSuccess: (data) => {
-      return data as [ExpensesChange & DateFields];
-    },
-
-    cacheTime: 0,
-    onError: (error) => {
-      enqueueSnackbar(error as string, {
-        variant: 'error',
-      });
-    },
-  });
-
-  const { mutateAsync: removeSubDoc } = useMutation({
-    mutationFn: (subDocId: string) => deleteCustSubDocument({ ...formFields, subDocId }),
-
-    onSuccess: () => {
-      queryClient.invalidateQueries(['customer']);
-    },
-  });
+  const removeSubDoc = useDeleteCustomerSubDoc(formFields);
+  const { data, isLoading } = useGetCustomerRowData(formFields);
 
   if (isLoading) return <TableLoader colSpan={colSpan} />;
 
@@ -98,16 +72,16 @@ const ChangeIncomeRow = () => {
                   </TableCell>
                 </TableRow>
               )}
-              <FormCountHandler
-                formCount={formCount}
-                setFormCount={(value) => setFormCount(value)}
-                colSpan={colSpan}
-              />
             </TableBody>
+            {!formOpen && (
+              <TableBody>
+                <FormOpenHandler setFormOpen={(value) => setFormOpen(value)} colSpan={colSpan} />
+              </TableBody>
+            )}
           </Table>
         </Box>
-        {formCount > 0 && (
-          <ExpenseChangeForm formCount={formCount} setFormCount={(value) => setFormCount(value)} />
+        {formOpen && (
+          <ExpenseChangeForm setFormOpen={(value) => setFormOpen(value)} formFields={formFields} />
         )}
       </TableCell>
     </TableRow>
