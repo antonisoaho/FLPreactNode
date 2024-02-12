@@ -28,11 +28,18 @@ interface RowProps {
 const Row: React.FC<RowProps> = ({ row, onUserPrefsOpen }) => {
   const [open, setOpen] = useState(false);
 
-  const { data: user, mutateAsync: handleOpen } = useMutation({
+  const handleOpen = (_id: string) => {
+    setOpen(true);
+    getUser(_id);
+  };
+
+  const {
+    data: user,
+    mutateAsync: getUser,
+    isLoading,
+  } = useMutation({
     mutationFn: (id: string) => getSingleUserById(id),
-    onSuccess: () => {
-      setOpen(!open);
-    },
+
     onError: (error) => {
       enqueueSnackbar(error as string, {
         variant: 'error',
@@ -68,36 +75,42 @@ const Row: React.FC<RowProps> = ({ row, onUserPrefsOpen }) => {
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Box sx={{ margin: 1 }}>
               <Table size="small">
-                <TableHead>
-                  <TableRow>
-                    <TableCell>ID</TableCell>
-                    <TableCell>Mail</TableCell>
-                    <TableCell>Uppdaterad</TableCell>
-                    <TableCell>Skapad</TableCell>
-                    <TableCell>
-                      <Tooltip title="Redigera användare" placement="right" arrow>
-                        <Fab
-                          size="small"
-                          aria-label="edit"
-                          onClick={() => onUserPrefsOpen(row._id)}>
-                          <EditIcon />
-                        </Fab>
-                      </Tooltip>
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                {user ? (
-                  <TableBody>
-                    <TableRow>
-                      <TableCell>{user._id}</TableCell>
-                      <TableCell>{user.email}</TableCell>
-                      <TableCell>{new Date(user.updatedAt!).toLocaleDateString()}</TableCell>
-                      <TableCell>{new Date(user.createdAt!).toLocaleDateString()}</TableCell>
-                      <TableCell />
-                    </TableRow>
-                  </TableBody>
+                {isLoading ? (
+                  <TableHead>
+                    <TableLoader colSpan={5} />
+                  </TableHead>
                 ) : (
-                  <TableLoader colSpan={5} />
+                  <>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>ID</TableCell>
+                        <TableCell>Mail</TableCell>
+                        <TableCell>Uppdaterad</TableCell>
+                        <TableCell>Skapad</TableCell>
+                        <TableCell>
+                          <Tooltip title="Redigera användare" placement="right" arrow>
+                            <Fab
+                              size="small"
+                              aria-label="edit"
+                              onClick={() => onUserPrefsOpen(row._id)}>
+                              <EditIcon />
+                            </Fab>
+                          </Tooltip>
+                        </TableCell>
+                      </TableRow>
+                    </TableHead>
+                    {user && (
+                      <TableBody>
+                        <TableRow>
+                          <TableCell>{user._id}</TableCell>
+                          <TableCell>{user.email}</TableCell>
+                          <TableCell>{new Date(user.updatedAt!).toLocaleDateString()}</TableCell>
+                          <TableCell>{new Date(user.createdAt!).toLocaleDateString()}</TableCell>
+                          <TableCell />
+                        </TableRow>
+                      </TableBody>
+                    )}
+                  </>
                 )}
               </Table>
             </Box>
