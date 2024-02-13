@@ -9,6 +9,9 @@ const bankFundSchema = new Schema(
     value: { type: Number },
     timePerspective: { type: String },
     monthlySavings: { type: Number },
+    saveForHowLong: { type: Number },
+    interestRate: { type: Number },
+    projectedGrowth: { type: Number },
   },
   { timestamps: true }
 );

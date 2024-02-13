@@ -10,8 +10,6 @@ const pensionSchema = new Schema(
     pensionAge: { type: Number },
     monthlyPension: { type: Number },
     compensationPeriod: { type: Number },
-    altPaymentAge: { type: Number },
-    impactPercent: { type: Number },
     shellFee: { type: Number },
     riskClass: { type: Number },
     fundFee: { type: Number },

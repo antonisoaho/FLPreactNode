@@ -22,15 +22,13 @@ const ExpenseBaseForm: React.FC<CustomFormProps> = ({ setFormOpen, formFields })
   const { persons, isLoading } = useGetCustomerNames(formFields.custId);
 
   const details: ExpensesBase = {
-    values: {
-      expenseType: '',
-      mapped: 0,
-      pension: [],
-      activeEnd: [],
-      difPension: [],
-      difActiveEnd: [],
-      difDeath: [],
-    },
+    expenseType: '',
+    mapped: 0,
+    pension: [],
+    activeEnd: [],
+    difPension: [],
+    difActiveEnd: [],
+    difDeath: [],
   };
 
   const {
@@ -91,7 +89,7 @@ const ExpenseBaseForm: React.FC<CustomFormProps> = ({ setFormOpen, formFields })
                       {...FormSelectProps}
                       required
                       label="Utgiftstyp"
-                      {...register(`item.${index}.values.expenseType`, {
+                      {...register(`item.${index}.expenseType`, {
                         required: 'Vänligen fyll i typ av utgift',
                       })}>
                       {expenseTypeSelect.map((item) => (
@@ -106,7 +104,7 @@ const ExpenseBaseForm: React.FC<CustomFormProps> = ({ setFormOpen, formFields })
                       {...FormNumberFieldProps}
                       required
                       label="Kartlaggt belopp"
-                      {...register(`item.${index}.values.mapped`, {
+                      {...register(`item.${index}.mapped`, {
                         required: 'Vänligen fyll i kartlaggt belopp',
                       })}
                     />
@@ -124,7 +122,7 @@ const ExpenseBaseForm: React.FC<CustomFormProps> = ({ setFormOpen, formFields })
                         {...FormNumberFieldProps}
                         required
                         label={`Pensionsålder ${person.split(' ')[0]}`}
-                        {...register(`item.${index}.values.pension.${idx}`, {
+                        {...register(`item.${index}.pension.${idx}`, {
                           required: 'Vänligen fyll i pensionsålder',
                         })}
                       />
@@ -133,7 +131,7 @@ const ExpenseBaseForm: React.FC<CustomFormProps> = ({ setFormOpen, formFields })
                       <TextField
                         {...FormNumberFieldProps}
                         label={`Aktiv tid slut ${person.split(' ')[0]}`}
-                        {...register(`item.${index}.values.activeEnd.${idx}`, {
+                        {...register(`item.${index}.activeEnd.${idx}`, {
                           required: 'Vänligen fyll i ålder för aktiv tid slut',
                         })}
                       />
@@ -142,21 +140,21 @@ const ExpenseBaseForm: React.FC<CustomFormProps> = ({ setFormOpen, formFields })
                       <TextField
                         {...FormNumberFieldProps}
                         label={`Dif ${person.split(' ')[0]} pension`}
-                        {...register(`item.${index}.values.difPension.${idx}`)}
+                        {...register(`item.${index}.difPension.${idx}`)}
                       />
                     </TableCell>
                     <TableCell width="20%">
                       <TextField
                         {...FormNumberFieldProps}
                         label={`Dif ${person.split(' ')[0]} aktivt slut`}
-                        {...register(`item.${index}.values.difActiveEnd.${idx}`)}
+                        {...register(`item.${index}.difActiveEnd.${idx}`)}
                       />
                     </TableCell>
                     <TableCell width="20%">
                       <TextField
                         {...FormNumberFieldProps}
                         label={`Dif ${person.split(' ')[0]} död`}
-                        {...register(`item.${index}.values.difDeath.${idx}`)}
+                        {...register(`item.${index}.difDeath.${idx}`)}
                       />
                     </TableCell>
                   </TableRow>

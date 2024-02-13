@@ -9,8 +9,8 @@ const liabilityBaseSchema = new Schema(
     debt: { type: Number },
     interest: { type: Number },
     monthlyAmortization: { type: Number },
-    loanProtection: { type: Boolean },
     lockInterestDate: { type: Date },
+    loanProtection: { type: Boolean },
   },
   { timestamps: true }
 );

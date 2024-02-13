@@ -28,21 +28,19 @@ const IncomeBaseForm: React.FC<CustomFormProps> = ({ setFormOpen, formFields }) 
 
   const details: IncomeBase = {
     belongs: '',
-    values: {
-      serviceIncome: undefined,
-      ofWhichOwnAB: undefined,
-      companyCarBenefit: {
-        amount: undefined,
-        gross: false,
-      },
-      soleTraderIncome: undefined,
-      taxFree: undefined,
-      k10: {
-        amount: undefined,
-        savedDistribution: undefined,
-        salaryBasis: undefined,
-        ownershipShare: undefined,
-      },
+    serviceIncome: undefined,
+    ofWhichOwnAB: undefined,
+    companyCarBenefit: {
+      amount: undefined,
+      gross: false,
+    },
+    soleTraderIncome: undefined,
+    taxFree: undefined,
+    k10: {
+      amount: undefined,
+      savedDistribution: undefined,
+      salaryBasis: undefined,
+      ownershipShare: undefined,
     },
   };
 
@@ -105,7 +103,7 @@ const IncomeBaseForm: React.FC<CustomFormProps> = ({ setFormOpen, formFields }) 
                   <TextField
                     required
                     label="Ink. av tjänst"
-                    {...register(`item.${index}.values.serviceIncome`, {
+                    {...register(`item.${index}.serviceIncome`, {
                       required: 'Vänligen mata in inkomst.',
                       min: 0,
                     })}
@@ -115,7 +113,7 @@ const IncomeBaseForm: React.FC<CustomFormProps> = ({ setFormOpen, formFields }) 
                 <TableCell>
                   <TextField
                     label="Varav eget AB"
-                    {...register(`item.${index}.values.ofWhichOwnAB`, { min: 0 })}
+                    {...register(`item.${index}.ofWhichOwnAB`, { min: 0 })}
                     {...FormNumberFieldProps}
                   />
                 </TableCell>
@@ -128,14 +126,14 @@ const IncomeBaseForm: React.FC<CustomFormProps> = ({ setFormOpen, formFields }) 
                 <TableCell>
                   <TextField
                     label="NE Inkomst"
-                    {...register(`item.${index}.values.soleTraderIncome`, { min: 0 })}
+                    {...register(`item.${index}.soleTraderIncome`, { min: 0 })}
                     {...FormNumberFieldProps}
                   />
                 </TableCell>
                 <TableCell>
                   <TextField
                     label="Skattefritt"
-                    {...register(`item.${index}.values.taxFree`, { min: 0 })}
+                    {...register(`item.${index}.taxFree`, { min: 0 })}
                     {...FormNumberFieldProps}
                   />
                 </TableCell>
@@ -157,28 +155,28 @@ const IncomeBaseForm: React.FC<CustomFormProps> = ({ setFormOpen, formFields }) 
                   <TableCell>
                     <TextField
                       label="Belopp K10"
-                      {...register(`item.${index}.values.k10.amount`, { min: 0 })}
+                      {...register(`item.${index}.k10.amount`, { min: 0 })}
                       {...FormNumberFieldProps}
                     />
                   </TableCell>
                   <TableCell>
                     <TextField
                       label="Sparad utdelning"
-                      {...register(`item.${index}.values.k10.savedDistribution`, { min: 0 })}
+                      {...register(`item.${index}.k10.savedDistribution`, { min: 0 })}
                       {...FormNumberFieldProps}
                     />
                   </TableCell>
                   <TableCell>
                     <TextField
                       label="Löneunderlag"
-                      {...register(`item.${index}.values.k10.salaryBasis`, { min: 0 })}
+                      {...register(`item.${index}.k10.salaryBasis`, { min: 0 })}
                       {...FormNumberFieldProps}
                     />
                   </TableCell>
                   <TableCell>
                     <TextField
                       label="Ägarandel"
-                      {...register(`item.${index}.values.k10.ownershipShare`, { min: 0, max: 100 })}
+                      {...register(`item.${index}.k10.ownershipShare`, { min: 0, max: 100 })}
                       {...FormNumberFieldProps}
                       InputProps={{
                         endAdornment: <InputAdornment position="end">%</InputAdornment>,
@@ -193,7 +191,7 @@ const IncomeBaseForm: React.FC<CustomFormProps> = ({ setFormOpen, formFields }) 
                   <TableCell>
                     <TextField
                       label="Förmånsvärde"
-                      {...register(`item.${index}.values.companyCarBenefit.amount`)}
+                      {...register(`item.${index}.companyCarBenefit.amount`)}
                       {...FormNumberFieldProps}
                     />
                   </TableCell>
@@ -201,7 +199,7 @@ const IncomeBaseForm: React.FC<CustomFormProps> = ({ setFormOpen, formFields }) 
                     <InputLabel shrink className="form-checkbox-label">
                       Bruttovärde
                     </InputLabel>
-                    <Checkbox {...register(`item.${index}.values.companyCarBenefit.gross`)} />
+                    <Checkbox {...register(`item.${index}.companyCarBenefit.gross`)} />
                   </TableCell>
                   <TableCell />
                 </TableRow>

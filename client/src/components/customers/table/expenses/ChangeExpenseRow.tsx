@@ -54,11 +54,11 @@ const ChangeIncomeRow = () => {
               {data!.length > 0 ? (
                 (data as [ExpensesChange & DateFields])!.map((exp) => (
                   <TableRow key={exp._id}>
-                    <TableCell>{exp.values!.changeType || '-'}</TableCell>
-                    <TableCell>{exp.values!.when?.toLocaleString() || '-'}</TableCell>
-                    <TableCell>{exp.values!.value || '-'}</TableCell>
-                    <TableCell>{exp.values!.ongoing?.toLocaleString() || '-'}</TableCell>
-                    <TableCell>{exp.values!.comment || '-'}</TableCell>
+                    <TableCell>{exp!.changeType || '-'}</TableCell>
+                    <TableCell>{exp!.when?.toLocaleString() || '-'}</TableCell>
+                    <TableCell>{exp!.value || '-'}</TableCell>
+                    <TableCell>{exp!.ongoing?.toLocaleString() || '-'}</TableCell>
+                    <TableCell>{exp!.comment || '-'}</TableCell>
                     <TableCell>{new Date(exp.updatedAt!).toLocaleDateString()}</TableCell>
                     <TableCell>
                       <ListItemButton onClick={() => removeSubDoc(exp._id)}>Ta bort</ListItemButton>

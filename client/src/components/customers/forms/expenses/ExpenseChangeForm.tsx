@@ -24,13 +24,11 @@ const ExpenseChangeForm: React.FC<CustomFormProps> = ({ setFormOpen, formFields 
   const sendToServer = useSubmitCustomerForm(formFields);
 
   const details: ExpensesChange = {
-    values: {
-      changeType: '',
-      when: undefined,
-      ongoing: undefined,
-      value: undefined,
-      comment: '',
-    },
+    changeType: '',
+    when: undefined,
+    ongoing: undefined,
+    value: undefined,
+    comment: '',
   };
 
   const {
@@ -82,7 +80,7 @@ const ExpenseChangeForm: React.FC<CustomFormProps> = ({ setFormOpen, formFields 
                       {...FormSelectProps}
                       required
                       label="Utgiftstyp"
-                      {...register(`item.${index}.values.changeType`, {
+                      {...register(`item.${index}.changeType`, {
                         required: 'Vänligen fyll i typ av utgift',
                       })}>
                       {expenseTypeSelect.map((item) => (
@@ -96,7 +94,7 @@ const ExpenseChangeForm: React.FC<CustomFormProps> = ({ setFormOpen, formFields 
                     <TextField
                       required
                       {...FormNumberFieldProps}
-                      {...register(`item.${index}.values.when`, {
+                      {...register(`item.${index}.when`, {
                         min: 0,
                         max: 100,
                       })}
@@ -107,7 +105,7 @@ const ExpenseChangeForm: React.FC<CustomFormProps> = ({ setFormOpen, formFields 
                     <TextField
                       required
                       {...FormNumberFieldProps}
-                      {...register(`item.${index}.values.ongoing`, {
+                      {...register(`item.${index}.ongoing`, {
                         min: 0,
                         max: 100,
                       })}
@@ -118,14 +116,14 @@ const ExpenseChangeForm: React.FC<CustomFormProps> = ({ setFormOpen, formFields 
                     <TextField
                       required
                       {...FormNumberFieldProps}
-                      {...register(`item.${index}.values.value`)}
+                      {...register(`item.${index}.value`)}
                       label="Belopp"
                     />
                   </TableCell>
                   <TableCell width="15%">
                     <TextField
                       {...FormTextFieldProps}
-                      {...register(`item.${index}.values.comment`)}
+                      {...register(`item.${index}.comment`)}
                       label="Kommentar"
                     />
                   </TableCell>

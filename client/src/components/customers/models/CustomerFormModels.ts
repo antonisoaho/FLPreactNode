@@ -14,53 +14,45 @@ export type CustomerChildren = {
 
 export type IncomeBase = {
   belongs?: string;
-  values?: {
-    serviceIncome?: number;
-    ofWhichOwnAB?: number;
-    companyCarBenefit?: {
-      amount?: number;
-      gross?: boolean;
-    };
-    soleTraderIncome?: number;
-    taxFree?: number;
-    k10?: {
-      amount?: number;
-      savedDistribution?: number;
-      salaryBasis?: number;
-      ownershipShare?: number;
-    };
+  serviceIncome?: number;
+  ofWhichOwnAB?: number;
+  companyCarBenefit?: {
+    amount?: number;
+    gross?: boolean;
+  };
+  soleTraderIncome?: number;
+  taxFree?: number;
+  k10?: {
+    amount?: number;
+    savedDistribution?: number;
+    salaryBasis?: number;
+    ownershipShare?: number;
   };
 };
 
 export type IncomeChange = {
   belongs?: string;
-  values?: {
-    changeType?: string;
-    when?: number;
-    newAmount?: number;
-  };
+  changeType?: string;
+  when?: number;
+  newAmount?: number;
 };
 
 export type ExpensesBase = {
-  values?: {
-    expenseType?: string;
-    mapped?: number;
-    pension?: number[];
-    activeEnd?: number[];
-    difPension?: number[];
-    difActiveEnd?: number[];
-    difDeath?: number[];
-  };
+  expenseType?: string;
+  mapped?: number;
+  pension?: number[];
+  activeEnd?: number[];
+  difPension?: number[];
+  difActiveEnd?: number[];
+  difDeath?: number[];
 };
 
 export type ExpensesChange = {
-  values?: {
-    changeType?: string;
-    when?: number;
-    ongoing?: number;
-    value?: number;
-    comment?: string;
-  };
+  changeType?: string;
+  when?: number;
+  ongoing?: number;
+  value?: number;
+  comment?: string;
 };
 
 export type Investment = {

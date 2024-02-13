@@ -53,9 +53,9 @@ const BaseExpenseRow = () => {
                   </TableHead>
                   <TableBody>
                     <TableRow>
-                      <TableCell colSpan={colSpan / 2}>{exp.values?.expenseType}</TableCell>
+                      <TableCell colSpan={colSpan / 2}>{exp?.expenseType}</TableCell>
                       <TableCell colSpan={colSpan / 2}>
-                        {exp.values?.mapped ? exp.values!.mapped.toLocaleString() + ' SEK' : '-'}
+                        {exp?.mapped ? exp!.mapped.toLocaleString() + ' SEK' : '-'}
                       </TableCell>
                       <TableCell />
                     </TableRow>
@@ -73,21 +73,21 @@ const BaseExpenseRow = () => {
                       </TableHead>
                       <TableBody>
                         <TableRow>
-                          <TableCell>{exp.values?.pension?.[idx] || '-'}</TableCell>
-                          <TableCell>{exp.values?.activeEnd?.[idx] || '-'}</TableCell>
+                          <TableCell>{exp?.pension?.[idx] || '-'}</TableCell>
+                          <TableCell>{exp?.activeEnd?.[idx] || '-'}</TableCell>
                           <TableCell>
-                            {exp.values?.difPension?.[idx]
-                              ? exp.values?.difPension?.[idx].toLocaleString() + ' SEK'
+                            {exp?.difPension?.[idx]
+                              ? exp?.difPension?.[idx].toLocaleString() + ' SEK'
                               : 0}
                           </TableCell>
                           <TableCell>
-                            {exp.values?.difActiveEnd?.[idx]
-                              ? exp.values?.difActiveEnd?.[idx].toLocaleString() + ' SEK'
+                            {exp?.difActiveEnd?.[idx]
+                              ? exp?.difActiveEnd?.[idx].toLocaleString() + ' SEK'
                               : 0}
                           </TableCell>
                           <TableCell>
-                            {exp.values?.difDeath?.[idx]
-                              ? exp.values?.difDeath?.[idx].toLocaleString() + ' SEK'
+                            {exp?.difDeath?.[idx]
+                              ? exp?.difDeath?.[idx].toLocaleString() + ' SEK'
                               : 0}
                           </TableCell>
                         </TableRow>

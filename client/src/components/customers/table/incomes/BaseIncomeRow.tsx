@@ -63,33 +63,29 @@ const BaseIncomeRow = () => {
                   <TableBody>
                     <TableRow>
                       <TableCell>
-                        {inc.values!.serviceIncome
-                          ? inc.values!.serviceIncome.toLocaleString() + ' SEK'
+                        {inc!.serviceIncome ? inc!.serviceIncome.toLocaleString() + ' SEK' : '-'}
+                      </TableCell>
+                      <TableCell>
+                        {inc!.ofWhichOwnAB ? inc!.ofWhichOwnAB.toLocaleString() + ' SEK' : '-'}
+                      </TableCell>
+                      <TableCell>
+                        {inc!.companyCarBenefit?.amount
+                          ? inc!.companyCarBenefit!.amount.toLocaleString() + ' SEK'
                           : '-'}
                       </TableCell>
                       <TableCell>
-                        {inc.values!.ofWhichOwnAB
-                          ? inc.values!.ofWhichOwnAB.toLocaleString() + ' SEK'
-                          : '-'}
-                      </TableCell>
-                      <TableCell>
-                        {inc.values!.companyCarBenefit?.amount
-                          ? inc.values!.companyCarBenefit!.amount.toLocaleString() + ' SEK'
-                          : '-'}
-                      </TableCell>
-                      <TableCell>
-                        {inc.values!.companyCarBenefit?.gross === true
+                        {inc!.companyCarBenefit?.gross === true
                           ? 'Brutto'
-                          : inc.values!.companyCarBenefit?.gross === false
+                          : inc!.companyCarBenefit?.gross === false
                           ? 'Netto'
                           : '-'}
                       </TableCell>
                       <TableCell>
-                        {inc.values?.soleTraderIncome
-                          ? inc.values!.soleTraderIncome.toLocaleString() + ' SEK'
+                        {inc?.soleTraderIncome
+                          ? inc!.soleTraderIncome.toLocaleString() + ' SEK'
                           : '-'}
                       </TableCell>
-                      <TableCell>{inc.values?.taxFree || '-'}</TableCell>
+                      <TableCell>{inc?.taxFree || '-'}</TableCell>
                     </TableRow>
                   </TableBody>
                   <TableHead>
@@ -106,24 +102,20 @@ const BaseIncomeRow = () => {
                   <TableBody>
                     <TableRow>
                       <TableCell>
-                        {inc.values?.k10?.amount
-                          ? inc.values!.k10!.amount.toLocaleString() + ' SEK'
+                        {inc?.k10?.amount ? inc!.k10!.amount.toLocaleString() + ' SEK' : '-'}
+                      </TableCell>
+                      <TableCell>
+                        {inc?.k10?.savedDistribution
+                          ? inc?.k10?.savedDistribution.toLocaleString() + ' SEK'
                           : '-'}
                       </TableCell>
                       <TableCell>
-                        {inc.values?.k10?.savedDistribution
-                          ? inc.values?.k10?.savedDistribution.toLocaleString() + ' SEK'
+                        {inc?.k10?.salaryBasis
+                          ? inc?.k10?.salaryBasis.toLocaleString() + ' SEK'
                           : '-'}
                       </TableCell>
                       <TableCell>
-                        {inc.values?.k10?.salaryBasis
-                          ? inc.values?.k10?.salaryBasis.toLocaleString() + ' SEK'
-                          : '-'}
-                      </TableCell>
-                      <TableCell>
-                        {inc.values?.k10?.ownershipShare
-                          ? inc.values?.k10?.ownershipShare + '%'
-                          : '-'}
+                        {inc?.k10?.ownershipShare ? inc?.k10?.ownershipShare + '%' : '-'}
                       </TableCell>
                       <TableCell />
                       <TableCell>
@@ -139,7 +131,7 @@ const BaseIncomeRow = () => {
               <TableBody>
                 <TableRow>
                   <TableCell align="center" colSpan={colSpan}>
-                    Inga inkomster
+                    Inga inkomster registrerade.
                   </TableCell>
                 </TableRow>
               </TableBody>

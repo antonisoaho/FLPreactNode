@@ -59,13 +59,11 @@ const ChangeIncomeRow = () => {
                   </TableHead>
                   <TableBody>
                     <TableRow>
-                      <TableCell>{inc.values!.changeType}</TableCell>
+                      <TableCell>{inc!.changeType}</TableCell>
+                      <TableCell>{inc!.when ? inc!.when.toLocaleString() + ' år' : '-'}</TableCell>
                       <TableCell>
-                        {inc.values!.when ? inc.values!.when.toLocaleString() + ' år' : '-'}
-                      </TableCell>
-                      <TableCell>
-                        {inc.values!.newAmount !== undefined
-                          ? inc.values!.newAmount.toLocaleString() + ' SEK'
+                        {inc!.newAmount !== undefined
+                          ? inc!.newAmount.toLocaleString() + ' SEK'
                           : '-'}
                       </TableCell>
                       <TableCell align="right">

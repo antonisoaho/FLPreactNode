@@ -23,11 +23,10 @@ const IncomeChangeForm: React.FC<CustomFormProps> = ({ setFormOpen, formFields }
 
   const details: IncomeChange = {
     belongs: '',
-    values: {
-      changeType: '',
-      when: undefined,
-      newAmount: undefined,
-    },
+
+    changeType: '',
+    when: undefined,
+    newAmount: undefined,
   };
 
   const changeValueSelect = [
@@ -108,7 +107,7 @@ const IncomeChangeForm: React.FC<CustomFormProps> = ({ setFormOpen, formFields }
                   {...FormSelectProps}
                   required
                   label="Typ av ändring"
-                  {...register(`item.${index}.values.changeType`, {
+                  {...register(`item.${index}.changeType`, {
                     required: 'Vänligen välj typ av ändring.',
                   })}>
                   {changeValueSelect.map((item) => (
@@ -123,7 +122,7 @@ const IncomeChangeForm: React.FC<CustomFormProps> = ({ setFormOpen, formFields }
                   required
                   {...FormNumberFieldProps}
                   label="Om hur många år"
-                  {...register(`item.${index}.values.when`, { min: 0 })}
+                  {...register(`item.${index}.when`, { min: 0 })}
                 />
               </TableCell>
               <TableCell width="20%">
@@ -131,7 +130,7 @@ const IncomeChangeForm: React.FC<CustomFormProps> = ({ setFormOpen, formFields }
                   required
                   {...FormNumberFieldProps}
                   label="Nytt belopp"
-                  {...register(`item.${index}.values.newAmount`)}
+                  {...register(`item.${index}.newAmount`)}
                 />
               </TableCell>
               <TableCell width="10%" align="right">

@@ -4,25 +4,14 @@ const assetSchema = new Schema(
   {
     assetType: { type: String },
     name: { type: String },
-    value: {
-      type: Number,
-      required: function () {
-        return this.assetType != null;
-      },
-    },
+    value: { type: Number },
     stake: { type: Number },
     mortgageDeed: { type: Number },
     valueYear: { type: Number },
-    belongs: {
-      type: String,
-      required: function () {
-        return this.assetType != null;
-      },
-    },
+    belongs: { type: String },
     tax: { type: Number },
     assessedValue: { type: Number }, // Taxeringsvärde
-    legalTitleCost: { type: Number },
-    investments: { type: Number },
+    base: { type: Number },
   },
   { timestamps: true }
 );

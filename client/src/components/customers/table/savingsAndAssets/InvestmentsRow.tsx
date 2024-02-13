@@ -119,7 +119,7 @@ const InvestmentsRow = () => {
             ) : (
               <TableBody>
                 <TableRow>
-                  <TableCell colSpan={colSpan}>Inga bankmedel hittades regisrerade.</TableCell>
+                  <TableCell colSpan={colSpan}>Inga investeringar hittades regisrerade.</TableCell>
                 </TableRow>
               </TableBody>
             )}

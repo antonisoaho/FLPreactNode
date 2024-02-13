@@ -9,13 +9,14 @@ const investmentSchema = new Schema(
     depositedAmount: { type: Number },
     value: { type: Number },
     riskClass: { type: Number },
-    charge: { type: Number },
+    managementFee: { type: Number },
+    shellFee: { type: Number },
     timePerspective: { type: String },
     monthlySavings: { type: Number },
     saveForHowLong: { type: Number },
-    projectedGrowth: { type: Number },
     additionalInvestment: { type: Number },
     when: { type: Number },
+    projectedGrowth: { type: Number },
   },
   { timestamps: true }
 );
