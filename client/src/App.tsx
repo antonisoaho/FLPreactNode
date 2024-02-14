@@ -28,6 +28,7 @@ const App = () => {
   const setUser = useSetRecoilState(userState);
 
   const { isLoading } = useQuery({
+    refetchOnWindowFocus: false,
     queryFn: userInfoGetMe,
     queryKey: ['loggedInUser'],
     retry: false,

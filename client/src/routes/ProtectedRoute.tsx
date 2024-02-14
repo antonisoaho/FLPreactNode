@@ -1,10 +1,13 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import { useRecoilValue } from 'recoil';
+import { userState } from '../services/state/RecoilAtoms';
 
 export const ProtectedRoute = () => {
-  const token = localStorage.getItem('TOKEN');
   const location = useLocation();
 
-  return token !== undefined ? <Outlet /> : <Navigate to="/login" state={{ from: location }} />;
+  const { loggedIn } = useRecoilValue(userState);
+
+  return loggedIn ? <Outlet /> : <Navigate to="/login" state={{ from: location }} />;
 };
 
 export default ProtectedRoute;
